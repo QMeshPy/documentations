@@ -100,6 +100,7 @@ docs/
 │   └── BENCHMARK.md                      Original benchmark analysis
 │
 ├── algorand-x402/                        ← Machine-payable quantum services on Algorand
+│   ├── overview.md                       Why x402, request flow, TestNet verification evidence
 │   ├── algorand-x402-design.md           Design
 │   ├── algorand-x402-implementation-plan.md
 │   └── algorand-x402-runbook.md          TestNet setup and verification
