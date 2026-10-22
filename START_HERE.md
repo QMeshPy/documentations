@@ -99,6 +99,19 @@ docs/
 │   ├── QAOA_OPTIMIZATION_RESEARCH.md     Literature survey
 │   └── BENCHMARK.md                      Original benchmark analysis
 │
+├── algorand-x402/                        ← Machine-payable quantum services on Algorand
+│   ├── algorand-x402-design.md           Design
+│   ├── algorand-x402-implementation-plan.md
+│   └── algorand-x402-runbook.md          TestNet setup and verification
+│
+├── toju/                                 ← Toju agent storage (Base Sepolia testnet)
+│   ├── toju-agent-storage-plan.md
+│   ├── toju-agent-storage-research.md
+│   ├── toju-render-testnet-guide.md      Host your own Toju server on Render
+│   ├── toju-deployment-diagnosis.md
+│   ├── toju-devcon-demo.md
+│   └── devcon-mobile-speaking-script.md
+│
 └── future-roadmap/                       ← Per-milestone roadmap docs
     ├── 00-sequencing-and-program-plan.md
     ├── 01-production-sdk-and-platform.md
@@ -120,6 +133,8 @@ docs/
 | Understand system internals | `ARCHITECTURE.md` → `design.md` |
 | Make product/advisor decisions | `research/QUANTUM_SCALING_STRATEGY.md` → `research/ALTERNATIVE_QUANTUM_FINANCE_PROBLEMS.md` |
 | Deploy to production | `../DEPLOYMENT-MANUAL.md` → `LIGHTSAIL-DEPLOYMENT.md` |
+| Take paid x402 requests on Algorand | `algorand-x402/algorand-x402-runbook.md` → `algorand-x402/algorand-x402-design.md` |
+| Run or host Toju agent storage | `toju/toju-render-testnet-guide.md` → `toju/toju-devcon-demo.md` |
 
 ---
 
