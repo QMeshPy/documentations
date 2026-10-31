@@ -32,4 +32,6 @@ Source of truth for most pages remains the repo-root `.md` files. After editing 
 npm run sync-docs
 ```
 
+Imported pages keep the `.md` extension so math braces, autolinks, and comparison symbols are parsed as Markdown. The generated research and technical landing pages use `.mdx` for their Card components. Unsupported code languages render as plain text.
+
 Then restart or refresh the dev server.
