@@ -15,79 +15,79 @@ const outRoot = path.join(fumadocsRoot, 'content', 'docs');
 const pages = [
   {
     src: 'START_HERE.md',
-    dest: 'index.mdx',
+    dest: 'index.md',
     title: 'Start here',
     description: 'Navigation guide for QMesh documentation.',
   },
   {
     src: 'ARCHITECTURE.md',
-    dest: 'architecture.mdx',
+    dest: 'architecture.md',
     title: 'Architecture',
     description: 'End-to-end system architecture and component breakdown.',
   },
   {
     src: 'design.md',
-    dest: 'design.mdx',
+    dest: 'design.md',
     title: 'Design',
     description: 'Design rationale, cost model, and tradeoffs.',
   },
   {
     src: 'requirements.md',
-    dest: 'requirements.mdx',
+    dest: 'requirements.md',
     title: 'Requirements',
     description: 'Functional and non-functional requirements.',
   },
   {
     src: 'FINANCIAL_MODELING_FOUNDATIONS.md',
-    dest: 'financial-modeling.mdx',
+    dest: 'financial-modeling.md',
     title: 'Financial modeling',
     description: 'Finance theory and the quantum use case.',
   },
   {
     src: 'FUTURE_ROADMAP.md',
-    dest: 'roadmap.mdx',
+    dest: 'roadmap.md',
     title: 'Roadmap overview',
     description: 'Milestone-level product roadmap.',
   },
   {
     src: 'LIGHTSAIL-DEPLOYMENT.md',
-    dest: 'deployment.mdx',
+    dest: 'deployment.md',
     title: 'Lightsail deployment',
     description: 'Deploy and host the platform on Lightsail.',
   },
   {
     src: 'IPFS_INTEGRATION_STRATEGIC_VISION.md',
-    dest: 'ipfs-vision.mdx',
+    dest: 'ipfs-vision.md',
     title: 'IPFS vision',
     description: 'VAULT and IPFS strategic integration.',
   },
   {
     src: 'ipfs-progress.md',
-    dest: 'ipfs-progress.mdx',
+    dest: 'ipfs-progress.md',
     title: 'IPFS progress',
     description: 'IPFS task progress notes.',
   },
   {
     src: 'QAE_ENHANCEMENT_NOTE.md',
-    dest: 'qae-enhancement.mdx',
+    dest: 'qae-enhancement.md',
     title: 'QAE enhancement',
     description: 'Quantum Amplitude Estimation extension notes.',
   },
   {
     src: 'AGENT_PROGRESS.md',
-    dest: 'agent-progress.mdx',
+    dest: 'agent-progress.md',
     title: 'Agent progress',
     description: 'Implementation and assistant progress notes.',
   },
   {
     src: 'distributed_quantum_services_katex_rendered.md',
-    dest: 'paper-katex.mdx',
+    dest: 'paper-katex.md',
     title: 'Paper (KaTeX)',
     description: 'Distributed quantum services paper with KaTeX math.',
   },
   {
     src: 'RECENT_UPDATES.md',
-    dest: 'recent-updates.mdx',
+    dest: 'recent-updates.md',
     title: 'Recent updates',
     description: 'Merged PRs from QMeshPy/distributed-quantum and where docs live.',
   },
@@ -95,19 +95,19 @@ const pages = [
   // payments
   {
     src: 'payments/README.md',
-    dest: 'payments/index.mdx',
+    dest: 'payments/index.md',
     title: 'Payments',
     description: 'Payment docs index for credits, ledger, and worker payouts.',
   },
   {
     src: 'payments/PAYMENT_LEDGER.md',
-    dest: 'payments/ledger.mdx',
+    dest: 'payments/ledger.md',
     title: 'Payment ledger',
     description: 'Unified payment events and USDC-denominated credit ledger.',
   },
   {
     src: 'payments/stripe-connect-vs-onchain-payouts.md',
-    dest: 'payments/payouts-spike.mdx',
+    dest: 'payments/payouts-spike.md',
     title: 'Connect vs on-chain payouts',
     description: 'Decision spike: Stripe Connect stablecoin vs on-chain worker payouts.',
   },
@@ -115,7 +115,7 @@ const pages = [
   // auth
   {
     src: 'auth/AUTH.md',
-    dest: 'auth/index.mdx',
+    dest: 'auth/index.md',
     title: 'Authentication',
     description: 'Better Auth email OTP and Sign-in with Ethereum.',
   },
@@ -123,7 +123,7 @@ const pages = [
   // starknet
   {
     src: 'starknet/STARKNET_SESSION_GUIDE.md',
-    dest: 'starknet/index.mdx',
+    dest: 'starknet/index.md',
     title: 'Starknet sessions',
     description: 'Agent spending policies and session-key spend on Starknet Sepolia.',
   },
@@ -131,7 +131,7 @@ const pages = [
   // provenance
   {
     src: 'provenance/PROVENANCE.md',
-    dest: 'provenance/index.mdx',
+    dest: 'provenance/index.md',
     title: 'Provenance',
     description: 'Run provenance, Merkle verification, and Ethereum anchors.',
   },
@@ -139,19 +139,19 @@ const pages = [
   // chains
   {
     src: 'chains/CHAIN_REGISTRY.md',
-    dest: 'chains/index.mdx',
+    dest: 'chains/index.md',
     title: 'Chain registry',
     description: 'Multi-chain registry, RPC adapters, and frontend integration.',
   },
   {
     src: 'chains/ens-resolution.md',
-    dest: 'chains/ens-resolution.mdx',
+    dest: 'chains/ens-resolution.md',
     title: 'ENS resolution',
     description: 'ENS name resolution for wallets and display.',
   },
   {
     src: 'chains/ens-worker-subnames.md',
-    dest: 'chains/ens-worker-subnames.mdx',
+    dest: 'chains/ens-worker-subnames.md',
     title: 'ENS worker subnames',
     description: 'Worker subname proof-of-concept on ENS.',
   },
@@ -159,7 +159,7 @@ const pages = [
   // vault
   {
     src: 'vault/IPFS_VAULT.md',
-    dest: 'vault/index.mdx',
+    dest: 'vault/index.md',
     title: 'VAULT / IPFS',
     description: 'CID resolve, trustless gateways, circuit publish, run links.',
   },
@@ -167,31 +167,31 @@ const pages = [
   // research
   {
     src: 'research/RESEARCH_PAPER_DRAFT.md',
-    dest: 'research/paper.mdx',
+    dest: 'research/paper.md',
     title: 'Research paper draft',
     description: 'Main research paper draft.',
   },
   {
     src: 'research/MATHEMATICAL_APPENDIX.md',
-    dest: 'research/mathematical-appendix.mdx',
+    dest: 'research/mathematical-appendix.md',
     title: 'Mathematical appendix',
     description: 'Formal derivations and proofs.',
   },
   {
     src: 'research/QUANTUM_SCALING_STRATEGY.md',
-    dest: 'research/scaling-strategy.mdx',
+    dest: 'research/scaling-strategy.md',
     title: 'Quantum scaling strategy',
     description: 'Scaling hypothesis and quantum advantage framing.',
   },
   {
     src: 'research/ALTERNATIVE_QUANTUM_FINANCE_PROBLEMS.md',
-    dest: 'research/alternative-problems.mdx',
+    dest: 'research/alternative-problems.md',
     title: 'Alternative quantum finance problems',
     description: 'Backup research directions in quantum finance.',
   },
   {
     src: 'research/DATASET_DOWNLOAD_STRATEGY.md',
-    dest: 'research/datasets.mdx',
+    dest: 'research/datasets.md',
     title: 'Dataset strategy',
     description: 'Dataset acquisition notes.',
   },
@@ -199,25 +199,25 @@ const pages = [
   // technical
   {
     src: 'technical/IMPLEMENTATION_NOTES.md',
-    dest: 'technical/implementation.mdx',
+    dest: 'technical/implementation.md',
     title: 'Implementation notes',
     description: 'Optimization journey and code-level decisions.',
   },
   {
     src: 'technical/GRADIENT_OPTIMIZATION_POSTMORTEM.md',
-    dest: 'technical/gradient-postmortem.mdx',
+    dest: 'technical/gradient-postmortem.md',
     title: 'Gradient postmortem',
     description: 'Failed gradient approach and root cause.',
   },
   {
     src: 'technical/QAOA_OPTIMIZATION_RESEARCH.md',
-    dest: 'technical/qaoa-research.mdx',
+    dest: 'technical/qaoa-research.md',
     title: 'QAOA research',
     description: 'QAOA optimization literature notes.',
   },
   {
     src: 'technical/BENCHMARK.md',
-    dest: 'technical/benchmark.mdx',
+    dest: 'technical/benchmark.md',
     title: 'Benchmarks',
     description: 'Benchmark results and bottleneck analysis.',
   },
@@ -225,93 +225,93 @@ const pages = [
   // future roadmap
   {
     src: 'future-roadmap/README.md',
-    dest: 'future-roadmap/index.mdx',
+    dest: 'future-roadmap/index.md',
     title: 'Future roadmap',
     description: 'Detailed roadmap documents by milestone.',
   },
   {
     src: 'future-roadmap/00-sequencing-and-program-plan.md',
-    dest: 'future-roadmap/00-sequencing.mdx',
+    dest: 'future-roadmap/00-sequencing.md',
     title: 'Sequencing and program plan',
   },
   {
     src: 'future-roadmap/01-production-sdk-and-platform.md',
-    dest: 'future-roadmap/01-sdk-platform.mdx',
+    dest: 'future-roadmap/01-sdk-platform.md',
     title: 'Production SDK and platform',
   },
   {
     src: 'future-roadmap/02-bring-your-own-node-network.md',
-    dest: 'future-roadmap/02-byon.mdx',
+    dest: 'future-roadmap/02-byon.md',
     title: 'Bring-your-own-node network',
   },
   {
     src: 'future-roadmap/03-autonomous-research-and-drug-discovery-platform.md',
-    dest: 'future-roadmap/03-research-platform.mdx',
+    dest: 'future-roadmap/03-research-platform.md',
     title: 'Autonomous research platform',
   },
   {
     src: 'future-roadmap/04-torrent-native-service-network.md',
-    dest: 'future-roadmap/04-torrent-network.mdx',
+    dest: 'future-roadmap/04-torrent-network.md',
     title: 'Torrent-native service network',
   },
   {
     src: 'future-roadmap/05-hydra-self-healing-network.md',
-    dest: 'future-roadmap/05-hydra.mdx',
+    dest: 'future-roadmap/05-hydra.md',
     title: 'Hydra self-healing network',
   },
 
   // algorand-x402
   {
     src: 'algorand-x402/overview.md',
-    dest: 'algorand-x402/index.mdx',
+    dest: 'algorand-x402/index.md',
     title: 'Algorand x402 overview',
     description: 'Algorand x402 payment integration overview.',
   },
   {
     src: 'algorand-x402/algorand-x402-design.md',
-    dest: 'algorand-x402/design.mdx',
+    dest: 'algorand-x402/design.md',
     title: 'Algorand x402 design',
   },
   {
     src: 'algorand-x402/algorand-x402-implementation-plan.md',
-    dest: 'algorand-x402/implementation.mdx',
+    dest: 'algorand-x402/implementation.md',
     title: 'Algorand x402 implementation',
   },
   {
     src: 'algorand-x402/algorand-x402-runbook.md',
-    dest: 'algorand-x402/runbook.mdx',
+    dest: 'algorand-x402/runbook.md',
     title: 'Algorand x402 runbook',
   },
 
   // toju
   {
     src: 'toju/toju-devcon-demo.md',
-    dest: 'toju/devcon-demo.mdx',
+    dest: 'toju/devcon-demo.md',
     title: 'Toju Devcon demo',
   },
   {
     src: 'toju/toju-render-testnet-guide.md',
-    dest: 'toju/render-testnet.mdx',
+    dest: 'toju/render-testnet.md',
     title: 'Toju Render testnet guide',
   },
   {
     src: 'toju/toju-deployment-diagnosis.md',
-    dest: 'toju/deployment-diagnosis.mdx',
+    dest: 'toju/deployment-diagnosis.md',
     title: 'Toju deployment diagnosis',
   },
   {
     src: 'toju/toju-agent-storage-plan.md',
-    dest: 'toju/agent-storage-plan.mdx',
+    dest: 'toju/agent-storage-plan.md',
     title: 'Toju agent storage plan',
   },
   {
     src: 'toju/toju-agent-storage-research.md',
-    dest: 'toju/agent-storage-research.mdx',
+    dest: 'toju/agent-storage-research.md',
     title: 'Toju agent storage research',
   },
   {
     src: 'toju/devcon-mobile-speaking-script.md',
-    dest: 'toju/speaking-script.mdx',
+    dest: 'toju/speaking-script.md',
     title: 'Devcon speaking script',
   },
 ];
@@ -401,7 +401,7 @@ for (const page of pages) {
   }
 
   let body = fs.readFileSync(srcPath, 'utf8');
-  const title = page.title ?? titleFromH1(body) ?? path.basename(page.dest, '.mdx');
+  const title = page.title ?? titleFromH1(body) ?? path.basename(page.dest, '.md');
   body = stripLeadingH1(body);
   body = rewriteLinks(body);
 
