@@ -55,6 +55,16 @@ that help readers decide what to do next without hunting.
 - [ipfs-progress.md](ipfs-progress.md) - IPFS task progress.
 - [QAE_ENHANCEMENT_NOTE.md](QAE_ENHANCEMENT_NOTE.md) - Quantum Amplitude Estimation extension notes.
 
+### Recent product sync
+
+- [RECENT_UPDATES.md](RECENT_UPDATES.md) - merged PRs from `QMeshPy/distributed-quantum` and where the docs live.
+- [payments/](payments/README.md) - payment ledger, credit packs, Connect vs on-chain payouts.
+- [auth/AUTH.md](auth/AUTH.md) - Better Auth email OTP and Sign-in with Ethereum.
+- [starknet/STARKNET_SESSION_GUIDE.md](starknet/STARKNET_SESSION_GUIDE.md) - agent session-key spend on Sepolia.
+- [provenance/PROVENANCE.md](provenance/PROVENANCE.md) - provenance verify and Ethereum anchors.
+- [chains/](chains/CHAIN_REGISTRY.md) - chain registry, ENS, worker subnames.
+- [vault/IPFS_VAULT.md](vault/IPFS_VAULT.md) - VAULT CID resolve, gateways, circuit/run links.
+
 ### Deployment
 
 - [LIGHTSAIL-DEPLOYMENT.md](LIGHTSAIL-DEPLOYMENT.md) - Lightsail deployment guide.
@@ -74,6 +84,13 @@ linking between documents in this repository.
 |-- requirements.md
 |-- LIGHTSAIL-DEPLOYMENT.md
 |-- FUTURE_ROADMAP.md
+|-- RECENT_UPDATES.md
+|-- payments/
+|-- auth/
+|-- starknet/
+|-- provenance/
+|-- chains/
+|-- vault/
 |-- research/
 |   |-- RESEARCH_PAPER_DRAFT.md
 |   |-- MATHEMATICAL_APPENDIX.md

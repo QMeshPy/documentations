@@ -6,6 +6,21 @@
 
 ## Pick Your Path
 
+### I want what just shipped in the product repo
+**→** [`RECENT_UPDATES.md`](RECENT_UPDATES.md)
+
+Merged PRs from `QMeshPy/distributed-quantum` (billing, SIWE, Starknet sessions, provenance, VAULT, chains).
+
+### I want payments, credits, or worker payouts
+**→** [`payments/README.md`](payments/README.md)
+
+Ledger model, Stripe credit packs / USDC, and Connect vs on-chain payout decision.
+
+### I want VAULT / IPFS sharing
+**→** [`vault/IPFS_VAULT.md`](vault/IPFS_VAULT.md)
+
+Open any CID, trustless gateways, circuit publish, run↔circuit links.
+
 ### I want to understand the system architecture
 **→** [`ARCHITECTURE.md`](ARCHITECTURE.md)
 
