@@ -85,6 +85,84 @@ const pages = [
     title: 'Paper (KaTeX)',
     description: 'Distributed quantum services paper with KaTeX math.',
   },
+  {
+    src: 'RECENT_UPDATES.md',
+    dest: 'recent-updates.mdx',
+    title: 'Recent updates',
+    description: 'Merged PRs from QMeshPy/distributed-quantum and where docs live.',
+  },
+
+  // payments
+  {
+    src: 'payments/README.md',
+    dest: 'payments/index.mdx',
+    title: 'Payments',
+    description: 'Payment docs index for credits, ledger, and worker payouts.',
+  },
+  {
+    src: 'payments/PAYMENT_LEDGER.md',
+    dest: 'payments/ledger.mdx',
+    title: 'Payment ledger',
+    description: 'Unified payment events and USDC-denominated credit ledger.',
+  },
+  {
+    src: 'payments/stripe-connect-vs-onchain-payouts.md',
+    dest: 'payments/payouts-spike.mdx',
+    title: 'Connect vs on-chain payouts',
+    description: 'Decision spike: Stripe Connect stablecoin vs on-chain worker payouts.',
+  },
+
+  // auth
+  {
+    src: 'auth/AUTH.md',
+    dest: 'auth/index.mdx',
+    title: 'Authentication',
+    description: 'Better Auth email OTP and Sign-in with Ethereum.',
+  },
+
+  // starknet
+  {
+    src: 'starknet/STARKNET_SESSION_GUIDE.md',
+    dest: 'starknet/index.mdx',
+    title: 'Starknet sessions',
+    description: 'Agent spending policies and session-key spend on Starknet Sepolia.',
+  },
+
+  // provenance
+  {
+    src: 'provenance/PROVENANCE.md',
+    dest: 'provenance/index.mdx',
+    title: 'Provenance',
+    description: 'Run provenance, Merkle verification, and Ethereum anchors.',
+  },
+
+  // chains
+  {
+    src: 'chains/CHAIN_REGISTRY.md',
+    dest: 'chains/index.mdx',
+    title: 'Chain registry',
+    description: 'Multi-chain registry, RPC adapters, and frontend integration.',
+  },
+  {
+    src: 'chains/ens-resolution.md',
+    dest: 'chains/ens-resolution.mdx',
+    title: 'ENS resolution',
+    description: 'ENS name resolution for wallets and display.',
+  },
+  {
+    src: 'chains/ens-worker-subnames.md',
+    dest: 'chains/ens-worker-subnames.mdx',
+    title: 'ENS worker subnames',
+    description: 'Worker subname proof-of-concept on ENS.',
+  },
+
+  // vault
+  {
+    src: 'vault/IPFS_VAULT.md',
+    dest: 'vault/index.mdx',
+    title: 'VAULT / IPFS',
+    description: 'CID resolve, trustless gateways, circuit publish, run links.',
+  },
 
   // research
   {
@@ -276,6 +354,19 @@ const linkMap = [
   ],
   [/technical\/BENCHMARK\.md/, '/docs/technical/benchmark', 'Benchmarks'],
   [/future-roadmap\/README\.md/, '/docs/future-roadmap', 'Future roadmap'],
+  [/RECENT_UPDATES\.md/, '/docs/recent-updates', 'Recent updates'],
+  [/payments\/README\.md/, '/docs/payments', 'Payments'],
+  [/payments\/PAYMENT_LEDGER\.md/, '/docs/payments/ledger', 'Payment ledger'],
+  [/payments\/stripe-connect-vs-onchain-payouts\.md/, '/docs/payments/payouts-spike', 'Connect vs on-chain payouts'],
+  [/auth\/AUTH\.md/, '/docs/auth', 'Authentication'],
+  [/starknet\/STARKNET_SESSION_GUIDE\.md/, '/docs/starknet', 'Starknet sessions'],
+  [/provenance\/PROVENANCE\.md/, '/docs/provenance', 'Provenance'],
+  [/chains\/CHAIN_REGISTRY\.md/, '/docs/chains', 'Chain registry'],
+  [/chains\/ens-resolution\.md/, '/docs/chains/ens-resolution', 'ENS resolution'],
+  [/chains\/ens-worker-subnames\.md/, '/docs/chains/ens-worker-subnames', 'ENS worker subnames'],
+  [/vault\/IPFS_VAULT\.md/, '/docs/vault', 'VAULT / IPFS'],
+  [/algorand-x402\/overview\.md/, '/docs/algorand-x402', 'Algorand x402'],
+  [/toju\/toju-devcon-demo\.md/, '/docs/toju/devcon-demo', 'Toju Devcon demo'],
 ];
 
 function rewriteLinks(body) {
@@ -334,10 +425,18 @@ writeMeta('.', {
   title: 'QMesh',
   pages: [
     'index',
+    'recent-updates',
     'architecture',
     'design',
     'requirements',
     'financial-modeling',
+    '---',
+    'payments',
+    'auth',
+    'starknet',
+    'provenance',
+    'chains',
+    'vault',
     '---',
     'research',
     'technical',
@@ -428,6 +527,36 @@ writeMeta('future-roadmap', {
     '04-torrent-network',
     '05-hydra',
   ],
+});
+
+writeMeta('payments', {
+  title: 'Payments',
+  pages: ['index', 'ledger', 'payouts-spike'],
+});
+
+writeMeta('auth', {
+  title: 'Auth',
+  pages: ['index'],
+});
+
+writeMeta('starknet', {
+  title: 'Starknet',
+  pages: ['index'],
+});
+
+writeMeta('provenance', {
+  title: 'Provenance',
+  pages: ['index'],
+});
+
+writeMeta('chains', {
+  title: 'Chains',
+  pages: ['index', 'ens-resolution', 'ens-worker-subnames'],
+});
+
+writeMeta('vault', {
+  title: 'VAULT',
+  pages: ['index'],
 });
 
 writeMeta('algorand-x402', {
