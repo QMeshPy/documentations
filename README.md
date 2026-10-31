@@ -19,6 +19,7 @@ that help readers decide what to do next without hunting.
 | Evaluate quantum scaling | [research/QUANTUM_SCALING_STRATEGY.md](research/QUANTUM_SCALING_STRATEGY.md) | [technical/GRADIENT_OPTIMIZATION_POSTMORTEM.md](technical/GRADIENT_OPTIMIZATION_POSTMORTEM.md) |
 | Audit implementation decisions | [technical/IMPLEMENTATION_NOTES.md](technical/IMPLEMENTATION_NOTES.md) | [technical/BENCHMARK.md](technical/BENCHMARK.md) |
 | Deploy or host the platform | [LIGHTSAIL-DEPLOYMENT.md](LIGHTSAIL-DEPLOYMENT.md) | [START_HERE.md](START_HERE.md) |
+| Find documents moved from the application repository | [repository/README.md](repository/README.md) | Original-path migration index |
 | Review future direction | [FUTURE_ROADMAP.md](FUTURE_ROADMAP.md) | [future-roadmap/README.md](future-roadmap/README.md) |
 
 ## What is inside
@@ -30,6 +31,8 @@ that help readers decide what to do next without hunting.
 - [design.md](design.md) - design rationale, cost model, and tradeoffs.
 - [requirements.md](requirements.md) - functional and non-functional requirements.
 - [AGENT_PROGRESS.md](AGENT_PROGRESS.md) - implementation and assistant progress notes.
+- [repository/README.md](repository/README.md) - application repository documents, retaining their original folder structure.
+- [superpowers/PRESENTATION_README.md](superpowers/PRESENTATION_README.md) - demo scripts, presentation material, and links to related design specs.
 
 ### Research
 
@@ -87,6 +90,7 @@ linking between documents in this repository.
 |   |-- QAOA_OPTIMIZATION_RESEARCH.md
 |   `-- BENCHMARK.md
 |-- future-roadmap/
+|-- repository/
 `-- superpowers/
 ```
 

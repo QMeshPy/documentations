@@ -37,7 +37,7 @@ Why we pivoted from speed tricks to scaling demonstration. Crossover predictions
 Honest analysis: parameter-shift gradients were 2–3× slower. Root cause: 8× evaluation overhead.
 
 ### I want to deploy the platform
-**→** [`../DEPLOYMENT-MANUAL.md`](../DEPLOYMENT-MANUAL.md) then [`LIGHTSAIL-DEPLOYMENT.md`](LIGHTSAIL-DEPLOYMENT.md)
+**→** [`repository/DEPLOYMENT-MANUAL.md`](repository/DEPLOYMENT-MANUAL.md) then [`LIGHTSAIL-DEPLOYMENT.md`](LIGHTSAIL-DEPLOYMENT.md)
 
 ### I want to understand finance theory and the quantum use case
 **→** [`FINANCIAL_MODELING_FOUNDATIONS.md`](FINANCIAL_MODELING_FOUNDATIONS.md)
@@ -133,7 +133,7 @@ docs/
 | Understand quantum advantage | `research/QUANTUM_SCALING_STRATEGY.md` → `research/MATHEMATICAL_APPENDIX.md` §F |
 | Understand system internals | `ARCHITECTURE.md` → `design.md` |
 | Make product/advisor decisions | `research/QUANTUM_SCALING_STRATEGY.md` → `research/ALTERNATIVE_QUANTUM_FINANCE_PROBLEMS.md` |
-| Deploy to production | `../DEPLOYMENT-MANUAL.md` → `LIGHTSAIL-DEPLOYMENT.md` |
+| Deploy to production | `repository/DEPLOYMENT-MANUAL.md` → `LIGHTSAIL-DEPLOYMENT.md` |
 | Take paid x402 requests on Algorand | `algorand-x402/algorand-x402-runbook.md` → `algorand-x402/algorand-x402-design.md` |
 | Run or host Toju agent storage | `toju/toju-render-testnet-guide.md` → `toju/toju-devcon-demo.md` |
 
