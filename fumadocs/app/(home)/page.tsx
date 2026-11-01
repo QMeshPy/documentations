@@ -52,7 +52,7 @@ function Rule({ children }: { children: string }) {
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen lg:grid lg:grid-cols-[minmax(30rem,40%)_1fr]">
+    <main className="min-h-screen lg:grid lg:grid-cols-[minmax(34rem,48%)_1fr]">
       {/* Hero panel */}
       <section className="relative flex min-h-[34rem] flex-col justify-between overflow-hidden border-b border-fd-border lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-e">
         <div className="qm-grid absolute inset-0 opacity-70" aria-hidden />
@@ -67,7 +67,7 @@ export default function HomePage() {
 
         {/* The five layers, animated. On desktop it scales to the space between header and title. */}
         <div className="relative min-h-0 flex-1 px-4 py-3 max-lg:h-[26rem] max-lg:flex-none">
-          <div className="mx-auto h-full w-full max-w-[34rem]">
+          <div className="mx-auto h-full w-full">
             <StackScene fit />
           </div>
         </div>
