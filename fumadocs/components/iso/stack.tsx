@@ -1,5 +1,5 @@
-import { Box, EASE, IsoSvg, Label, P, kf, pulse, type Frame, type O, type V } from './core';
-import { Cable, Cyl, FaceR, Hatch, PlateText, RBox, Screw, Top } from './solids';
+import { EASE, IsoSvg, Label, P, kf, pulse, type Frame, type O, type V } from './core';
+import { Cable, Cyl, FaceR, Hatch, Plane, PlateText, RBox, Screw, Top } from './solids';
 import {
   Drum,
   Hub,
@@ -28,11 +28,17 @@ import {
  * Only a band along each platform's two front edges can be seen (the platform
  * above hides the rest), so devices sit along those edges.
  */
-const o: O = { ox: 150, oy: 506 };
+const o: O = { ox: 190, oy: 506 };
 const LOOP = 12;
-const PLATE: V = [8, 4.4, 0.4];
+// The floor grows toward the back (-x, -y): its front corner and front edges,
+// where every device stands, do not move, but the left and right corners
+// swing outward, so the floor is wider on screen.
+const EX = 1.6;
+const EY = 1.2;
+const PLATE_AT: [number, number] = [-EX, -EY];
+const PLATE: V = [8 + EX, 4.4 + EY, 0.4];
 const GAP = 3.6;
-const CONDUIT: [number, number] = [7.6, 0.45];
+const CONDUIT: [number, number] = [7.6, -0.75];
 
 const layers = [
   { n: '01', name: 'YOUR APP', sub: 'You send a quantum circuit' },
@@ -129,12 +135,13 @@ const LAYER = [L1, L2, L3, L4, L5];
 /* ----------------------------- animation ----------------------------- */
 // Down: the request visits each layer. Up: the receipt returns.
 const arrive = (k: number) => 0.04 + 0.09 * k;
-const zStart = topZ(0) + 0.7;
-const dz = (k: number) => topZ(k) + 0.28 - zStart;
+const zStart = topZ(0) + 0.8;
+const dz = (k: number) => topZ(k) + 0.3 - zStart; // zStart is the orb's centre
 
 const css = (() => {
   let out =
     '.qm-stack .lab{font-size:13px}' +
+    '.qm-stack .orb{stroke:var(--acc);stroke-width:1}.qm-stack .orb-glow{fill:var(--acc);opacity:.22;transform-box:fill-box;transform-origin:center;animation:stk-glow 1.8s ease-in-out infinite}.qm-stack .orb-spark{fill:#fff;opacity:.8;stroke:none}@keyframes stk-glow{0%,100%{transform:scale(.8);opacity:.3}50%{transform:scale(1.3);opacity:.1}}' +
     '@media (max-width:520px){.qm-stack .lab,.qm-stack .sub,.qm-stack .lead,.qm-stack .dot,.qm-stack .tag,.qm-stack .kick{display:none}}';
 
   // the request cube falls
@@ -170,17 +177,24 @@ const css = (() => {
 })();
 
 export function StackScene({ fit = false }: { fit?: boolean }) {
-  const [tx, ty] = P(o, [CONDUIT[0], CONDUIT[1], zStart + 0.2]);
+  const [ox, oyy] = P(o, [CONDUIT[0], CONDUIT[1], zStart]);
   return (
     <IsoSvg
       id="qm-stack"
       fit={fit}
-      viewBox="0 0 660 712"
+      viewBox="0 0 740 712"
       title="One request travelling through the five layers of QMesh"
       desc="A request, shown as a glowing cube labelled your circuit, falls through five layers. Your app: laptops and a tablet send a quantum circuit. Coordinator: servers named plan, reserve and run split it up and plan the work. Payments and registry: payment terminals and ledger drums take payment per run and find workers. Peer mesh: everyday laptops, towers, phones and boards run the pieces. Provenance: receipt printers produce a receipt that proves what ran, and the receipt travels back up to your app."
       css={css}
     >
-      <text className="kick" x={410} y={40}>
+      <defs>
+        <radialGradient id="qm-orb" cx="0.36" cy="0.3" r="0.8">
+          <stop offset="0" style={{ stopColor: 'color-mix(in srgb, white 75%, var(--acc))' }} />
+          <stop offset="0.45" style={{ stopColor: 'var(--acc)' }} />
+          <stop offset="1" style={{ stopColor: 'color-mix(in srgb, black 35%, var(--acc))' }} />
+        </radialGradient>
+      </defs>
+      <text className="kick" x={486} y={40}>
         ONE REQUEST, FIVE LAYERS
       </text>
 
@@ -189,8 +203,8 @@ export function StackScene({ fit = false }: { fit?: boolean }) {
         const Layer = LAYER[k];
         return (
           <g key={k}>
-            <RBox o={o} at={[0, 0, z]} size={PLATE} r={0.28} bevel={0.13}>
-              <Top o={o} at={[0, 0, z + PLATE[2]]}>
+            <RBox o={o} at={[PLATE_AT[0], PLATE_AT[1], z]} size={PLATE} r={0.28} bevel={0.13}>
+              <Top o={o} at={[PLATE_AT[0], PLATE_AT[1], z + PLATE[2]]}>
                 <rect
                   className="hl"
                   x={0}
@@ -205,7 +219,7 @@ export function StackScene({ fit = false }: { fit?: boolean }) {
                 <Screw cx={0.3} cy={PLATE[1] - 0.3} />
                 <Screw cx={PLATE[0] - 0.3} cy={PLATE[1] - 0.3} />
               </Top>
-              <FaceR o={o} at={[PLATE[0], PLATE[1], z + PLATE[2]]}>
+              <FaceR o={o} at={[PLATE_AT[0] + PLATE[0], PLATE_AT[1] + PLATE[1], z + PLATE[2]]}>
                 <Hatch x={0.25} y={0.1} w={3.2} h={0.2} n={3} />
                 <PlateText x={3.6} y={0.07} w={0.5} h={0.26} text={`L${k + 1}`} size={0.15} />
               </FaceR>
@@ -221,22 +235,28 @@ export function StackScene({ fit = false }: { fit?: boolean }) {
       })}
 
       {layers.map((l, k) => {
-        const [fx, fy] = P(o, [PLATE[0], 0, topZ(k)]);
-        return <Label key={l.n} className={`stk-lab${k}`} from={[fx + 6, fy + 1]} x={410} y={fy + 5} n={l.n} text={l.name} sub={l.sub} />;
+        const [fx, fy] = P(o, [PLATE_AT[0] + PLATE[0], PLATE_AT[1], topZ(k)]);
+        return <Label key={l.n} className={`stk-lab${k}`} from={[fx + 6, fy + 1]} x={486} y={fy + 5} n={l.n} text={l.name} sub={l.sub} />;
       })}
 
-      {/* the request going down */}
+      {/* the request going down: a glowing orb */}
       <g className="mv keep stk-pk">
-        <Box o={o} at={[CONDUIT[0] - 0.14, CONDUIT[1] - 0.14, zStart]} size={[0.28, 0.28, 0.28]} tone="a" />
-        <text className="tag" x={tx + 16} y={ty - 20}>
+        <circle className="orb-glow" cx={ox} cy={oyy} r={17} />
+        <circle className="orb" cx={ox} cy={oyy} r={8.5} fill="url(#qm-orb)" />
+        <ellipse className="orb-spark" cx={ox - 2.6} cy={oyy - 3.2} rx={2.6} ry={1.9} />
+        <text className="tag" x={ox + 22} y={oyy - 16}>
           YOUR CIRCUIT
         </text>
       </g>
 
-      {/* the receipt coming back up */}
+      {/* the receipt coming back up: a small glass slip, like the ones the printers make */}
       <g className="mv stk-rc">
-        <Box o={o} at={[CONDUIT[0] - 0.2, CONDUIT[1] - 0.2, zStart]} size={[0.4, 0.4, 0.1]} tone="a" />
-        <text className="tag" x={tx + 16} y={ty - 20}>
+        <Plane o={o} at={[CONDUIT[0] - 0.32, CONDUIT[1], zStart + 0.35]} u={[1, 0, 0]} v={[0, 0, -1]}>
+          <rect className="glass" x={0} y={0} width={0.64} height={0.7} />
+          <Hatch x={0.1} y={0.12} w={0.44} h={0.24} n={3} />
+          <polyline className="accs" points="0.14,0.5 0.26,0.6 0.5,0.4" />
+        </Plane>
+        <text className="tag" x={ox + 22} y={oyy - 16}>
           RECEIPT
         </text>
       </g>
