@@ -225,13 +225,32 @@ html:not(.dark) .qi{--g:#fbfbfd;--ink:#14161c;--mute:#5b6070;--acc:#4f46e5;--edg
 .qi .w{fill:none;stroke:var(--edge);stroke-width:1;stroke-linecap:round;stroke-linejoin:round}
 .qi .wa{stroke:var(--acc)}
 .qi .d{stroke-dasharray:2 3}
-.qi .lead{stroke:var(--faint);stroke-width:1;stroke-dasharray:2 3}
+.qi .lead{stroke-width:1}
 .qi .dot{fill:var(--mute)}
 .qi .lab{font-family:var(--font-geist-mono),ui-monospace,monospace;font-size:11px;letter-spacing:.09em}
 .qi .lab .n{fill:var(--mute)}.qi .lab .t{fill:var(--ink)}
 .qi .mv{transform-box:fill-box;transform-origin:50% 50%;opacity:0}
 .qi .mv.keep{opacity:1}
 .qi .hl{fill:var(--acc);opacity:0;stroke:none}
+.qi .st{stroke-width:.75}
+.qi .w.soft{stroke:var(--faint)}
+.qi .dotf{fill:var(--faint);stroke:none}
+.qi .plate{font-family:var(--font-geist-mono),ui-monospace,monospace;fill:var(--mute);stroke:none;letter-spacing:.05em}
+.qi .led{fill:var(--g);stroke:var(--edge);stroke-width:1}
+.qi .led.on{fill:var(--acc);stroke:var(--acc)}
+.qi .bl1{animation:qi-bl 2.6s steps(1) infinite}
+.qi .bl2{animation:qi-bl 3.1s steps(1) infinite .7s}
+.qi .bl3{animation:qi-bl 1.9s steps(1) infinite .3s}
+@keyframes qi-bl{0%,55%{opacity:1}56%,100%{opacity:.2}}
+.qi .cab{fill:none;stroke:var(--edge);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
+.qi .cab.flow{stroke:var(--acc);stroke-width:1.8;stroke-dasharray:2 10;animation:qi-flow 1.1s linear infinite}
+@keyframes qi-flow{to{stroke-dashoffset:-12}}
+.qi .glass{fill:color-mix(in srgb,var(--acc) 24%,transparent);stroke:var(--acc);stroke-width:1}
+.qi .screen{fill:color-mix(in srgb,var(--ink) 5%,var(--g));stroke:var(--edge);stroke-width:1}
+.qi .ink{fill:color-mix(in srgb,var(--ink) 55%,var(--g));stroke:none}
+.qi .accf{fill:var(--acc);stroke:none}
+.qi .accs{fill:none;stroke:var(--acc);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.qi .lead{stroke:var(--edge);stroke-dasharray:none;opacity:.55}
 @media (prefers-reduced-motion:reduce){.qi *{animation:none!important}}
 `;
 
@@ -241,6 +260,7 @@ export function IsoSvg({
   desc,
   css = '',
   viewBox = '0 0 720 460',
+  fit = false,
   children,
 }: {
   id: string;
@@ -248,6 +268,8 @@ export function IsoSvg({
   desc: string;
   css?: string;
   viewBox?: string;
+  /** Fill the parent's height (and keep the aspect ratio) instead of sizing from the width. */
+  fit?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -257,7 +279,7 @@ export function IsoSvg({
       role="img"
       aria-labelledby={`${id}-t`}
       aria-describedby={`${id}-d`}
-      style={{ width: '100%', height: 'auto', display: 'block' }}
+      style={fit ? { width: '100%', height: '100%', display: 'block' } : { width: '100%', height: 'auto', display: 'block' }}
       fill="none"
     >
       <title id={`${id}-t`}>{title}</title>

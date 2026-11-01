@@ -65,10 +65,10 @@ export default function HomePage() {
           </Link>
         </header>
 
-        {/* The five layers, animated */}
-        <div className="relative flex flex-1 items-center justify-center px-4 py-4">
-          <div className="w-full max-w-[34rem]">
-            <StackScene />
+        {/* The five layers, animated. On desktop it scales to the space between header and title. */}
+        <div className="relative min-h-0 flex-1 px-4 py-3 max-lg:h-[26rem] max-lg:flex-none">
+          <div className="mx-auto h-full w-full max-w-[34rem]">
+            <StackScene fit />
           </div>
         </div>
 

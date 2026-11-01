@@ -15,7 +15,7 @@ export function Iso({ scene }: { scene: string }) {
   const Scene = scenes[scene as SceneName];
   if (!Scene) return null;
   return (
-    <div className="qm-iso-fig not-prose">
+    <div className="qm-iso-fig not-prose" style={scene === 'stack' ? { maxWidth: '34rem', marginInline: 'auto' } : undefined}>
       <Scene />
     </div>
   );
