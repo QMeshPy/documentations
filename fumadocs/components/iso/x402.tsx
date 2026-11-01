@@ -1,52 +1,57 @@
-import { Box, IsoSvg, Label, P, TopFace, Wire, anim, pulse, route, type O, type V } from './core';
+import { IsoSvg, anim, route, type O, type V } from './core';
+import { Cable } from './solids';
+import { Drum, Laptop, MiniPc, Server, Tower } from './devices';
+import {
+  Coin,
+  Floor,
+  Orb,
+  OrbDefs,
+  Pad,
+  Slip,
+  TOPZ,
+  floorPath,
+  sceneCss,
+  stepCss,
+  Steps,
+  windowCss,
+  type Step,
+} from './scene-kit';
 
 /**
- * The x402 flow: request, 402 Payment Required, pay in USDC, run, result.
+ * x402: ask, get a 402 with the price, pay in USDC on Algorand, then the job
+ * runs and the result comes back.
  */
-const o: O = { ox: 215, oy: 70 };
-const LOOP = 11;
+const o: O = { ox: 185, oy: 70 };
+const LOOP = 15;
+const Z = TOPZ + 0.12;
 
-const CLIENT_AT: V = [0, 2, 0];
-const CLIENT: V = [1.6, 1.6, 1];
-const SERVICE_AT: V = [5, 2, 0];
-const SERVICE: V = [1.8, 1.8, 1.4];
-const LEDGER_AT: V = [4.6, 5.4, 0];
-const LEDGER: V = [2.4, 1.8, 0.35];
+const CLIENT: [number, number] = [0.5, 1.7];
+const GATE: [number, number] = [3.9, 1.7];
+const DRUM: [number, number] = [5.1, 4.9];
+const MESH_X = 7.2;
 
-const rowY = 2.8; // centre line between client and service
-const Z = 0.55;
-
-const steps = [
-  { n: '01', text: 'REQUEST', a: 0.05 },
-  { n: '02', text: '402 PAYMENT REQUIRED', a: 0.24 },
-  { n: '03', text: 'PAY IN USDC', a: 0.43 },
-  { n: '04', text: 'RUN AND RETURN', a: 0.72 },
+const steps: Step[] = [
+  { n: '01', name: 'REQUEST', sub: 'The client asks for a run', a: 0.03, b: 0.16 },
+  { n: '02', name: '402', sub: 'The gateway answers with the price', a: 0.17, b: 0.33 },
+  { n: '03', name: 'PAY', sub: 'USDC moves on Algorand TestNet', a: 0.35, b: 0.58 },
+  { n: '04', name: 'RUN', sub: 'Once paid, the job is created and run', a: 0.6, b: 0.78 },
+  { n: '05', name: 'RESULT', sub: 'The answer goes back to the client', a: 0.8, b: 0.96 },
 ];
 
+const cOut: V = [2.5, 2.35, Z]; // client end of the cable
+const gIn: V = [3.6, 2.35, Z]; // gateway end
+const LANE = 3.6; // return lane for results
+
 const css = (() => {
-  let c = '';
-  // 1 request: client -> service
-  c += anim('x4-req', LOOP, route([1.8, rowY, Z], [[4.9, rowY, Z]], 0.05, 0.17));
-  // 2 the 402 answer: service -> client
-  c += anim('x4-402', LOOP, route([4.9, rowY, 1.0], [[1.9, rowY, 1.0]], 0.24, 0.36));
-  // 3 payment: client -> ledger (down the y axis, then across x)
-  c += anim('x4-pay', LOOP, route([0.8, 3.8, 0.35], [[0.8, 6.3, 0.35], [4.7, 6.3, 0.6]], 0.43, 0.56));
-  // 3b confirmation: ledger -> service
-  c += anim('x4-ok', LOOP, route([6.2, 5.9, 0.7], [[6.2, 4.0, 0.7], [5.9, 3.95, 1.5]], 0.6, 0.7));
-  // 4 result: service -> client
-  c += anim('x4-res', LOOP, route([4.9, rowY, 0.7], [[1.9, rowY, 0.7]], 0.78, 0.92));
-
-  c += pulse('x4-svc1', 0.17, 0.03, 0.05, 0.08, 0.5) + `.x4-svc1{animation:x4-svc1 ${LOOP}s linear infinite}`;
-  c += pulse('x4-svc2', 0.72, 0.03, 0.05, 0.08, 0.5) + `.x4-svc2{animation:x4-svc2 ${LOOP}s linear infinite}`;
-  c += pulse('x4-led', 0.57, 0.03, 0.06, 0.08, 0.55) + `.x4-led{animation:x4-led ${LOOP}s linear infinite}`;
-  c += pulse('x4-cli', 0.93, 0.03, 0.03, 0.04, 0.5) + `.x4-cli{animation:x4-cli ${LOOP}s linear infinite}`;
-
-  steps.forEach((s, i) => {
-    const next = steps[i + 1]?.a ?? 0.96;
-    const f = (t: number, v: string) => `${(Math.max(0, Math.min(1, t)) * 100).toFixed(2)}%{fill:${v}}`;
-    c += `@keyframes x4-lb${i}{${f(0, 'var(--ink)')}${f(s.a - 0.02, 'var(--ink)')}${f(s.a, 'var(--acc)')}${f(next - 0.03, 'var(--acc)')}${f(next, 'var(--ink)')}${f(1, 'var(--ink)')}}`;
-    c += `.x4-lab${i} .t{animation:x4-lb${i} ${LOOP}s linear infinite}`;
-  });
+  let c = sceneCss('qm-x402') + stepCss('x4', LOOP, steps);
+  c += anim('x4-req', LOOP, route(cOut, [gIn], 0.04, 0.15));
+  c += anim('x4-402', LOOP, route(gIn, [cOut], 0.19, 0.31));
+  c += anim('x4-pay', LOOP, route([1.4, 3.2, Z], [[1.6, 3.2, Z], [1.6, DRUM[1], Z], [4.4, DRUM[1], Z]], 0.37, 0.52));
+  c += anim('x4-ok', LOOP, route([5.1, 4.1, Z], [[5.1, 3.3, Z]], 0.54, 0.6));
+  c += anim('x4-job', LOOP, route([5.7, 2.0, Z + 0.3], [[MESH_X - 0.4, 2.0, Z + 0.3]], 0.62, 0.74));
+  c += anim('x4-res', LOOP, route([MESH_X - 0.3, LANE, Z], [[2.3, LANE, Z], [2.3, 3.2, Z]], 0.81, 0.94));
+  c += windowCss('x4-padM', LOOP, 0.72, 0.84, 0.5);
+  c += windowCss('x4-led', LOOP, 0.5, 0.64, 0.5);
   return c;
 })();
 
@@ -54,58 +59,37 @@ export function X402Scene() {
   return (
     <IsoSvg
       id="qm-x402"
-      viewBox="10 45 700 350"
-      title="The x402 payment flow"
-      desc="A client requests a quantum run. The service answers 402 Payment Required. The client pays in USDC on the Algorand ledger, the ledger confirms to the service, and the service runs the job and returns the result."
+      viewBox="0 0 810 340"
+      title="How an x402 payment works"
+      desc="A client asks the gateway for a quantum run. The gateway answers 402 Payment Required with the price. The client pays in USDC on the Algorand ledger. Once the payment settles, the gateway creates the job on the mesh, and the result goes back to the client."
       css={css}
     >
-      <Wire o={o} dashed path={[[CLIENT_AT[0] + CLIENT[0], rowY, 0.02], [SERVICE_AT[0], rowY, 0.02]]} />
-      <Wire o={o} dashed path={[[0.8, CLIENT_AT[1] + CLIENT[1], 0.02], [0.8, 6.3, 0.02], [LEDGER_AT[0], 6.3, 0.02]]} />
-      <Wire o={o} dashed path={[[6.2, LEDGER_AT[1], 0.02], [6.2, SERVICE_AT[1] + SERVICE[1], 0.02]]} />
+      <OrbDefs id="x4-orb" />
+      <Floor o={o} />
 
-      {/* ledger: a short chain of blocks */}
-      <Box o={o} at={LEDGER_AT} size={LEDGER} />
-      <TopFace o={o} at={LEDGER_AT} size={LEDGER} className="hl x4-led" />
-      {[0, 1, 2].map((i) => (
-        <Box key={i} o={o} at={[LEDGER_AT[0] + 0.25 + i * 0.7, LEDGER_AT[1] + 0.45, LEDGER[2]]} size={[0.5, 0.9, 0.3]} tone={i === 2 ? 'a' : 'n'} />
-      ))}
+      <Cable o={o} flow path={floorPath([[2.5, 2.35], [3.9, 2.35]])} />
+      <Cable o={o} flow path={floorPath([[1.6, 3.1], [1.6, DRUM[1]], [4.4, DRUM[1]]])} />
+      <Cable o={o} flow path={floorPath([[5.1, 3.1], [5.1, 4.1]])} />
+      <Cable o={o} flow path={floorPath([[5.5, 2.0], [MESH_X, 2.0]])} />
+      <Cable o={o} flow path={floorPath([[MESH_X, LANE], [2.3, LANE], [2.3, 3.1]])} />
 
-      {/* service */}
-      <Box o={o} at={SERVICE_AT} size={SERVICE} />
-      <TopFace o={o} at={SERVICE_AT} size={SERVICE} className="hl x4-svc1" />
-      <TopFace o={o} at={SERVICE_AT} size={SERVICE} className="hl x4-svc2" />
-      <Box o={o} at={[SERVICE_AT[0] + 0.5, SERVICE_AT[1] + 0.5, SERVICE[2]]} size={[0.8, 0.8, 0.3]} tone="a" />
+      <Laptop o={o} x={CLIENT[0]} y={CLIENT[1]} z={TOPZ} scale={0.82} variant="code" />
+      <Server o={o} x={GATE[0]} y={GATE[1]} z={TOPZ} w={1.6} d={1.4} h={1.3} label="x402" />
+      <Pad o={o} at={[3.5, 4.1]} size={[2.4, 1.7]} name="ALGORAND" cls="x4-led" />
+      <Drum o={o} x={DRUM[0]} y={DRUM[1]} z={TOPZ} r={0.62} h={0.9} />
 
-      {/* client */}
-      <Box o={o} at={CLIENT_AT} size={CLIENT} />
-      <TopFace o={o} at={CLIENT_AT} size={CLIENT} className="hl x4-cli" />
-      <Box o={o} at={[CLIENT_AT[0] + 0.4, CLIENT_AT[1] + 0.4, CLIENT[2]]} size={[0.8, 0.8, 0.14]} />
+      <Pad o={o} at={[MESH_X, 0.9]} size={[1.9, 3.0]} name="MESH" cls="x4-padM" />
+      <Tower o={o} x={MESH_X + 0.55} y={1.2} z={TOPZ} h={1.0} />
+      <MiniPc o={o} x={MESH_X + 0.5} y={2.6} z={TOPZ} />
 
-      {/* movers */}
-      <g className="mv x4-req"><Box o={o} at={[1.8, rowY - 0.2, Z]} size={[0.4, 0.4, 0.4]} /></g>
-      <g className="mv x4-402"><Box o={o} at={[4.9, rowY - 0.45, 1.0]} size={[0.5, 0.9, 0.18]} tone="a" /></g>
-      <g className="mv x4-pay"><Box o={o} at={[0.6, 3.6, 0.35]} size={[0.5, 0.5, 0.16]} tone="a" /></g>
-      <g className="mv x4-ok"><Box o={o} at={[6.0, 5.7, 0.7]} size={[0.4, 0.4, 0.4]} tone="a" /></g>
-      <g className="mv x4-res"><Box o={o} at={[4.9, rowY - 0.2, 0.7]} size={[0.4, 0.4, 0.4]} tone="a" /></g>
+      <g className="mv x4-req"><Slip o={o} at={cOut} tag="RUN MY CIRCUIT" /></g>
+      <g className="mv x4-402"><Slip o={o} at={gIn} tag="402 PAY IN USDC" /></g>
+      <g className="mv x4-pay"><Coin o={o} at={[1.4, 3.2, Z]} /></g>
+      <g className="mv x4-ok"><Slip o={o} at={[5.1, 4.1, Z]} tag="PAID" /></g>
+      <g className="mv x4-job"><Orb o={o} id="x4-orb" at={[5.7, 2.0, Z + 0.3]} tag="JOB" /></g>
+      <g className="mv x4-res"><Slip o={o} at={[MESH_X - 0.3, LANE, Z]} tag="RESULT" /></g>
 
-      {/* entity labels */}
-      {(() => {
-        const [ax, ay] = P(o, [CLIENT_AT[0], CLIENT_AT[1] + CLIENT[1], 0.4]);
-        const [bx, by] = P(o, [SERVICE_AT[0] + SERVICE[0], SERVICE_AT[1], SERVICE[2]]);
-        const [cx, cy] = P(o, [LEDGER_AT[0] + LEDGER[0], LEDGER_AT[1] + LEDGER[1], 0.1]);
-        return (
-          <>
-            <Label from={[ax, ay]} x={ax - 30} y={ay + 12} anchor="end" text="CLIENT" />
-            <Label from={[bx, by]} x={bx + 36} y={by + 4} text="QMESH API" />
-            <Label from={[cx, cy]} x={cx + 36} y={cy + 20} text="ALGORAND TESTNET" />
-          </>
-        );
-      })()}
-
-      {/* step list */}
-      {steps.map((s, i) => (
-        <Label key={s.n} className={`x4-lab${i}`} x={500} y={130 + i * 30} n={s.n} text={s.text} />
-      ))}
+      <Steps prefix="x4" steps={steps} x={478} y={72} />
     </IsoSvg>
   );
 }

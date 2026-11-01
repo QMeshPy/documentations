@@ -7,6 +7,8 @@ icon: Handshake
 A peer can only run so much at once, and it may refuse. So the coordinator never sends fragments blindly: it first
 **reserves** the peer, and only a committed reservation is followed by a dispatch.
 
+<Iso scene="reservation" />
+
 ## The protocol
 
 Reservations travel over libp2p streams. Their protocol ids are derived from the rendezvous namespace
