@@ -1,6 +1,4 @@
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { baseOptions } from '@/lib/layout.shared';
-
 export default function Layout({ children }: LayoutProps<'/'>) {
-  return <HomeLayout {...baseOptions()}>{children}</HomeLayout>;
+  // The home page draws its own chrome (hero panel plus README panel).
+  return <>{children}</>;
 }

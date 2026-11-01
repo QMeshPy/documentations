@@ -418,8 +418,77 @@ function handleDollars(body) {
     .join('');
 }
 
+
+/**
+ * Sidebar sections. Folders in parentheses are Fumadocs route groups: they add
+ * a section to the sidebar but never appear in a URL, so /docs/architecture stays.
+ */
+const GROUPS = {
+  concepts: {
+    title: 'Concepts',
+    icon: 'BookOpen',
+    pages: ['architecture', 'design', 'requirements', 'financial-modeling'],
+  },
+  platform: {
+    title: 'Platform',
+    icon: 'Layers',
+    pages: ['payments', 'auth', 'starknet', 'provenance', 'chains', 'vault', 'algorand-x402', 'toju'],
+  },
+  research: { title: 'Research', icon: 'FlaskConical', pages: ['research', 'technical'] },
+  roadmap: {
+    title: 'Roadmap and operations',
+    icon: 'Map',
+    pages: ['roadmap', 'future-roadmap', 'deployment', 'recent-updates'],
+  },
+  notes: {
+    title: 'Notes',
+    icon: 'StickyNote',
+    pages: ['ipfs-vision', 'ipfs-progress', 'qae-enhancement', 'paper-katex', 'agent-progress'],
+  },
+};
+
+const groupOfTop = new Map(
+  Object.entries(GROUPS).flatMap(([g, def]) => def.pages.map((p) => [p, g])),
+);
+
+/** Physical path (inside its route group) for a logical content path. */
+function phys(rel) {
+  const top = rel.split('/')[0].replace(/\.mdx?$/, '');
+  const g = groupOfTop.get(top);
+  return g ? `(${g})/${rel}` : rel;
+}
+
+const PAGE_ICONS = {
+  architecture: 'Network',
+  design: 'PencilRuler',
+  requirements: 'ListChecks',
+  'financial-modeling': 'ChartLine',
+  payments: 'Wallet',
+  auth: 'KeyRound',
+  starknet: 'Bot',
+  provenance: 'FingerprintPattern',
+  chains: 'Link2',
+  vault: 'Boxes',
+  'algorand-x402': 'Coins',
+  toju: 'HardDrive',
+  research: 'FlaskConical',
+  technical: 'Wrench',
+  roadmap: 'Map',
+  'future-roadmap': 'Milestone',
+  deployment: 'Server',
+  'recent-updates': 'Clock',
+  'ipfs-vision': 'Eye',
+  'ipfs-progress': 'ListTodo',
+  'qae-enhancement': 'Atom',
+  'paper-katex': 'FileText',
+  'agent-progress': 'ListTodo',
+};
+
 function writeMeta(dir, meta) {
-  const file = path.join(outRoot, dir, 'meta.json');
+  const physical = dir === '.' || dir.startsWith('(') ? dir : phys(dir);
+  const icon = PAGE_ICONS[dir];
+  if (icon && !meta.icon) meta = { ...meta, icon };
+  const file = path.join(outRoot, physical, 'meta.json');
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, `${JSON.stringify(meta, null, 2)}\n`);
 }
@@ -439,6 +508,7 @@ for (const page of pages) {
   let body = fs.readFileSync(srcPath, 'utf8');
   const title = page.title ?? titleFromH1(body) ?? path.basename(page.dest, '.md');
   body = stripLeadingH1(body);
+  body = body.replace(/^(?:Back to \[[^\n]*\n+)+/m, '');
   body = rewriteLinks(body);
   body = resolveRelativeLinks(body, page.src);
   body = handleDollars(body);
@@ -447,13 +517,16 @@ for (const page of pages) {
     '---',
     `title: ${JSON.stringify(title)}`,
     page.description ? `description: ${JSON.stringify(page.description)}` : null,
+    !page.dest.includes('/') && PAGE_ICONS[page.dest.replace(/\.mdx?$/, '')]
+      ? `icon: ${PAGE_ICONS[page.dest.replace(/\.mdx?$/, '')]}`
+      : null,
     '---',
     '',
   ]
     .filter(Boolean)
     .join('\n');
 
-  const destPath = path.join(outRoot, page.dest);
+  const destPath = path.join(outRoot, phys(page.dest));
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   fs.writeFileSync(destPath, `${frontmatter}\n${body.trim()}\n`);
   synced += 1;
@@ -461,38 +534,12 @@ for (const page of pages) {
 
 writeMeta('.', {
   title: 'QMesh',
-  pages: [
-    'index',
-    '---Concepts---',
-    'architecture',
-    'design',
-    'requirements',
-    'financial-modeling',
-    '---Platform---',
-    'payments',
-    'auth',
-    'starknet',
-    'provenance',
-    'chains',
-    'vault',
-    'algorand-x402',
-    'toju',
-    '---Research---',
-    'research',
-    'technical',
-    '---Roadmap and operations---',
-    'roadmap',
-    'future-roadmap',
-    'deployment',
-    'recent-updates',
-    '---Notes---',
-    'ipfs-vision',
-    'ipfs-progress',
-    'qae-enhancement',
-    'paper-katex',
-    'agent-progress',
-  ],
+  pages: ['index', ...Object.keys(GROUPS).map((g) => `(${g})`)],
 });
+
+for (const [g, def] of Object.entries(GROUPS)) {
+  writeMeta(`(${g})`, { title: def.title, icon: def.icon, pages: def.pages });
+}
 
 // Hand-authored pages (introduction, section landings) live in authored/.
 const authoredRoot = path.join(fumadocsRoot, 'authored');
@@ -501,7 +548,7 @@ if (fs.existsSync(authoredRoot)) {
 }
 
 fs.writeFileSync(
-  path.join(outRoot, 'research', 'index.mdx'),
+  path.join(outRoot, phys('research/index.mdx')),
   `---
 title: "Research"
 description: "Research papers, math appendix, and quantum scaling strategy."
@@ -520,7 +567,7 @@ QMesh research docs cover the portfolio-optimization thesis, formal derivations,
 );
 
 fs.writeFileSync(
-  path.join(outRoot, 'technical', 'index.mdx'),
+  path.join(outRoot, phys('technical/index.mdx')),
   `---
 title: "Technical"
 description: "Implementation notes, postmortems, and benchmarks."

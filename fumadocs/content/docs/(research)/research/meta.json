@@ -1,0 +1,12 @@
+{
+  "title": "Research",
+  "pages": [
+    "index",
+    "paper",
+    "mathematical-appendix",
+    "scaling-strategy",
+    "alternative-problems",
+    "datasets"
+  ],
+  "icon": "FlaskConical"
+}

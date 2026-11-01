@@ -1,0 +1,9 @@
+{
+  "title": "Payments",
+  "pages": [
+    "index",
+    "ledger",
+    "payouts-spike"
+  ],
+  "icon": "Wallet"
+}

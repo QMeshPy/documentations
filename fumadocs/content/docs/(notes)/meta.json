@@ -1,0 +1,11 @@
+{
+  "title": "Notes",
+  "icon": "StickyNote",
+  "pages": [
+    "ipfs-vision",
+    "ipfs-progress",
+    "qae-enhancement",
+    "paper-katex",
+    "agent-progress"
+  ]
+}

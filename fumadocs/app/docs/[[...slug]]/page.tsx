@@ -1,12 +1,6 @@
 import { source } from '@/lib/source';
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-  MarkdownCopyButton,
-  ViewOptionsPopover,
-} from 'fumadocs-ui/layouts/notebook/page';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { PageActions } from '@/components/docs/page-actions';
 import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
@@ -23,16 +17,12 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const markdownUrl = getPageMarkdownUrl(page).url;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
-      <div className="flex flex-row gap-2 items-center border-b pb-6">
-        <MarkdownCopyButton markdownUrl={markdownUrl} />
-        <ViewOptionsPopover
-          markdownUrl={markdownUrl}
-          githubUrl={`${editBase}/${page.path}`}
-        />
+    <DocsPage toc={page.data.toc} full={page.data.full} breadcrumb={{ enabled: false }}>
+      <div className="qm-title-row">
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <PageActions markdownUrl={markdownUrl} githubUrl={`${editBase}/${page.path}`} />
       </div>
+      <DocsDescription className="qm-description">{page.data.description}</DocsDescription>
       <DocsBody>
         <MDX
           components={getMDXComponents({

@@ -1,0 +1,10 @@
+{
+  "title": "Roadmap and operations",
+  "icon": "Map",
+  "pages": [
+    "roadmap",
+    "future-roadmap",
+    "deployment",
+    "recent-updates"
+  ]
+}
