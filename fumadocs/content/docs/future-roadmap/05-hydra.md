@@ -1,9 +1,9 @@
 ---
 title: "Hydra self-healing network"
 ---
-Back to [Future Roadmap](../FUTURE_ROADMAP.md)
+Back to [Future Roadmap](/docs/roadmap)
 
-Previous: [Milestone 4: Torrent-Native Service Network](04-torrent-native-service-network.md)
+Previous: [Milestone 4: Torrent-Native Service Network](/docs/future-roadmap/04-torrent-network)
 
 ## Mission
 

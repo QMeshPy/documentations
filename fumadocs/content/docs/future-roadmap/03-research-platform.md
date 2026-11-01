@@ -1,11 +1,11 @@
 ---
 title: "Autonomous research platform"
 ---
-Back to [Future Roadmap](../FUTURE_ROADMAP.md)
+Back to [Future Roadmap](/docs/roadmap)
 
-Previous: [Milestone 2: Bring Your Own Node Network](02-bring-your-own-node-network.md)
+Previous: [Milestone 2: Bring Your Own Node Network](/docs/future-roadmap/02-byon)
 
-Next: [Milestone 4: Torrent-Native Service Network](04-torrent-native-service-network.md)
+Next: [Milestone 4: Torrent-Native Service Network](/docs/future-roadmap/04-torrent-network)
 
 ## Mission
 

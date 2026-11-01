@@ -1,9 +1,19 @@
 import { createGetUrl } from 'fumadocs-core/source';
 
 export const appName = 'QMesh';
+export const siteTagline = 'Quantum, run as a network';
+export const siteDescription =
+  'Documentation for QMesh: quantum computation as discoverable, payable and verifiable network services.';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';
+
+/** Where the product itself lives. */
+export const links = {
+  landing: 'https://www.distributed-quantum.com',
+  console: 'https://www.distributed-quantum.com/signin?next=/dashboard',
+  product: 'https://github.com/QMeshPy/distributed-quantum',
+};
 
 export const gitConfig = {
   user: 'QMeshPy',

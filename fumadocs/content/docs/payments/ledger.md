@@ -191,10 +191,10 @@ before and are not charged to a user.
 ### Manual test (Stripe CLI, test mode)
 
 1. In the Stripe Dashboard (test mode), create a product with a **one-time** price,
-   e.g. $10, and set `STRIPE_CREDIT_PACKS=price_...:10`.
+   e.g. \$10, and set `STRIPE_CREDIT_PACKS=price_...:10`.
 2. Set the secrets above, `QB2_CIRCUIT_JOB_CREDIT_COST=2`, and restart both apps.
 3. `stripe listen --forward-to localhost:3000/api/auth/stripe/webhook`
-4. Settings → Credits → **Buy 10 credits · $10.00**, pay with `4242 4242 4242 4242`.
+4. Settings → Credits → **Buy 10 credits · \$10.00**, pay with `4242 4242 4242 4242`.
    The balance shows 10.
 5. `stripe events resend <evt_id>`: the webhook returns `duplicate: true` and the
    balance stays 10. `GET /api/v1/admin/payments/events/stripe:checkout:<cs_...>`
@@ -238,7 +238,7 @@ Stripe → webhook → session retrieved with payment_intent.payment_method expa
 - **Refunds** are supported, full or partial, and go back as stablecoins to the
   paying wallet. Refunding does not yet debit the credits it granted; that applies
   to card refunds too and is a follow-up.
-- **Limits.** Stablecoin Checkout needs USD prices, US$10,000 at most per
+- **Limits.** Stablecoin Checkout needs USD prices, US\$10,000 at most per
   transaction, and a Stripe account approved for "Stablecoins and Cryptocurrency".
   Stripe currently offers it to US businesses (not New York); other regions are in
   private preview. Stablecoin subscriptions are out of scope.
@@ -252,7 +252,7 @@ Stripe → webhook → session retrieved with payment_intent.payment_method expa
 3. Fund a MetaMask wallet on Polygon Amoy with test USDC (faucet.circle.com) and a
    little POL for gas (faucet.polygon.technology).
 4. `stripe listen --forward-to localhost:3000/api/auth/stripe/webhook`, then
-   Settings → Credits → **Buy 10 credits · $10.00 in USDC** and pay on
+   Settings → Credits → **Buy 10 credits · \$10.00 in USDC** and pay on
    crypto.stripe.com. The balance shows 10.
 5. `stripe events resend <evt_id>`: `duplicate: true`, the balance stays 10, and
    `GET /api/v1/admin/payments/events/stripe:checkout:<cs_...>` shows one confirmed

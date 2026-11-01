@@ -75,7 +75,7 @@ Before recording, open [Toju health](https://toju-devcon-testnet.onrender.com/he
 
 ## Deployment and limits
 
-Follow [the Render testnet guide](toju-render-testnet-guide.md) for build/start commands and environment setup. The Solana route is configured for **Solana testnet** with the mentor's existing program. Agent x402 payments use **Base Sepolia**, because that is Toju's EVM testnet payment route.
+Follow [the Render testnet guide](/docs/toju/render-testnet) for build/start commands and environment setup. The Solana route is configured for **Solana testnet** with the mentor's existing program. Agent x402 payments use **Base Sepolia**, because that is Toju's EVM testnet payment route.
 
 QStash schedules (UTC): warnings 00:00 daily; expiration cleanup 00:10 daily; debt cleanup 00:20 daily; usage snapshot 00:30 daily; usage comparison Sunday 00:40. One signed usage-snapshot request was delivered successfully. Destructive `/jobs/destroy` is not scheduled.
 

@@ -1,7 +1,7 @@
 ---
 title: "Toju agent storage research"
 ---
-> Historical research/diagnosis. Deployment subsequently succeeded on October 11, 2026 IST: the full official Toju fork is live on Render and a Groq agent export/payment/retrieval was verified. Current status and reproduction steps are in [the deployment guide](toju-render-testnet-guide.md) and [demo guide](toju-devcon-demo.md). Earlier “not yet tested/deployed” statements below describe the investigation at that time.
+> Historical research/diagnosis. Deployment subsequently succeeded on October 11, 2026 IST: the full official Toju fork is live on Render and a Groq agent export/payment/retrieval was verified. Current status and reproduction steps are in [the deployment guide](/docs/toju/render-testnet) and [demo guide](/docs/toju/devcon-demo). Earlier “not yet tested/deployed” statements below describe the investigation at that time.
 
 
 Research date: October 10, 2026. This is a research brief and design proposal, not an implementation or a successful live-test report.
@@ -116,7 +116,7 @@ Convert existing tool definitions and tool-result messages to the supported form
 
 Use backend-only `GROQ_API_KEY` and `GROQ_MODEL`; no keys in responses, prompts, logs, frontend bundles, or source control. Stay on the free plan and disable paid fallback. Audit every inference path reachable from the demo tools: changing only `chat()` would leave other proposal/analysis Bedrock calls in the repository.
 
-The signed-in Groq console confirms that the current plan is Free ($0). The user created the `quantumnodes-devcon` key in the console; it is saved only in the Git-ignored `backend/.env`. The console displayed no expiry. The Groq tool loop now has four passing checks, including its real MCP tool definitions; a live browser chat has not yet been tested.
+The signed-in Groq console confirms that the current plan is Free (\$0). The user created the `quantumnodes-devcon` key in the console; it is saved only in the Git-ignored `backend/.env`. The console displayed no expiry. The Groq tool loop now has four passing checks, including its real MCP tool definitions; a live browser chat has not yet been tested.
 
 ## Implementation approaches to compare
 
@@ -137,4 +137,4 @@ No product code, network payments, or storage uploads were performed during this
 
 ## Subsequent deployment investigation
 
-See [deployment diagnosis](toju-deployment-diagnosis.md) for the current Render suspension evidence, the mentor-supplied program verified on Solana testnet, self-hosting requirements, and the AgentKit/x402 dependency constraint. The Python-only transport proposal above has been superseded by an isolated TypeScript x402 v2 client to preserve the existing Coinbase wallet integration.
+See [deployment diagnosis](/docs/toju/deployment-diagnosis) for the current Render suspension evidence, the mentor-supplied program verified on Solana testnet, self-hosting requirements, and the AgentKit/x402 dependency constraint. The Python-only transport proposal above has been superseded by an isolated TypeScript x402 v2 client to preserve the existing Coinbase wallet integration.

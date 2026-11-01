@@ -49,7 +49,7 @@ Unit tests inject a mock ENS client (no RPC). A Sepolia end-to-end check can be 
 
 ## Worker subnames (PR 3 design)
 
-See [ens-worker-subnames.md](./ens-worker-subnames.md).
+See [ens-worker-subnames.md](/docs/chains/ens-worker-subnames).
 
 ## Out of scope here
 

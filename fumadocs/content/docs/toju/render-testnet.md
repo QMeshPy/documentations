@@ -13,7 +13,7 @@ Updated October 11, 2026 (IST). The full Toju server is deployed and the agent p
 - Gateway: `https://gateway.pinata.cloud`; the retired `ipfs.io` HTTP gateway returned 429 and must not be used for the demo.
 - Proven flow: Groq draft → explicit approval → one Base Sepolia faucet-USDC payment → Toju/Pinata upload → chain Transfer and downloaded SHA-256 verification. Receipt reconciliation also passed without a second signature or payment.
 
-See [recording steps and proof](toju-devcon-demo.md). Sections below reproduce this installation; warnings about upstream bugs refer to the original revision and are fixed in the deployed fork.
+See [recording steps and proof](/docs/toju/devcon-demo). Sections below reproduce this installation; warnings about upstream bugs refer to the original revision and are fixed in the deployed fork.
 
 ## What we are deploying
 

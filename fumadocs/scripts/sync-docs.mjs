@@ -14,12 +14,6 @@ const outRoot = path.join(fumadocsRoot, 'content', 'docs');
 /** @type {{ src: string, dest: string, title?: string, description?: string }[]} */
 const pages = [
   {
-    src: 'START_HERE.md',
-    dest: 'index.md',
-    title: 'Start here',
-    description: 'Navigation guide for QMesh documentation.',
-  },
-  {
     src: 'ARCHITECTURE.md',
     dest: 'architecture.md',
     title: 'Architecture',
@@ -382,6 +376,48 @@ function rewriteLinks(body) {
   return next;
 }
 
+
+/** `/docs/...` URL for a destination file. */
+function urlFor(dest) {
+  const clean = dest.replace(/\.mdx?$/, '').replace(/\/index$/, '').replace(/^index$/, '');
+  return `/docs${clean ? `/${clean}` : ''}`;
+}
+
+const PRODUCT_BLOB = 'https://github.com/QMeshPy/documentations/blob/main';
+
+/**
+ * Resolves any remaining relative `*.md` link against the page's own source
+ * folder. Known pages become site URLs; anything else falls back to GitHub
+ * so no link is left pointing at a file that does not exist on the site.
+ */
+function resolveRelativeLinks(body, srcRel) {
+  const srcDir = path.posix.dirname(srcRel);
+  const bySrc = new Map(pages.map((p) => [path.posix.normalize(p.src), p.dest]));
+  return body.replace(/\]\(([^)\s]+?\.md)(#[^)\s]*)?\)/g, (m, target, hash = '') => {
+    if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith('/')) return m;
+    const resolved = path.posix.normalize(path.posix.join(srcDir, target));
+    const dest = bySrc.get(resolved);
+    if (dest) return `](${urlFor(dest)}${hash})`;
+    if (/(^|\/)README\.md$/.test(resolved) && resolved === 'README.md') return `](/docs${hash})`;
+    if (resolved.startsWith('..')) return `](/docs${hash})`;
+    return `](${PRODUCT_BLOB}/${resolved}${hash})`;
+  });
+}
+
+const MATH = /\$\$|\$[^$\n]*\\[a-zA-Z]+[^$\n]*\$/;
+
+/**
+ * Pages with real math keep `$` so remark-math + KaTeX can typeset it.
+ * Everywhere else `$` is currency, so it is escaped outside code.
+ */
+function handleDollars(body) {
+  if (MATH.test(body)) return body;
+  return body
+    .split(/(```[\s\S]*?```|`[^`\n]*`)/g)
+    .map((chunk, i) => (i % 2 === 1 ? chunk : chunk.replace(/(?<!\\)\$/g, '\\$')))
+    .join('');
+}
+
 function writeMeta(dir, meta) {
   const file = path.join(outRoot, dir, 'meta.json');
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -404,6 +440,8 @@ for (const page of pages) {
   const title = page.title ?? titleFromH1(body) ?? path.basename(page.dest, '.md');
   body = stripLeadingH1(body);
   body = rewriteLinks(body);
+  body = resolveRelativeLinks(body, page.src);
+  body = handleDollars(body);
 
   const frontmatter = [
     '---',
@@ -425,36 +463,42 @@ writeMeta('.', {
   title: 'QMesh',
   pages: [
     'index',
-    'recent-updates',
+    '---Concepts---',
     'architecture',
     'design',
     'requirements',
     'financial-modeling',
-    '---',
+    '---Platform---',
     'payments',
     'auth',
     'starknet',
     'provenance',
     'chains',
     'vault',
-    '---',
+    'algorand-x402',
+    'toju',
+    '---Research---',
     'research',
     'technical',
-    '---',
+    '---Roadmap and operations---',
     'roadmap',
     'future-roadmap',
     'deployment',
-    '---',
+    'recent-updates',
+    '---Notes---',
     'ipfs-vision',
     'ipfs-progress',
     'qae-enhancement',
     'paper-katex',
     'agent-progress',
-    '---',
-    'algorand-x402',
-    'toju',
   ],
 });
+
+// Hand-authored pages (introduction, section landings) live in authored/.
+const authoredRoot = path.join(fumadocsRoot, 'authored');
+if (fs.existsSync(authoredRoot)) {
+  fs.cpSync(authoredRoot, outRoot, { recursive: true });
+}
 
 fs.writeFileSync(
   path.join(outRoot, 'research', 'index.mdx'),

@@ -1,7 +1,7 @@
 ---
 title: "Sequencing and program plan"
 ---
-Back to [Future Roadmap](../FUTURE_ROADMAP.md)
+Back to [Future Roadmap](/docs/roadmap)
 
 ## Purpose
 
@@ -248,8 +248,8 @@ When choosing between two roadmap options, prefer the one that:
 
 ## Related Milestone Docs
 
-- [Milestone 1: Production SDK and Platform](01-production-sdk-and-platform.md)
-- [Milestone 2: Bring Your Own Node Network](02-bring-your-own-node-network.md)
-- [Milestone 3: Autonomous Research and Drug Discovery Platform](03-autonomous-research-and-drug-discovery-platform.md)
-- [Milestone 4: Torrent-Native Service Network](04-torrent-native-service-network.md)
-- [Milestone 5: Hydra Self-Healing Network](05-hydra-self-healing-network.md)
+- [Milestone 1: Production SDK and Platform](/docs/future-roadmap/01-sdk-platform)
+- [Milestone 2: Bring Your Own Node Network](/docs/future-roadmap/02-byon)
+- [Milestone 3: Autonomous Research and Drug Discovery Platform](/docs/future-roadmap/03-research-platform)
+- [Milestone 4: Torrent-Native Service Network](/docs/future-roadmap/04-torrent-network)
+- [Milestone 5: Hydra Self-Healing Network](/docs/future-roadmap/05-hydra)

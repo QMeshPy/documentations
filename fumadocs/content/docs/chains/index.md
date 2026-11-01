@@ -85,7 +85,7 @@ not checksums, existence, ownership, or transaction success.
 is allowed only on testnets with `verify_transaction`, and it does not use the wallet
 provider: anchors come from a dedicated low-balance account, never a user or platform
 wallet. Ethereum Sepolia declares it. See
-[Anchor transactions](PROVENANCE.md#anchor-transactions-21).
+[Anchor transactions](https://github.com/QMeshPy/documentations/blob/main/chains/PROVENANCE.md#anchor-transactions-21).
 
 Robinhood Chain Testnet (`eip155:46630`, #18) declares `explorer_url` and
 `verify_transaction` only, with no stablecoin. Official Stock Tokens and Chainlink
@@ -272,7 +272,7 @@ database, blockchain, or wallet: the RPC adapter tests answer JSON-RPC from a
 scripted in-process provider. They do not verify live peer or wallet integration.
 
 The dependency fix pins the published libp2p 0.6.0 release and removes the moving
-archive URL; see [Local development](README.md#local-development). The bootstrap
+archive URL; see [Local development](https://github.com/QMeshPy/documentations/blob/main/chains/README.md#local-development). The bootstrap
 unit tests still mock peer services. The existing `test_libp2p_peerstore.py` tests
 exercise the real library with temporary SQLite files.
 `tests/network/test_libp2p_transport.py` verifies real bidirectional RPC, discovery

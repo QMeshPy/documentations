@@ -1,9 +1,9 @@
 ---
 title: "Production SDK and platform"
 ---
-Back to [Future Roadmap](../FUTURE_ROADMAP.md)
+Back to [Future Roadmap](/docs/roadmap)
 
-Next: [Milestone 2: Bring Your Own Node Network](02-bring-your-own-node-network.md)
+Next: [Milestone 2: Bring Your Own Node Network](/docs/future-roadmap/02-byon)
 
 ## Mission
 

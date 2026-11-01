@@ -2,7 +2,7 @@
 title: "Algorand x402 overview"
 description: "Algorand x402 payment integration overview."
 ---
-> Moved here from the `distributed-quantum` README. For setup and verification commands see the [TestNet runbook](algorand-x402-runbook.md); for the design see [algorand-x402-design.md](algorand-x402-design.md).
+> Moved here from the `distributed-quantum` README. For setup and verification commands see the [TestNet runbook](/docs/algorand-x402/runbook); for the design see [algorand-x402-design.md](/docs/algorand-x402/design).
 
 > **QMeshPy is a decentralized quantum-computing service network where developers and autonomous agents can discover quantum workloads, pay seamlessly with Algorand USDC through x402, and trigger real distributed quantum circuit and quantum-finance computations across a libp2p mesh.**
 

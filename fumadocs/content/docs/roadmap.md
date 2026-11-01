@@ -12,21 +12,21 @@ Back to [Docs Index](/docs)
 
 This document is the long-horizon product and platform roadmap for the project.
 
-It is intentionally different from [tasks.md](tasks.md).
+It is intentionally different from [tasks.md](https://github.com/QMeshPy/documentations/blob/main/tasks.md).
 
-- [tasks.md](tasks.md) is the near-term implementation plan for the current proof of concept
+- [tasks.md](https://github.com/QMeshPy/documentations/blob/main/tasks.md) is the near-term implementation plan for the current proof of concept
 - this roadmap is the multi-milestone future plan for what the project grows into
 
 ## How To Read This Roadmap
 
 Start here for the big picture, then move into the detailed milestone docs:
 
-1. [Program sequencing and dependency plan](future-roadmap/00-sequencing-and-program-plan.md)
-2. [Milestone 1: Production SDK and Platform](future-roadmap/01-production-sdk-and-platform.md)
-3. [Milestone 2: Bring Your Own Node Network](future-roadmap/02-bring-your-own-node-network.md)
-4. [Milestone 3: Autonomous Research and Drug Discovery Platform](future-roadmap/03-autonomous-research-and-drug-discovery-platform.md)
-5. [Milestone 4: Torrent-Native Service Network](future-roadmap/04-torrent-native-service-network.md)
-6. [Milestone 5: Hydra Self-Healing Network](future-roadmap/05-hydra-self-healing-network.md)
+1. [Program sequencing and dependency plan](/docs/future-roadmap/00-sequencing)
+2. [Milestone 1: Production SDK and Platform](/docs/future-roadmap/01-sdk-platform)
+3. [Milestone 2: Bring Your Own Node Network](/docs/future-roadmap/02-byon)
+4. [Milestone 3: Autonomous Research and Drug Discovery Platform](/docs/future-roadmap/03-research-platform)
+5. [Milestone 4: Torrent-Native Service Network](/docs/future-roadmap/04-torrent-network)
+6. [Milestone 5: Hydra Self-Healing Network](/docs/future-roadmap/05-hydra)
 
 ## Roadmap Thesis
 
@@ -126,10 +126,10 @@ flowchart LR
 
 If you want different levels of detail:
 
-- for the full big-picture view: stay on this page, then read the [program sequencing and dependency plan](future-roadmap/00-sequencing-and-program-plan.md)
-- for product strategy detail: start with [Milestone 1](future-roadmap/01-production-sdk-and-platform.md) and [Milestone 3](future-roadmap/03-autonomous-research-and-drug-discovery-platform.md)
-- for distributed systems depth: focus on [Milestone 2](future-roadmap/02-bring-your-own-node-network.md), [Milestone 4](future-roadmap/04-torrent-native-service-network.md), and [Milestone 5](future-roadmap/05-hydra-self-healing-network.md)
-- for an execution sequence: use the [program sequencing and dependency plan](future-roadmap/00-sequencing-and-program-plan.md)
+- for the full big-picture view: stay on this page, then read the [program sequencing and dependency plan](/docs/future-roadmap/00-sequencing)
+- for product strategy detail: start with [Milestone 1](/docs/future-roadmap/01-sdk-platform) and [Milestone 3](/docs/future-roadmap/03-research-platform)
+- for distributed systems depth: focus on [Milestone 2](/docs/future-roadmap/02-byon), [Milestone 4](/docs/future-roadmap/04-torrent-network), and [Milestone 5](/docs/future-roadmap/05-hydra)
+- for an execution sequence: use the [program sequencing and dependency plan](/docs/future-roadmap/00-sequencing)
 
 ## Relationship To Existing POC Docs
 
@@ -138,7 +138,7 @@ These existing documents still matter:
 - [Architecture](/docs/architecture): what the current system is
 - [Design](/docs/design): why the proof of concept was shaped the way it was
 - [Requirements](/docs/requirements): what the current POC is meant to satisfy
-- [tasks.md](tasks.md): the near-term implementation plan for the present codebase
+- [tasks.md](https://github.com/QMeshPy/documentations/blob/main/tasks.md): the near-term implementation plan for the present codebase
 
 This roadmap starts where those documents stop.
 

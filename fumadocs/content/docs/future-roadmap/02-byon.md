@@ -1,11 +1,11 @@
 ---
 title: "Bring-your-own-node network"
 ---
-Back to [Future Roadmap](../FUTURE_ROADMAP.md)
+Back to [Future Roadmap](/docs/roadmap)
 
-Previous: [Milestone 1: Production SDK and Platform](01-production-sdk-and-platform.md)
+Previous: [Milestone 1: Production SDK and Platform](/docs/future-roadmap/01-sdk-platform)
 
-Next: [Milestone 3: Autonomous Research and Drug Discovery Platform](03-autonomous-research-and-drug-discovery-platform.md)
+Next: [Milestone 3: Autonomous Research and Drug Discovery Platform](/docs/future-roadmap/03-research-platform)
 
 ## Mission
 

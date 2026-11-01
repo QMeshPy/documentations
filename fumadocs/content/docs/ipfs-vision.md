@@ -535,7 +535,7 @@ This architecture positions our platform as the **first quantum computing infras
 **Pinata Subscription** (Optional - User-Managed):
 
 - Users who want guaranteed long-term availability can create Pinata accounts
-- Pricing: Free tier (1 GB), Professional ($20-50/month per user for 10-100 GB)
+- Pricing: Free tier (1 GB), Professional (\$20-50/month per user for 10-100 GB)
 - Platform option: Offer shared Pinata pool where users contribute to community pinning fund
 - Alternative: Users can pin to any IPFS service (Filebase, Web3.Storage, etc.)
 - **Not required for core functionality** — IPFS peer network provides availability
@@ -547,7 +547,7 @@ This architecture positions our platform as the **first quantum computing infras
 - WebRTC: Built into browsers, libp2p handles all NAT traversal automatically
 - **No deployment complexity** — Just add Helia npm package to frontend build
 
-**Total Additional Infrastructure**: **$0/month** — Completely frontend-based solution with no backend modifications
+**Total Additional Infrastructure**: **\$0/month** — Completely frontend-based solution with no backend modifications
 
 ---
 

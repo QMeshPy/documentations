@@ -1,7 +1,7 @@
 ---
 title: "Toju deployment diagnosis"
 ---
-> Historical research/diagnosis. Deployment subsequently succeeded on October 11, 2026 IST: the full official Toju fork is live on Render and a Groq agent export/payment/retrieval was verified. Current status and reproduction steps are in [the deployment guide](toju-render-testnet-guide.md) and [demo guide](toju-devcon-demo.md). Earlier “not yet tested/deployed” statements below describe the investigation at that time.
+> Historical research/diagnosis. Deployment subsequently succeeded on October 11, 2026 IST: the full official Toju fork is live on Render and a Groq agent export/payment/retrieval was verified. Current status and reproduction steps are in [the deployment guide](/docs/toju/render-testnet) and [demo guide](/docs/toju/devcon-demo). Earlier “not yet tested/deployed” statements below describe the investigation at that time.
 
 
 Checked October 10, 2026. Source inspected: `tojunetwork/afara` commit `a0053d5fdd81904e00d1f6ac5889af31a8153d9d`. These are read-only observations, not a completed storage/payment test.

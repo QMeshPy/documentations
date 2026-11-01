@@ -2,20 +2,20 @@
 title: "Lightsail deployment"
 description: "Deploy and host the platform on Lightsail."
 ---
-**Target Cost**: $40-50/month (down from $3000/month - 98% savings!)
+**Target Cost**: \$40-50/month (down from \$3000/month - 98% savings!)
 
 **Architecture**:
 - Frontend: Vercel (FREE)
-- Backend: AWS Lightsail 8GB ($40/month)
+- Backend: AWS Lightsail 8GB (\$40/month)
 - Database: Neon PostgreSQL (FREE) + MongoDB Atlas (FREE)
-- File Storage: AWS S3 ($3-5/month for datasets up to 1GB)
+- File Storage: AWS S3 (\$3-5/month for datasets up to 1GB)
 - HTTPS: Caddy (included in Lightsail)
 
 ---
 
 ## Why These Specs?
 
-### Lightsail 8GB RAM ($40/month)
+### Lightsail 8GB RAM (\$40/month)
 
 **What you're getting**:
 - 8GB RAM
@@ -32,7 +32,7 @@ description: "Deploy and host the platform on Lightsail."
 - OS + Docker overhead: ~1GB
 - **Total**: 7-8GB peak usage
 
-**Alternative if budget is tight**: 4GB Lightsail ($24/month) works but:
+**Alternative if budget is tight**: 4GB Lightsail (\$24/month) works but:
 - Can only process 1 job at a time
 - Need to add file streaming for 88MB+ CSVs
 - More likely to crash under load
@@ -62,7 +62,7 @@ description: "Deploy and host the platform on Lightsail."
 
 ---
 
-### 2. Backend - Lightsail 8GB ($40/month)
+### 2. Backend - Lightsail 8GB (\$40/month)
 
 **What runs here**:
 - FastAPI backend (port 8080)
@@ -72,12 +72,12 @@ description: "Deploy and host the platform on Lightsail."
 **Why Lightsail vs EC2?**
 | Feature | EC2 (Your Old Setup) | Lightsail |
 |---------|---------------------|-----------|
-| Base cost | ~$30/month | $40/month (fixed) |
-| Data transfer | $0.09/GB (expensive!) | 5TB included |
+| Base cost | ~\$30/month | \$40/month (fixed) |
+| Data transfer | \$0.09/GB (expensive!) | 5TB included |
 | Billing | Complex, unpredictable | Fixed price |
-| Your 10-day bill | $1000 | $13 |
+| Your 10-day bill | \$1000 | \$13 |
 
-**The $1000 bill was mostly data transfer charges!** Lightsail includes bandwidth.
+**The \$1000 bill was mostly data transfer charges!** Lightsail includes bandwidth.
 
 ---
 
@@ -104,12 +104,12 @@ description: "Deploy and host the platform on Lightsail."
 
 ---
 
-### 4. File Storage - AWS S3 ($3-5/month)
+### 4. File Storage - AWS S3 (\$3-5/month)
 
 **S3 Pricing breakdown**:
-- Storage: $0.023/GB/month
-- PUT requests: $0.005 per 1000 uploads
-- GET requests: $0.0004 per 1000 downloads
+- Storage: \$0.023/GB/month
+- PUT requests: \$0.005 per 1000 uploads
+- GET requests: \$0.0004 per 1000 downloads
 
 **Example cost for your use case**:
 ```
@@ -120,7 +120,7 @@ Downloads: 500 × $0.0004/1000 = $0.0002
 TOTAL: ~$0.25/month
 ```
 
-Even with 1TB of data: 1000GB × $0.023 = $23/month
+Even with 1TB of data: 1000GB × \$0.023 = \$23/month
 
 **S3 Configuration needed**:
 - Bucket name: `quantum-datasets-prod`
@@ -158,7 +158,7 @@ Even with 1TB of data: 1000GB × $0.023 = $23/month
    - AWS Console → Lightsail → Create instance
    - Platform: Linux/Unix
    - Blueprint: Ubuntu 24.04 LTS
-   - Plan: $40/month (8GB RAM)
+   - Plan: \$40/month (8GB RAM)
    - Name: `quantum-backend-prod`
    - Attach static IP (FREE!)
    - Download SSH key
@@ -335,17 +335,17 @@ QC_LIBP2P__ENABLED=false
 
 | Component | Service | Monthly Cost |
 |-----------|---------|--------------|
-| Frontend | Vercel FREE | $0 |
-| Backend | Lightsail 8GB | $40 |
-| PostgreSQL | Neon FREE | $0 |
-| MongoDB | Atlas FREE | $0 |
-| File Storage | S3 (~10GB) | $3-5 |
-| HTTPS/DNS | Caddy (included) | $0 |
-| **TOTAL** | | **$43-45/month** |
+| Frontend | Vercel FREE | \$0 |
+| Backend | Lightsail 8GB | \$40 |
+| PostgreSQL | Neon FREE | \$0 |
+| MongoDB | Atlas FREE | \$0 |
+| File Storage | S3 (~10GB) | \$3-5 |
+| HTTPS/DNS | Caddy (included) | \$0 |
+| **TOTAL** | | **\$43-45/month** |
 
 **Comparison**:
-- Your old EC2 setup: $3000/month (for 10 days of usage)
-- New Lightsail setup: $43/month
+- Your old EC2 setup: \$3000/month (for 10 days of usage)
+- New Lightsail setup: \$43/month
 - **Savings: 98.6%** 🎉
 
 ---
@@ -356,10 +356,10 @@ As your users grow:
 
 | Users | Monthly Cost | Configuration |
 |-------|--------------|---------------|
-| **1-10** | $45 | Current setup (Lightsail 8GB) |
-| **10-50** | $100 | Lightsail 16GB ($80) + Neon paid ($10) + S3 ($10) |
-| **50-200** | $300 | Lightsail 32GB ($160) + RDS ($80) + Atlas M10 ($60) |
-| **200+** | $500+ | Move to ECS Fargate + auto-scaling + Redis queue |
+| **1-10** | \$45 | Current setup (Lightsail 8GB) |
+| **10-50** | \$100 | Lightsail 16GB (\$80) + Neon paid (\$10) + S3 (\$10) |
+| **50-200** | \$300 | Lightsail 32GB (\$160) + RDS (\$80) + Atlas M10 (\$60) |
+| **200+** | \$500+ | Move to ECS Fargate + auto-scaling + Redis queue |
 
 ---
 
@@ -376,7 +376,7 @@ As your users grow:
 - Update Docker images: `docker compose pull && docker compose up -d`
 
 ### Monthly tasks (30 minutes)
-- Review AWS bill (should be ~$45)
+- Review AWS bill (should be ~\$45)
 - Check free tier limits (Neon 3GB, Atlas 512MB)
 - Backup database (Neon auto-backups, but good to verify)
 - Rotate S3 access keys (security best practice)
@@ -398,7 +398,7 @@ As your users grow:
 ### Out of memory errors
 - Current jobs: Check `docker stats`
 - Reduce concurrent jobs from 2 to 1 in `.env`
-- Consider upgrading to 16GB Lightsail ($80/month)
+- Consider upgrading to 16GB Lightsail (\$80/month)
 
 ### Slow processing
 - Qiskit simulations are CPU-bound (8 qubits = ~2-3 minutes)

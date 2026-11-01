@@ -1,11 +1,11 @@
 ---
 title: "Torrent-native service network"
 ---
-Back to [Future Roadmap](../FUTURE_ROADMAP.md)
+Back to [Future Roadmap](/docs/roadmap)
 
-Previous: [Milestone 3: Autonomous Research and Drug Discovery Platform](03-autonomous-research-and-drug-discovery-platform.md)
+Previous: [Milestone 3: Autonomous Research and Drug Discovery Platform](/docs/future-roadmap/03-research-platform)
 
-Next: [Milestone 5: Hydra Self-Healing Network](05-hydra-self-healing-network.md)
+Next: [Milestone 5: Hydra Self-Healing Network](/docs/future-roadmap/05-hydra)
 
 ## Mission
 
