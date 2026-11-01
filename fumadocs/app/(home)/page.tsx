@@ -4,6 +4,7 @@ import { links } from '@/lib/shared';
 import { QMeshMark } from '@/components/logo';
 import { TopNav } from '@/components/docs/topbar';
 import { CodeTabs } from '@/components/home/code-tabs';
+import { StackScene } from '@/components/iso/stack';
 
 const builtOn = [
   'py-libp2p',
@@ -64,9 +65,11 @@ export default function HomePage() {
           </Link>
         </header>
 
-        {/* Mark, large: a coordinator with its peers (room for the isometric hero later) */}
-        <div className="relative hidden flex-1 items-center justify-center lg:flex" aria-hidden>
-          <QMeshMark className="w-56 text-fd-foreground opacity-80" />
+        {/* The five layers, animated */}
+        <div className="relative flex flex-1 items-center justify-center px-4 py-4">
+          <div className="w-full max-w-[34rem]">
+            <StackScene />
+          </div>
         </div>
 
         <div className="relative px-7 pb-8 pt-10 lg:pb-12">

@@ -32,6 +32,11 @@ The underlying platform separates circuit, finance, discovery, and enrollment se
 
 ### How the x402 request flow works
 
+
+```iso
+x402
+```
+
 ```text
 ┌───────────────────────┐
 │ Developer / Agent     │

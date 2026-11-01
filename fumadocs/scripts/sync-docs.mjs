@@ -484,6 +484,20 @@ const PAGE_ICONS = {
   'agent-progress': 'ListTodo',
 };
 
+
+/** Isometric scenes inserted after a heading in an imported page. */
+const SCENES = {
+  'ARCHITECTURE.md': [[/^### 5\.5 Dependency Graph and Fragmentation\s*$/m, 'fragments']],
+  'algorand-x402/overview.md': [[/^### How the x402 request flow works\s*$/m, 'x402']],
+};
+
+function injectScenes(src, body) {
+  for (const [heading, scene] of SCENES[src] ?? []) {
+    body = body.replace(heading, (m) => `${m}\n\n\`\`\`iso\n${scene}\n\`\`\`\n`);
+  }
+  return body;
+}
+
 function writeMeta(dir, meta) {
   const physical = dir === '.' || dir.startsWith('(') ? dir : phys(dir);
   const icon = PAGE_ICONS[dir];
@@ -512,6 +526,7 @@ for (const page of pages) {
   body = rewriteLinks(body);
   body = resolveRelativeLinks(body, page.src);
   body = handleDollars(body);
+  body = injectScenes(page.src, body);
 
   const frontmatter = [
     '---',

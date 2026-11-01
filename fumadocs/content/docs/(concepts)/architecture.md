@@ -314,6 +314,11 @@ If the parser cannot understand an operation or declaration, it fails fast with 
 
 ### 5.5 Dependency Graph and Fragmentation
 
+
+```iso
+fragments
+```
+
 After normalization, operations are transformed into a dependency-aware representation.
 
 The essential rule is:

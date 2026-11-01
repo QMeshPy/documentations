@@ -28,6 +28,7 @@ import type { MDXComponents } from 'mdx/types';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Mermaid } from './mermaid';
+import { Iso } from './iso';
 
 /** Icons available inside MDX, e.g. `<Card icon={<Network />} />`. */
 const icons = {
@@ -96,6 +97,7 @@ export function getMDXComponents(components?: MDXComponents) {
     Folder,
     TypeTable,
     Mermaid,
+    Iso,
     Cards,
     Card,
     ...icons,

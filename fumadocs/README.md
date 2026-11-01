@@ -38,3 +38,26 @@ npm run sync-docs
 Imported pages keep the `.md` extension so math braces, autolinks, and comparison symbols are parsed as Markdown. Math (`$…$`, `$$…$$`) is typeset with KaTeX; on pages without math the sync escapes `$` so prices stay prices. ```` ```mermaid ```` blocks render as diagrams. The generated research and technical landing pages use `.mdx` for their Card components. Unsupported code languages render as plain text.
 
 Then restart or refresh the dev server.
+
+## Isometric illustrations
+
+`components/iso/` is a small kit for the diagrams: true 30 degree isometric, 1px strokes over three tonal faces,
+one accent, themed from CSS variables, pure SVG and CSS (no script), and a still frame under
+`prefers-reduced-motion`.
+
+| Scene | Use |
+| --- | --- |
+| `stack` | The five layers of a run (home hero, Introduction) |
+| `fragments` | Circuit split into fragments across peers (Architecture) |
+| `x402` | Request, 402, pay, run, result (Algorand x402) |
+
+In MDX use `<Iso scene="stack" />`. In imported Markdown use a fence:
+
+````md
+```iso
+fragments
+```
+````
+
+`scripts/sync-docs.mjs` injects scenes after chosen headings (`SCENES`). New scenes go in `components/iso/` and
+are registered in `components/iso/index.tsx`.
