@@ -45,7 +45,7 @@ Each folder has a `meta.json` that sets the page order. A page is added by creat
 | --- | --- |
 | `content/docs` | MDX pages |
 | `components/` | MDX components (Mermaid, Steps, Tabs, icons) and the QMesh mark |
-| `components/iso/` | Isometric illustrations |
+| `packages/iso/` | The isometric kit and scenes (self-contained, see its README) |
 | `lib/source.ts` | Content source loader |
 | `lib/layout.shared.tsx` | Nav and GitHub options |
 | `app/(home)` | Landing page |
@@ -53,7 +53,7 @@ Each folder has a `meta.json` that sets the page order. A page is added by creat
 
 ## Isometric illustrations
 
-`components/iso/` is a small kit for the diagrams: true 30 degree isometric, 1px strokes over three tonal faces,
+`packages/iso/` is a small kit for the diagrams: true 30 degree isometric, 1px strokes over three tonal faces,
 one accent, themed from CSS variables, pure SVG and CSS (no script), and a still frame under
-`prefers-reduced-motion`. Scenes are registered in `components/iso/index.tsx` and used in MDX as
+`prefers-reduced-motion`. Scenes are registered in `packages/iso/src/scenes.tsx` and used in MDX as
 `<Iso scene="stack" />`.

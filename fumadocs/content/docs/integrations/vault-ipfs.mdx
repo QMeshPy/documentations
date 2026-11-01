@@ -1,0 +1,79 @@
+---
+title: VAULT and IPFS
+description: "A browser content layer for circuits and runs: publish, share by CID, and open any CID with verification."
+icon: Boxes
+---
+
+**VAULT** is the console's content layer. Circuits and runs are stored as content-addressed JSON in your browser with
+[Helia](https://helia.io) (an IPFS implementation in JavaScript), and you can **pin** them to a provider and share a link.
+Because the address is a hash of the content (a CID), whoever opens it can check they got exactly what was published.
+
+It arrived in four pull requests: [#40](https://github.com/QMeshPy/distributed-quantum/pull/40) (Filecoin pinning through
+Lighthouse), [#83](https://github.com/QMeshPy/distributed-quantum/pull/83) (open any CID),
+[#90](https://github.com/QMeshPy/distributed-quantum/pull/90) (publish circuits) and
+[#109](https://github.com/QMeshPy/distributed-quantum/pull/109) (link runs to circuits). The platform's own IPFS node is a
+separate piece: [Kubo content node](/docs/integrations/kubo).
+
+<Iso scene="vault" />
+
+## Publish a circuit
+
+On **Lab → New Run**, **Publish circuit to VAULT** stores a record with `name`, `description`, `qasm`, `qubitCount`,
+`gateCount`, `author`, `publishedAt` and `tags`. The same **Pin** flow used for runs then appears. The circuit shows up in your
+Circuit Library and can be re-opened by its CID.
+
+## Link runs to circuits
+
+Run records are encoded with `@helia/dag-json`, so the `circuitCid` field is a real IPLD **link** to the circuit record. One
+root CID covers the run and its circuit. Sharing a completed run stores the OpenQASM as a circuit block if needed, then links
+it. Older records with a plain string `circuitCid` still open. The run page shows **Circuit (IPLD link)**.
+
+## Open any CID
+
+Paste a CID at `/vault/cid`, or open a shared link `/vault/cid/<cid>`. If the block is not in your browser yet, VAULT
+fetches the **raw block** from a list of trustless HTTP gateways, **re-hashes the bytes against the CID**, caches the block,
+and then decodes and schema-checks the record. A gateway cannot substitute different content for a CID. An invalid CID and an
+unreachable gateway give different error messages.
+
+```txt title="frontend/.env.local"
+# Optional. Defaults to Pinata first.
+NEXT_PUBLIC_IPFS_TRUSTLESS_GATEWAYS=https://gateway.pinata.cloud,https://trustless-gateway.link,https://4everland.io
+```
+
+<Callout type="warn" title="Privacy">
+  A trustless gateway sees every CID you request, and your IP address. For sensitive shared results, use a gateway you trust.
+  Verification stops substitution. It does not hide what you asked for.
+</Callout>
+
+## Pinning
+
+Pinning keeps a copy online after you close the tab. Pinata is the default. **Lighthouse** is offered as **Filecoin (via
+Lighthouse)**: Lighthouse makes the Filecoin deals itself on its default path, and QMesh sends no on-chain transaction.
+
+Things to know:
+
+- A failed upload no longer shows "Pinned": the pin record is saved only after the upload succeeds.
+- The pinned CID is the provider's own and can differ from the local CID. The record keeps the vault CID, and the share link uses
+  the gateway CID.
+- **Unpin only removes the vault record.** Lighthouse has no unpin API, so the file stays stored.
+- The whole record is uploaded as a **public** file.
+- Filecoin deal status is not shown or verified.
+
+```txt title="frontend/.env.local"
+NEXT_PUBLIC_PINATA_JWT=
+NEXT_PUBLIC_LIGHTHOUSE_KEY=
+```
+
+<Callout type="warn">
+  Anything prefixed `NEXT_PUBLIC_` is shipped to the browser. These two keys are exposed that way today. The open pull
+  request [#124](https://github.com/QMeshPy/distributed-quantum/pull/124) moves them server-side as `PINATA_JWT` and
+  `LIGHTHOUSE_API_KEY`, requires sign-in to upload, and asks you to **rotate any key that was exposed**. Until it merges, treat
+  the browser keys as public.
+</Callout>
+
+## What is still open
+
+The content layer has a long list of proposals under the [epic #43](https://github.com/QMeshPy/distributed-quantum/issues/43):
+a server-side pinning broker, pinning as a CAR so the pinned CID equals the Helia CID, versioned record schemas, persistent
+storage and eviction warnings, export and import as a CAR file, and a Kubo pinning provider. None of those exist yet. See the
+[roadmap](/docs/reference/roadmap).

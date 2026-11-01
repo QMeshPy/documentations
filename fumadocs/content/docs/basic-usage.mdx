@@ -88,7 +88,7 @@ immediately with a validation error and creates no job.
 <Callout>
   Credit metering is off by default (`QB2_CIRCUIT_JOB_CREDIT_COST=0`). When you turn it on, submitting a job holds
   its cost first. With too few credits the API answers
-  `402 Payment Required` with the error code `INSUFFICIENT_CREDITS` and creates no job.
+  `402 Payment Required` with the error code `insufficient_credits` and creates no job.
 </Callout>
 
 ## List your jobs
@@ -103,4 +103,4 @@ curl "http://localhost:8081/api/v1/jobs?limit=20&status=COMPLETED"
 
 - Understand each step in [Architecture](/docs/concepts/architecture).
 - Look up every endpoint in the [HTTP API reference](/docs/reference/http-api).
-- Charge for requests with [x402 payments](/docs/guides/x402-payments).
+- Charge for requests with [x402 payments](/docs/integrations/x402).

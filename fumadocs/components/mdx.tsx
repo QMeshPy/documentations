@@ -29,12 +29,13 @@ import {
   Route,
   Radar,
   ScrollText,
+  Plug,
 } from 'lucide-react';
 import type { MDXComponents } from 'mdx/types';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Mermaid } from './mermaid';
-import { Iso } from './iso';
+import { Iso } from '@/packages/iso';
 
 /** Icons available inside MDX, e.g. `<Card icon={<Network />} />`. */
 const icons = {
@@ -62,6 +63,7 @@ const icons = {
   Route,
   Radar,
   ScrollText,
+  Plug,
 };
 
 function Cards({ children }: { children: ReactNode }) {

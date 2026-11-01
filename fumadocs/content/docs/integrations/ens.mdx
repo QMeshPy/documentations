@@ -1,0 +1,46 @@
+---
+title: ENS
+description: Resolve names to addresses, show names instead of addresses, and a proof of concept for worker subnames.
+icon: AtSign
+---
+
+[ENS](https://ens.domains) maps human-readable names such as `alice.eth` to addresses. QMesh uses it so that people can
+type and read names instead of hex strings. It arrived in
+[#97](https://github.com/QMeshPy/distributed-quantum/pull/97), which supersedes an earlier attempt.
+
+## What it does
+
+- **Forward and reverse resolution.** A backend service, an HTTP API and console hooks resolve a name to an address and an
+  address to its verified primary name. Results are cached for 5 minutes by default (never more than 15) with an 8-second
+  timeout, and the console does a fresh lookup right before a send.
+- **Names in the wallet.** The transfer form accepts `name.eth`, shows the resolved, checksummed address, and requires an
+  explicit confirmation. Only the **address** is stored, never the name.
+- **Names on screen.** Proposal funders, the researcher wallet and the wallet strip show the primary ENS name, with the
+  address as a fallback.
+- **No guessing.** If resolution fails, the console shows an error. It never falls back to a guessed address.
+
+## API
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/ens/resolve?name=alice.eth` | Name to address. Needs an RPC for the configured network. Add `fresh=true` to skip the cache. |
+| `GET /api/v1/ens/reverse?address=0x...` | Address to its verified primary name, or `null` if none is set. |
+| `GET /api/v1/ens/workers` | The worker-subname proof of concept (list). |
+| `GET /api/v1/ens/workers/{subname}` | One worker record in the documented proof-of-concept shape. |
+
+## Configure
+
+| Variable | Purpose |
+| --- | --- |
+| `ENS_NETWORK` | `sepolia` or `mainnet`. By default it follows the payment network. |
+| `ENS_RPC_URL` | Override the default public RPC for that network. |
+
+## Worker subnames: a proof of concept
+
+The idea is for each worker to have a name under a QMesh-controlled domain (for example `worker-alpha`), with the name's
+records describing the worker. The pull request ships a schema document and a stub endpoint that returns that shape. It does
+**not** register names on-chain. Storing a `contenthash` record is deferred to a later phase.
+
+## Sign-in names
+
+[Sign-in with Ethereum](/docs/integrations/siwe) uses reverse resolution to fill in a user's display name and avatar.

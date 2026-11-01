@@ -1,0 +1,84 @@
+---
+title: Kubo content node
+description: "The platform's own IPFS node: locked-down RPC, a read-only gateway, storage limits, garbage collection and metrics."
+icon: Server
+---
+
+The Docker Compose stack includes a **Kubo** node, the reference IPFS implementation, pinned to **v0.43.1** by release tag and
+image digest. It gives QMesh a content store it controls: provenance bundles are published to it, and the backend can read
+content back with the CID verified. It arrived over several pull requests:
+[#80](https://github.com/QMeshPy/distributed-quantum/pull/80) (the node),
+[#82](https://github.com/QMeshPy/distributed-quantum/pull/82) (a locked-down RPC and a read-only gateway),
+[#85](https://github.com/QMeshPy/distributed-quantum/pull/85) to [#87](https://github.com/QMeshPy/distributed-quantum/pull/87)
+(a typed client), [#94](https://github.com/QMeshPy/distributed-quantum/pull/94) (CID-verified gateway reads),
+[#95](https://github.com/QMeshPy/distributed-quantum/pull/95) (publishing provenance) and
+[#96](https://github.com/QMeshPy/distributed-quantum/pull/96) (storage limits, garbage collection and metrics).
+
+<Callout type="warn">
+  IPFS is public, content-addressed networking. It is **not** confidential storage. Never add private data expecting its CID to
+  be secret.
+</Callout>
+
+## Start it
+
+Set a private RPC token first. It is 32 to 128 characters of letters, digits, `_` or `-`, with no `bearer:` prefix. Without a
+valid secret the node refuses to start (compute is unaffected).
+
+```bash
+openssl rand -hex 32          # put the result in .env as KUBO_RPC_SECRET
+chmod 600 .env
+docker compose up -d --wait kubo
+docker compose exec kubo sh /opt/qmesh/kubo-rpc.sh diag healthy
+```
+
+## What is exposed
+
+| Interface | Exposure |
+| --- | --- |
+| Swarm `4001` (TCP and UDP) | Published, for IPFS peers. Separate from the quantum workers' libp2p. |
+| Gateway `8080` | `127.0.0.1` only (`KUBO_GATEWAY_PORT` changes the host port). Reads `/ipfs/<CID>`. No writes. |
+| RPC `5001` | **Not published** and not proxied by Caddy. Only the backend reaches it, on the private `content_network`. |
+
+The RPC needs `Authorization: Bearer <token>`. The backend's scope allows only `id`, `diag/healthy`, `add`, `cat`, `pin/add`,
+`pin/rm`, `pin/ls`, `dag/import` and `block/stat`. Configuration, shutdown and other admin commands are denied even with the
+token. A start-up hook reapplies these rules on **every** start, so manual edits to managed keys are overwritten. To rotate
+the token, change `.env` and run `docker compose up -d --force-recreate kubo backend`. Pins and identity are kept.
+
+## Storage and garbage collection
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `KUBO_STORAGE_MAX` | `10GB` | A **soft** target for garbage collection, not a disk quota. |
+| `KUBO_GC_PERIOD` | `1h` | How often the daemon checks. |
+| (fixed) | 90% | The watermark that triggers collection. |
+
+Garbage collection only removes **unpinned, unreferenced** blocks. Pinned data is kept even above the target, so pins can fill the
+disk. Size the volume with headroom and watch it. Upgrading turns automatic collection on for existing volumes: pin what you need
+and back up the volume first. Never `docker compose down --volumes` on a deployment you want to keep.
+
+## Metrics
+
+```bash
+docker compose --profile monitoring up -d --wait kubo prometheus
+```
+
+A pinned Prometheus scrapes Kubo's native metrics every 30 seconds and keeps about 7 days or 512 MB. Neither the Prometheus UI nor
+Kubo's metrics has a published port. No Alertmanager is installed. Watch the disk that holds `kubo_data` yourself: the exporter
+does not report free space.
+
+## How the backend uses it
+
+- `KuboClient` is an async client for `add`, `pin_add`, `pin_rm`, `pin_ls`, `dag_import` (CAR files) and `block_stat`, with
+  bounded requests and safe errors that never include remote error text. **It does not retry**: a failed or timed-out write may
+  already have stored blocks, so reconcile instead of replaying.
+- A gateway client fetches by CID and **verifies the bytes** against it.
+- When `KUBO_RPC_SECRET` is set, each completed circuit run's [provenance bundle](/docs/concepts/provenance) is published and
+  pinned, best effort. A failure never changes the run.
+
+Content failures never block compute. The backend has no dependency on Kubo's health.
+
+## Proposals
+
+Not yet built: a browser-reachable address for Helia nodes, delegated routing, reprovide-only-pinned, a CID allowlist and takedown
+denylist for the public gateway, and an IPFS storage adapter for provenance verification (issues
+[#62](https://github.com/QMeshPy/distributed-quantum/issues/62) to [#74](https://github.com/QMeshPy/distributed-quantum/issues/74)).

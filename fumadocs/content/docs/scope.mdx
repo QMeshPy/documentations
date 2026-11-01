@@ -14,7 +14,7 @@ fits what you want to build.
 | Quantum execution | **Simulated.** Circuits run on Qiskit statevector simulation. There is no quantum hardware control. |
 | Peer network | **Real software.** The coordinator and workers talk over py-libp2p (GossipSub for discovery, streams for reservations and fragments). |
 | Local network | In local development the worker peers are started **inside the backend process** (`QB2_LIBP2P_DEV_SERVICE_PEER_COUNT`). That is a controlled demo network. An example script (`scripts/node-starter-template.py`) can start an external node, but QMesh is not a finished open network of third-party nodes. |
-| Payments | **Testnet.** The x402 flow settles USDC on Algorand TestNet. |
+| Payments | **Testnet and test mode.** x402 settles USDC on Algorand TestNet, Stripe runs in test mode, and agent payments use Base Sepolia and Starknet Sepolia. |
 | Provenance anchors | **Testnet only.** Anchoring is off until you set `QB2_ANCHOR_NETWORK`, and only test networks are allowed (Ethereum Sepolia in the packaged registry). |
 | Drug-discovery pipeline | **Experimental.** Its quantum stages are simulated. It is not covered by these docs. |
 
@@ -30,8 +30,8 @@ The backend requires authentication by default. The `backend/.env.example` file 
 for local development, which treats every request as a local administrator. Never run a public deployment that
 way.
 
-## Not documented yet
+## Integrations
 
-These areas exist in the product and are not covered here yet: credits and the payment ledger, the VAULT and
-IPFS content node, the chain registry and ENS, Sign-in with Ethereum, Starknet session keys for agents, and the
-agent workspace. They will be added as each one has a page that has been checked against the code.
+QMesh connects to Stripe, Algorand, Chainlink, ENS, Starknet, NEAR AI Cloud, IPFS and more. The
+[integrations overview](/docs/integrations/overview) lists each one and whether it is in `main`, in review or only proposed.
+Pages describe `main`. Open pull requests and issues are labelled as plans, not features.

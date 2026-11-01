@@ -66,7 +66,7 @@ working directory, so `backend/.env` works. Defaults below are the values in the
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `QB2_CIRCUIT_JOB_CREDIT_COST` | `0` | Credits held per circuit job. `0` turns metering off. |
-| `QB2_X402_GATEWAY_SECRET` | none | Enables the hidden internal routes used by the [x402 gateway](/docs/guides/x402-payments). Must equal the console's `X402_GATEWAY_SECRET`. |
+| `QB2_X402_GATEWAY_SECRET` | none | Enables the hidden internal routes used by the [x402 gateway](/docs/integrations/x402). Must equal the console's `X402_GATEWAY_SECRET`. |
 | `QB2_BILLING_INTERNAL_SECRET` | none | Shared secret for the console's billing calls. |
 | `QB2_PAYMENT_RECONCILE_INTERVAL_SECONDS` | `300` | How often the payment reconciliation sweep runs. |
 
@@ -97,8 +97,59 @@ working directory, so `backend/.env` works. Defaults below are the values in the
 | `QB2_CHAIN_REGISTRY_PATH` | the packaged registry | Path to a chain registry file. |
 | `NETWORK` | none | Wallet network name, for example `base-sepolia`. |
 
+## Agents and wallets
+
+| Variable | Purpose |
+| --- | --- |
+| `AGENT_AUTH_BRIDGE_SECRET` | Shared secret (at least 32 characters) used to sign and check the identity assertions the console sends. Same value in the console and backend. |
+| `AGENT_LLM_PROVIDER` | `groq`, `openrouter` or `near`. See [Agent LLM providers](/docs/integrations/agent-llm). |
+| `GROQ_API_KEY`, `GROQ_MODEL` | Groq. The default model is `openai/gpt-oss-20b`. |
+| `OPENROUTER_API_KEY`, `OPENROUTER_MODEL` | OpenRouter, free models only. |
+| `NEARAI_API_KEY`, `NEAR_MODEL` | NEAR AI Cloud. The model must support TEE attestation. |
+| `CDP_API_KEY_ID`, `CDP_API_KEY_SECRET`, `CDP_WALLET_SECRET` | Coinbase CDP server wallets. |
+| `WALLET_ENCRYPTION_KEY` | Encrypts stored session keys at rest. |
+| `TOJU_API_URL`, `TOJU_PAYMENT_RECIPIENT`, `TOJU_NODE_BINARY` | [Toju storage](/docs/integrations/toju). |
+| `ENS_NETWORK`, `ENS_RPC_URL` | [ENS](/docs/integrations/ens). |
+
+## Starknet
+
+| Variable | Purpose |
+| --- | --- |
+| `STARKNET_POLICY_CONTRACT` | Address of the deployed spending-policy contract. |
+| `STARKNET_SESSION_KEY_SPEND` | Set to `1` to use session-key spends. |
+| `STARKNET_RELAYER_ADDRESS`, `STARKNET_RELAYER_PRIVATE_KEY` | The account that submits spends. |
+| `AVNU_PAYMASTER_API_KEY` | Lets the AVNU paymaster sponsor `register_session`. |
+| `QB2_STARKNET_SEPOLIA_RPC_URL` | A live Starknet Sepolia RPC. |
+
+See [Starknet session keys](/docs/integrations/starknet).
+
+## Chains and prices
+
+| Variable | Purpose |
+| --- | --- |
+| `QB2_BASE_SEPOLIA_RPC_URL`, `QB2_ETHEREUM_SEPOLIA_RPC_URL`, `QB2_ROBINHOOD_TESTNET_RPC_URL`, `QB2_STARKNET_SEPOLIA_RPC_URL` | RPC overrides. See [Chain registry](/docs/integrations/chain-registry). |
+| `QB2_ROBINHOOD_MAINNET_RPC_URL` | Read-only RPC for tokenized-stock prices. See [Chainlink](/docs/integrations/chainlink). |
+
+## Console (frontend)
+
+These go in `frontend/.env.local` (see `frontend/.env.example`).
+
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_BACKEND_URL` | Where the console reaches the coordinator. |
+| `NEXT_PUBLIC_TRIAL_DISABLED` | `true` skips the one-hour trial gate locally. |
+| `MONGODB_URI`, `MONGODB_DB_NAME` | Sign-in sessions. |
+| `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET` | Better Auth. |
+| `RESEND_API_KEY`, `OTP_EMAIL_FROM` | Emailed sign-in codes. |
+| `NEXT_PUBLIC_APP_DOMAIN` | The expected [Sign-in with Ethereum](/docs/integrations/siwe) domain, if different from the host. |
+| `X402_ENABLED`, `X402_NETWORK`, `X402_AVM_ADDRESS`, `X402_FACILITATOR_URL`, `X402_QUANTUM_RUN_PRICE`, `X402_GATEWAY_SECRET` | [x402](/docs/integrations/x402). |
+| `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` | Subscriptions. See [Billing](/docs/integrations/billing). |
+| `STRIPE_CREDIT_PACKS`, `BILLING_INTERNAL_SECRET`, `STRIPE_STABLECOIN_PAYMENTS` | Credit packs and USDC packs. |
+| `NEXT_PUBLIC_IPFS_TRUSTLESS_GATEWAYS` | Gateways VAULT uses to open a CID. |
+| `NEXT_PUBLIC_PINATA_JWT`, `NEXT_PUBLIC_LIGHTHOUSE_KEY` | VAULT pinning. **Exposed to the browser.** See [VAULT and IPFS](/docs/integrations/vault-ipfs). |
+
 <Callout>
   Treat every variable above that holds a secret (`QB2_X402_GATEWAY_SECRET`, `QB2_BILLING_INTERNAL_SECRET`,
-  `KUBO_RPC_SECRET`, `QB2_ANCHOR_PRIVATE_KEY`) as private. Never expose one to a browser, and never commit a
+  `KUBO_RPC_SECRET`, `QB2_ANCHOR_PRIVATE_KEY`, `WALLET_ENCRYPTION_KEY`, `STARKNET_RELAYER_PRIVATE_KEY`, every API key) as private. Never expose one to a browser, and never commit a
   `.env` file.
 </Callout>

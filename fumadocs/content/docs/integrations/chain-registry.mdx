@@ -1,0 +1,81 @@
+---
+title: Chain registry
+description: One place that knows each network, how to reach it, and what QMesh is allowed to do there.
+icon: Link2
+---
+
+QMesh touches several networks, and its code should not scatter chain names, explorer links or RPC addresses through
+services. The **chain registry** holds them in one reviewed file, and every other part asks it. It grew over four pull
+requests: [#39](https://github.com/QMeshPy/distributed-quantum/pull/39) (the registry),
+[#92](https://github.com/QMeshPy/distributed-quantum/pull/92) (RPC endpoints and a read-only adapter),
+[#93](https://github.com/QMeshPy/distributed-quantum/pull/93) (shared wallet services) and
+[#102](https://github.com/QMeshPy/distributed-quantum/pull/102) (the public API and the console's chain selector).
+
+<Iso scene="chains" />
+
+## The networks
+
+The registry ships as `registry.toml` inside the backend package. Networks are named by a
+[CAIP-2](https://chainagnostic.org/CAIPs/caip-2) id.
+
+| Network | Id | Alias | What QMesh may do there |
+| --- | --- | --- | --- |
+| Base Sepolia (default) | `eip155:84532` | `base-sepolia` | Wallets, balances, USDC transfers, Aave supply and withdraw, a faucet hint, explorer links, transaction checks |
+| Ethereum Sepolia | `eip155:11155111` | `ethereum-sepolia` | Explorer links, transaction checks, the ETH/USD price feed, provenance anchoring |
+| Robinhood Chain Testnet | `eip155:46630` | `robinhood-testnet` | Explorer links and transaction checks only |
+| Starknet Sepolia | `starknet:SN_SEPOLIA` | `starknet-sepolia` | Explorer links and transaction checks, plus the opt-in [session policy](/docs/integrations/starknet) |
+
+**Mainnet entries must have `enabled = false`.** A disabled entry cannot be used for any operation and is left out of the
+public list. The only mainnet access is the read-only market-data exception described in
+[Chainlink](/docs/integrations/chainlink).
+
+## Capabilities
+
+Each entry lists the operations it supports, such as `create_wallet`, `get_balance`, `transfer_stablecoin`,
+`verify_transaction`, `get_price` and `anchor_root`. A service checks the capability **before** it calls a provider or an RPC.
+That is how Robinhood Chain can be in the registry for explorer links without any code being able to send a transaction
+there.
+
+Asking for a name that is empty, unknown or disabled is an error. QMesh never silently falls back to Base Sepolia, and
+there is no global "active" network.
+
+## RPC endpoints without leaking keys
+
+An entry names an environment variable, never a URL, plus an optional keyless public fallback:
+
+| Network | Override variable | Public fallback |
+| --- | --- | --- |
+| Base Sepolia | `QB2_BASE_SEPOLIA_RPC_URL` | `https://sepolia.base.org` |
+| Ethereum Sepolia | `QB2_ETHEREUM_SEPOLIA_RPC_URL` | `https://ethereum-sepolia-rpc.publicnode.com` |
+| Robinhood Chain Testnet | `QB2_ROBINHOOD_TESTNET_RPC_URL` | `https://rpc.testnet.chain.robinhood.com` |
+| Starknet Sepolia | `QB2_STARKNET_SEPOLIA_RPC_URL` | `https://starknet-sepolia-rpc.publicnode.com` |
+
+An override must be HTTPS, or plain HTTP to `localhost` for a local node. It may carry an API key. The URL is **never** returned
+by the API or logged: failures are logged by exception type only.
+
+## The read-only adapter
+
+`EvmRpcAdapter` reads from a network and holds no keys:
+
+- `get_balance(address)` returns native and stablecoin balances using the registry's token address and decimals.
+- `verify_transaction(tx_hash, ...)` answers `not_found`, `pending`, `failed` or `confirmed`, with a confirmation count, and can
+  check for an exact stablecoin transfer between two addresses.
+- Before its first query it compares the RPC's chain id with the registry's, so a mistyped override cannot read another network.
+
+Signing still goes through the wallet provider (Coinbase CDP). No adapter holds a key.
+
+## The public endpoint
+
+`GET /api/v1/chains` lists the enabled networks and the operations each supports, including aliases. It never returns RPC
+URLs or escrow configuration. The console uses it for its chain selector, and the wallet page takes network names and
+explorer links from it. A network that lacks the capability an action needs is listed as "(not available)".
+
+## Configure
+
+| Variable | Purpose |
+| --- | --- |
+| `QB2_CHAIN_REGISTRY_PATH` | Use another registry file. Relative paths use the working directory. |
+| `NETWORK` | The wallet network, by alias or id. Unset means the registry default. An unknown value stops startup. |
+
+Wallets are single-network for now. A second wallet network, a network per request and per-payment network storage wait for
+a second chain that supports wallets.

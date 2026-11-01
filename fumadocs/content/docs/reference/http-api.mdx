@@ -101,8 +101,49 @@ See [Provenance](/docs/concepts/provenance).
 | `GET /api/v1/credits/balance` | Your credit balance, derived from the ledger. |
 | `GET /api/v1/chains` | The configured test networks and the operations each supports. |
 
+## Agents, proposals and the marketplace
+
+These routes belong to the agent workspace, which is experimental. Several need a signed identity assertion for the user instead
+of an ordinary bearer token.
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/agents/llm-providers` | The language-model providers and whether each is configured. See [Agent LLM providers](/docs/integrations/agent-llm). |
+| `POST /api/v1/agents`, `GET /api/v1/agents`, `GET /api/v1/agents/{id}` | Create, list and read agents. |
+| `PUT /api/v1/agents/{id}/config` | Update an agent's spending configuration. |
+| `POST /api/v1/agents/{id}/chat`, `POST /api/v1/agents/{id}/analyze` | Chat with an agent, or have it analyze a proposal. |
+| `GET /api/v1/agents/{id}/spending` | What the agent has spent. |
+| `GET /api/v1/agents/{id}/exports`, `POST /api/v1/agents/{id}/exports/{proposal_id}` | Storage exports. See [Toju](/docs/integrations/toju). |
+| `POST /api/v1/agents/{id}/starknet-session` and `/spend`, `/tx`, `/txs`, `/revoke` | See [Starknet session keys](/docs/integrations/starknet). |
+| `POST /api/v1/proposals`, `GET /api/v1/proposals`, `GET /api/v1/proposals/{id}` | Research proposals. |
+| `POST /api/v1/proposals/{id}/fund`, `GET /api/v1/proposals/{id}/funders` | Fund a proposal, and list who did. |
+| `POST /api/v1/proposals/{id}/fragments/generate`, `.../fragments/{fragment_id}/claim`, `POST .../results` | Fragments of a proposal and their results. |
+| `POST /api/v1/marketplace/register-pricing`, `GET /api/v1/marketplace/workers` | Worker pricing and listings. |
+| `POST /api/v1/marketplace/estimate-cost`, `GET /api/v1/marketplace/worker/{worker_id}/earnings` | Cost estimates and worker earnings. |
+
+## ENS
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/ens/resolve?name=` | Name to address. |
+| `GET /api/v1/ens/reverse?address=` | Address to primary name. |
+| `GET /api/v1/ens/workers` and `/{subname}` | The worker-subname proof of concept. See [ENS](/docs/integrations/ens). |
+
+## Payments administration
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/admin/payments/events` and `/{key}` | List payment events, or read one. |
+| `POST /api/v1/admin/payments/events/{key}/reconcile` | Resolve a pending or uncertain event. |
+| `POST /api/v1/admin/payments/reconciliation` | Run the reconciliation sweep now. |
+| `GET /api/v1/admin/payments/accounts/{account_id}/balance` | A balance derived from the ledger. |
+
+All of these need the admin role. See [Credits and ledger](/docs/integrations/credits-ledger).
+
 ## Not covered here
 
-Administrative payment routes (`/api/v1/admin/payments/…`), the agent routes (`/api/v1/agent/…`), the experimental
-drug-discovery routes (`/api/v1/pharma/…`) and the hidden internal routes used by the x402 and billing gateways
-are not documented on this page. The OpenAPI page lists the ones that are public.
+The experimental drug-discovery routes (`/api/v1/pharma/...`), and the hidden internal routes used by the x402 and billing
+gateways, are not documented on this page. The OpenAPI page lists the ones that are public.
+
+The console also serves its own routes: `/api/x402/...` for [x402](/docs/integrations/x402), `/api/billing/...` for
+[billing](/docs/integrations/billing) and `/api/auth/...` for [sign-in](/docs/integrations/siwe).

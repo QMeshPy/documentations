@@ -1,0 +1,45 @@
+---
+title: Sign-in with Ethereum
+description: Sign in with a wallet, using EIP-4361, beside email codes.
+icon: KeyRound
+---
+
+Users can sign in with an Ethereum wallet as well as with an emailed code. It uses the Better Auth `siwe` plugin and
+follows [EIP-4361](https://eips.ethereum.org/EIPS/eip-4361). It arrived in
+[#100](https://github.com/QMeshPy/distributed-quantum/pull/100).
+
+## How a sign-in works
+
+1. The console asks the server for a **nonce**. A nonce is single use and expires.
+2. The wallet signs an EIP-4361 message that includes the nonce (an EIP-191 `personal_sign`).
+3. The server recovers the signer's address from the signature and checks the message: its **domain**, a **chain id** above
+   zero, and its `expirationTime` and `notBefore`.
+4. The nonce is consumed atomically. Replaying a signature fails at once.
+
+Signature checking uses `@noble/curves` (secp256k1) and `@noble/hashes` (keccak-256), without a heavy wallet library on the
+server. A successful reverse [ENS](/docs/integrations/ens) lookup fills in the user's name and avatar.
+
+## Linked wallets
+
+A signed-in user can attach more than one wallet. **Settings** has a panel to link, unlink and copy addresses, and to see ENS names.
+
+| Method and path | Purpose |
+| --- | --- |
+| `POST /api/auth/siwe/link` | Link a wallet to the current account after verifying the signature and nonce. Answers `409` if the address belongs to another account. |
+| `POST /api/auth/siwe/unlink` | Unlink a wallet. A user cannot unlink their **only** way in (no email and one wallet). If the primary wallet is unlinked, the oldest remaining one becomes primary. |
+| `GET /api/auth/siwe/wallets` | List linked wallets with chain id, primary flag, creation date and ENS name. |
+
+## Configure
+
+`NEXT_PUBLIC_APP_DOMAIN` sets the expected domain when it differs from the request host. Email codes use
+`RESEND_API_KEY` and `OTP_EMAIL_FROM`, and sessions are stored in MongoDB (`MONGODB_URI`). See
+`frontend/.env.example` for the full list.
+
+The feature ships with 16 tests covering nonce handling, message parsing, signature recovery, replay, domain, chain and expiry
+rejection, and the linking rules.
+
+<Callout type="warn">
+  [#124](https://github.com/QMeshPy/distributed-quantum/pull/124) is an open pull request that changes authentication
+  setup and, as written, conflicts with this feature on `main`. It must be reconciled before it merges. See the
+  [overview](/docs/integrations/overview).
+</Callout>

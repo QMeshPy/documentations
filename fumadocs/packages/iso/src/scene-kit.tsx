@@ -123,6 +123,16 @@ export function Mark({ o, at, kind, cls }: { o: O; at: V; kind: 'ok' | 'no'; cls
   );
 }
 
+/** A short mono caption anchored at a tile position, in the accent colour. */
+export function Tag({ o, at, text, dx = 14, dy = -14 }: { o: O; at: V; text: string; dx?: number; dy?: number }) {
+  const [x, y] = P(o, at);
+  return (
+    <text className="tag" x={x + dx} y={y + dy}>
+      {text}
+    </text>
+  );
+}
+
 export type Step = { n: string; name: string; sub: string; a: number; b: number };
 
 /** The step list, drawn at (x, y), one block per step, 54px apart. */

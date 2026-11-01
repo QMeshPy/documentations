@@ -22,10 +22,16 @@ together with a provenance record you can verify.
 - **Optimize a portfolio.** Upload asset data and compare a QAOA run with classical baselines.
 - **Price options and measure risk.** Run option-pricing and risk jobs (VaR, CVaR, credit risk) through the same
   job model.
-- **Pay per request.** Expose a paid endpoint with the [x402](/docs/guides/x402-payments) `402 Payment Required`
-  flow, settled in USDC on Algorand TestNet.
-- **Verify a result.** Every completed circuit job gets a provenance bundle with a Merkle root. See
-  [Provenance](/docs/concepts/provenance).
+- **Pay per request.** Expose a paid endpoint with the [x402](/docs/integrations/x402) `402 Payment Required` flow, settled in
+  USDC on Algorand TestNet, or sell [credit packs](/docs/integrations/billing) through Stripe.
+- **Verify a result.** Every completed circuit job gets a provenance bundle with a Merkle root, which can be pinned to IPFS and
+  anchored on Ethereum Sepolia. See [Provenance](/docs/concepts/provenance).
+- **Use real inputs.** Optimize portfolios from [Chainlink](/docs/integrations/chainlink) price history.
+- **Give agents a budget.** Cap what an AI agent can spend with [Starknet session keys](/docs/integrations/starknet), and choose
+  [private, attested inference](/docs/integrations/agent-llm).
+- **Share content.** Publish circuits and runs to [VAULT](/docs/integrations/vault-ipfs) and open any CID with verification.
+
+See every integration, and its state, in the [overview](/docs/integrations/overview).
 
 ## How a request flows
 
@@ -75,6 +81,9 @@ A request passes through five layers. Each one has its own page under Concepts.
   </Card>
   <Card icon={<Network />} title="Architecture" href="/docs/concepts/architecture">
     The pieces of the system and how they fit.
+  </Card>
+  <Card icon={<Plug />} title="Integrations" href="/docs/integrations/overview">
+    Payments, chains, storage and agents, and where each one stands.
   </Card>
 </Cards>
 

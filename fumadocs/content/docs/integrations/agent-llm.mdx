@@ -1,0 +1,63 @@
+---
+title: Agent LLM providers
+description: Choose Groq, OpenRouter or NEAR AI Cloud private inference for agent chat, and see whether a reply was attested.
+icon: Brain
+---
+
+Agent chat in the console talks to a language model. QMesh lets you pick the provider, and with **NEAR AI Cloud** it checks
+cryptographically that the reply came from a model running in a trusted execution environment (TEE). The work landed in
+three pull requests: [#81](https://github.com/QMeshPy/distributed-quantum/pull/81) (Groq and OpenRouter),
+[#91](https://github.com/QMeshPy/distributed-quantum/pull/91) (NEAR AI Cloud) and
+[#101](https://github.com/QMeshPy/distributed-quantum/pull/101) (the provider dropdown).
+
+<Callout type="warn">
+  [#81](https://github.com/QMeshPy/distributed-quantum/pull/81) **removed AWS Bedrock** from agent chat and replaced it with
+  Groq and OpenRouter. Bedrock is no longer an agent option.
+</Callout>
+
+<Iso scene="attest" />
+
+## The providers
+
+| Provider | Value | Model | Notes |
+| --- | --- | --- | --- |
+| Groq | `groq` | `GROQ_MODEL`, default `openai/gpt-oss-20b` | Needs `GROQ_API_KEY`. |
+| OpenRouter | `openrouter` | `OPENROUTER_MODEL` | **Free models only.** QMesh sends zero-price provider limits, so it cannot spend money. Needs `OPENROUTER_API_KEY`. |
+| NEAR AI Cloud | `near` | `NEAR_MODEL`, for example `z-ai/glm-5.3-flash` | Must be a Confidential TEE model with attestation support. Needs `NEARAI_API_KEY`. |
+
+`AGENT_LLM_PROVIDER` sets the server default. The chat page also has a **provider dropdown** that overrides it per browser
+and remembers the choice. A provider that is not configured is shown disabled, with "(not configured)". There is no paid
+fallback and no automatic retry on a rate limit: free models come and go.
+
+`GET /api/v1/agents/llm-providers` lists the providers and whether each is configured.
+
+## NEAR AI Cloud private inference
+
+With `AGENT_LLM_PROVIDER=near`, QMesh uses `nearai-inference-sdk` against `cloud-api.near.ai`. The guarantees:
+
+- **Every tool round is attested.** The agent loop is capped at 8 rounds, and each round makes its completions and then
+  checks a signature before the next tool runs.
+- **It fails closed.** A non-TEE model, a missing key, or an HTTP 402 or 404 stops the request. There is **no silent fallback**
+  to Groq or OpenRouter. The API answers `503`, and the message says that no fallback provider was used.
+- **The result is shown.** Each message carries a badge: **Model TEE verified**, **Gateway verified** or **Unverified**.
+
+A NEAR reply is slower than the others because of those attestation round trips. Set a spend limit for the key in the NEAR
+dashboard.
+
+```txt title="backend/.env"
+AGENT_LLM_PROVIDER=near
+NEARAI_API_KEY=
+NEAR_MODEL=z-ai/glm-5.3-flash
+```
+
+Pick the model id from `https://cloud-api.near.ai/v1/model/list`, choosing one with `attestationSupported=true`.
+
+## Related agent pieces
+
+- **Wallets.** Agents use Coinbase CDP server wallets on Base Sepolia. The API key is the secret key JSON from CDP:
+  `id` goes in `CDP_API_KEY_ID` and `privateKey` in `CDP_API_KEY_SECRET`. `CDP_WALLET_SECRET` is a separate one-time secret
+  from the CDP portal. Creating a wallet requests test ETH and USDC from the CDP faucet.
+- **Spending limits on-chain.** See [Starknet session keys](/docs/integrations/starknet).
+- **Storing a report.** See [Toju agent storage](/docs/integrations/toju).
+
+The agent chat is experimental. Keys for every provider are server-side only: never prefix them with `NEXT_PUBLIC_`.

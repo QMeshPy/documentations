@@ -4,7 +4,7 @@ import { links } from '@/lib/shared';
 import { QMeshMark } from '@/components/logo';
 import { TopNav } from '@/components/docs/topbar';
 import { CodeTabs } from '@/components/home/code-tabs';
-import { StackScene } from '@/components/iso/stack';
+import { StackScene } from '@/packages/iso';
 
 const builtOn = [
   'py-libp2p',
@@ -25,7 +25,7 @@ const features = [
   { t: 'Job lifecycle.', d: 'Follow every job from QUEUED to COMPLETED over a plain REST API.', chips: ['REST', 'progress', 'results'], href: '/docs/concepts/jobs' },
   { t: 'Peer discovery.', d: 'Workers announce themselves over GossipSub; the coordinator tracks their health.', chips: ['GossipSub', 'heartbeats', 'trust tiers'], href: '/docs/concepts/peers' },
   { t: 'Reservations.', d: 'Reserve a peer before sending work, with automatic fallback when one fails.', chips: ['prepare', 'commit', 'fallback'], href: '/docs/concepts/reservations' },
-  { t: 'Machine payments.', d: 'Charge per request with the x402 flow, settled in USDC on Algorand TestNet.', chips: ['402', 'USDC', 'Algorand'], href: '/docs/guides/x402-payments' },
+  { t: 'Machine payments.', d: 'Charge per request with the x402 flow, settled in USDC on Algorand TestNet.', chips: ['402', 'USDC', 'Algorand'], href: '/docs/integrations/x402' },
   { t: 'Provenance.', d: 'Every completed run gets a hashed bundle you can verify, publish and anchor.', chips: ['SHA-256', 'Merkle', 'IPFS'], href: '/docs/concepts/provenance' },
 ];
 

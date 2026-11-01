@@ -1,0 +1,89 @@
+---
+title: Chainlink and tokenized stocks
+description: Verifiable price inputs for finance and risk, and portfolio optimization on Robinhood tokenized stocks.
+icon: ChartLine
+---
+
+Finance and risk jobs need prices, and a price you cannot check is a weak input. QMesh reads **Chainlink Data Feeds** over
+JSON-RPC, validates every round, and records the exact rounds it used in the job's provenance so the inputs can be re-read
+later. There are two uses: an ETH/USD feed on Ethereum Sepolia, and price history for **Robinhood tokenized stocks**.
+
+<Iso scene="chainlink" />
+
+## ETH/USD on Ethereum Sepolia
+
+[#98](https://github.com/QMeshPy/distributed-quantum/pull/98) adds optional Chainlink ETH/USD pricing to European call
+pricing, risk analysis and portfolio valuation.
+
+- It validates feed freshness, price deviation and block consistency.
+- It keeps historical inputs for risk and portfolio calculations.
+- It records oracle observations and reproducible inputs with verifiable hashes.
+- Provenance files are downloadable with authentication, and the console signs its finance requests.
+- Only Ethereum Sepolia ETH/USD is supported. An unsupported portfolio asset is marked as such. **No price is substituted.**
+
+## Robinhood tokenized stocks
+
+Three pull requests ([#106](https://github.com/QMeshPy/distributed-quantum/pull/106),
+[#107](https://github.com/QMeshPy/distributed-quantum/pull/107) and
+[#108](https://github.com/QMeshPy/distributed-quantum/pull/108)) let you optimize a portfolio of stock tokens from the
+console's finance page.
+
+<Callout type="warn" title="One deliberate read-only mainnet exception">
+  Robinhood's Stock Tokens and their Chainlink feeds exist on Robinhood Chain **mainnet** only. The registry keeps only the
+  testnet. Price history is read from mainnet with `eth_call` alone: no wallet, no signature, no transaction.
+</Callout>
+
+### The nine assets
+
+AAPL, MSFT, NVDA, GOOGL, AMZN, META, TSLA, SPY and QQQ. The list is a reviewed allowlist that joins Robinhood's asset
+list with Chainlink's feed directory. Each entry was checked on-chain: the token's symbol, decimals and multiplier, and the
+feed's description and decimals.
+
+### The data rules
+
+| Rule | Detail |
+| --- | --- |
+| Pricing | Token prices. The feeds already include the token multiplier, which is never applied again. |
+| Sampling | Each weekday's price is the last valid round at or before **21:00 UTC** (after the US close), if it is at most 36 hours old. |
+| Gaps | A weekday on which no selected feed published (a market holiday) is dropped. Nothing is zero-filled. |
+| Launch rounds | Each feed's first rounds were published at about 100 million times the price, and are excluded. |
+| Range | At least 60 weekdays and at most 366 days, with no future end date. |
+| Fail closed | A bad answer, a move above 50% between rounds, feed drift, a feed silent for more than 7 days, or fewer than 60 aligned trading days rejects the history. |
+
+### Use it
+
+```bash
+curl http://localhost:8081/api/v1/finance/tokenized-assets
+```
+
+```bash
+curl -X POST http://localhost:8081/api/v1/finance/tokenized-portfolio \
+  -H "Content-Type: application/json" \
+  -d '{"symbols": ["AAPL", "MSFT", "SPY"], "start_date": "2026-06-23", "end_date": "2026-10-28"}'
+```
+
+The request is validated first: an unsupported or duplicate asset, a bad or future date, a range under 60 weekdays or an
+unacceptable `budget` is answered with `422` before any job exists. A valid request queues a normal finance job. When it
+completes, `GET /api/v1/finance/{job_id}` adds:
+
+- `market_data`: the source, chain, block, aligned date range, and per-asset token and feed addresses with first and last round ids.
+- `allocation_weights`: the optimizer's equal weights over each method's selected assets.
+- `disclaimer`: analysis only, not investment advice. Nothing is signed or traded.
+- `provenance`: every daily close as a Chainlink observation, so the inputs can be re-read by round id.
+
+Insufficient or invalid history fails the job with a fixed message. At most two history reads run at once per process, because
+the public RPC is rate-limited. Set `QB2_ROBINHOOD_MAINNET_RPC_URL` to use your own.
+
+[#115](https://github.com/QMeshPy/distributed-quantum/pull/115) later compacted the provenance (removing duplicated
+observations) and made the backend serve provenance downloads byte for byte so hashes still match.
+
+<Callout>
+  Stock Tokens are not offered to U.S. persons or in restricted jurisdictions, and QMesh only analyzes them. It never
+  holds, trades or recommends them.
+</Callout>
+
+## In review
+
+[#123](https://github.com/QMeshPy/distributed-quantum/pull/123) adds a read-only **wallet portfolio** analyzer:
+`POST /api/v1/risk/analyze-wallet` prices an address's holdings (or an ENS name) and runs the same VaR and CVaR engine.
+A holding that cannot be priced is listed, not dropped. It is open and may change.

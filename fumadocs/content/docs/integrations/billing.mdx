@@ -1,0 +1,108 @@
+---
+title: Billing
+description: Stripe subscriptions, prepaid credit packs, credit-metered circuit runs and USDC credit packs.
+icon: CreditCard
+---
+
+Billing is **optional** and runs in Stripe **test mode**. With nothing configured the console works exactly as it does
+without it. Three pieces build on each other: a subscription that lifts the free-trial gate, credit packs that pay for
+circuit runs, and an option to buy those packs in USDC. Worker payouts are a separate effort (see the end of this page).
+
+<Iso scene="credits" />
+
+| Piece | Pull request | Switched on by |
+| --- | --- | --- |
+| Subscriptions | [#42](https://github.com/QMeshPy/distributed-quantum/pull/42) | `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and `STRIPE_WEBHOOK_SECRET` |
+| Credit packs and metered runs | [#84](https://github.com/QMeshPy/distributed-quantum/pull/84) | Subscriptions, plus `STRIPE_CREDIT_PACKS` and the billing secret |
+| USDC credit packs | [#88](https://github.com/QMeshPy/distributed-quantum/pull/88) | `STRIPE_STABLECOIN_PAYMENTS=true` |
+
+## Subscriptions
+
+Users on the free trial can upgrade with Stripe Checkout. Subscribers manage or cancel their plan in the Stripe customer
+portal. An active subscription sets `hasSubscription`, which removes the trial gate. The integration uses the Better Auth
+Stripe plugin (`@better-auth/stripe`) with a single `pro` plan. In the console, **Settings → Billing** shows the plan
+status with **Upgrade** and **Manage** buttons.
+
+The webhook lives at `/api/auth/stripe/webhook`:
+
+- It verifies Stripe's signature before it does anything else.
+- It is idempotent on the event id. Claimed ids are stored in `stripe_webhook_events` with a unique index, so a
+  redelivered event is acknowledged and not processed twice.
+- If handling fails it releases its claim, so Stripe's retry is processed.
+- It recomputes `hasSubscription` by fetching the customer's subscriptions from Stripe instead of trusting the event
+  payload, and it counts `active` and `trialing` as subscribed.
+
+No card data touches QMesh. Payment details are entered only on Stripe-hosted Checkout and the customer portal.
+
+```txt title="frontend/.env.local"
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PRICE_ID=price_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+To test locally, run `stripe listen --forward-to localhost:3000/api/auth/stripe/webhook`, put the `whsec_...` it prints in
+`STRIPE_WEBHOOK_SECRET`, and pay with the test card `4242 4242 4242 4242`.
+
+## Credit packs
+
+A **credit** is one USDC. A user buys a one-off pack through Stripe Checkout, the purchase is written to the
+[credit ledger](/docs/integrations/credits-ledger) exactly once, and circuit runs spend credits.
+
+```txt title="frontend/.env.local"
+# One-time Stripe Prices and the credits each grants
+STRIPE_CREDIT_PACKS=price_abc:10,price_def:50
+BILLING_INTERNAL_SECRET=<openssl rand -hex 32>
+```
+
+```txt title="backend/.env"
+QB2_BILLING_INTERNAL_SECRET=<the same value>
+QB2_CIRCUIT_JOB_CREDIT_COST=1
+```
+
+How a purchase becomes credits:
+
+1. `POST /api/billing/credits/checkout` starts a payment-mode Checkout Session for a configured pack.
+2. The Stripe webhook receives `checkout.session.completed`. Credits are worked out from **Stripe's own line items**, never
+   from anything the browser sent. A purchase paid later (a delayed method) is credited on
+   `checkout.session.async_payment_succeeded`.
+3. The console calls the backend's internal route `POST /api/v1/internal/billing/credit-purchases`, protected by the
+   shared secret. The route exists only when `QB2_BILLING_INTERNAL_SECRET` is set.
+4. The purchase is keyed `stripe:checkout:<session id>`, so a redelivered webhook, or the completed and async-succeeded
+   events of one session, credit once. A redelivery also finishes a credit that a crash interrupted.
+
+`GET /api/v1/credits/balance` returns the caller's balance and the price of a circuit run.
+
+### Metered circuit runs
+
+Runs stay free until `QB2_CIRCUIT_JOB_CREDIT_COST` is above `0`. With it above zero:
+
+- Submitting a job **holds** the cost. With too few credits the API answers `402` with the error code
+  `insufficient_credits`.
+- A job that **completes** captures the hold. A job that **fails** releases it.
+- Jobs paid through [x402](/docs/integrations/x402) are paid per request and skip the meter.
+
+## USDC credit packs
+
+With `STRIPE_STABLECOIN_PAYMENTS=true`, USD-priced packs can also be bought in USDC (and other stablecoins Stripe
+supports) through Stripe's `crypto` payment method. Stripe settles to QMesh's balance in USD, so QMesh holds no wallet
+keys and runs no on-chain code for this. The purchase is recorded on its own `stablecoin` rail in the ledger, with the
+same exactly-once guarantee.
+
+Limits that come from Stripe, not QMesh:
+
+- The Stripe account must be approved for **Stablecoins and Cryptocurrency**, which is limited by region.
+- USD prices only, and up to US$10,000 per transaction.
+- Stablecoin payments cannot be disputed. Refunds are supported and go back to the paying wallet. A refund does **not**
+  yet debit the credits it granted. The same is true for card refunds.
+
+## In review: paying workers
+
+These are not merged. Treat them as plans.
+
+- [#104](https://github.com/QMeshPy/distributed-quantum/pull/104) pays workers **per fragment** in USDC as results are
+  recorded, capped at the job's credit hold, with each fragment paid once.
+- [#122](https://github.com/QMeshPy/distributed-quantum/pull/122) adds optional **Stripe Connect Express** onboarding so a
+  worker can cash out to a bank or a stablecoin wallet. It is gated by `STRIPE_CONNECT_ENABLED`.
+- The decision behind both is recorded in a
+  [spike](https://github.com/QMeshPy/distributed-quantum/issues/77): on-chain USDC is the default, and Connect is an
+  optional off-ramp for workers who want a normal cash-out.

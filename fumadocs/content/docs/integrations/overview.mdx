@@ -1,0 +1,60 @@
+---
+title: Overview
+description: Every integration QMesh has, what state it is in, and where the work happens.
+icon: Plug
+---
+
+QMesh connects to payment rails, blockchains, storage networks and AI providers. This page lists them all and says
+honestly where each one stands. It was written from the pull requests and issues of
+[QMeshPy/distributed-quantum](https://github.com/QMeshPy/distributed-quantum) as they stood on **1 November 2026**.
+Those change daily, so check the linked pull request for the current state.
+
+<Callout type="warn" title="Testnets and simulators">
+  Every chain and payment integration below targets a **test network** or Stripe **test mode**, and quantum
+  execution is simulated. The project's own ground rules say so: testnet first, and no feature is described as
+  running on quantum hardware. See [Scope](/docs/scope).
+</Callout>
+
+## The three states
+
+| State | Meaning |
+| --- | --- |
+| **In main** | The pull request is merged. The code is in the default branch. It may still be switched off by default. |
+| **In review** | A pull request is open and not merged. Details can change. |
+| **Proposed** | Only an issue exists. It is a plan, not a feature. |
+
+## In main
+
+| Integration | What it does | Pull requests | Page |
+| --- | --- | --- | --- |
+| Algorand x402 | Pay per run in USDC on Algorand TestNet through `402 Payment Required` | [#81](https://github.com/QMeshPy/distributed-quantum/pull/81) | [x402](/docs/integrations/x402) |
+| Stripe subscriptions | Upgrade past the free trial with Stripe Checkout | [#42](https://github.com/QMeshPy/distributed-quantum/pull/42) | [Billing](/docs/integrations/billing) |
+| Credit packs and metered runs | Buy credits, spend them on circuit runs | [#84](https://github.com/QMeshPy/distributed-quantum/pull/84) | [Billing](/docs/integrations/billing) |
+| Stablecoin credit packs | Pay for credit packs in USDC through Stripe | [#88](https://github.com/QMeshPy/distributed-quantum/pull/88) | [Billing](/docs/integrations/billing) |
+| Payment events and credit ledger | One append-only, USDC-denominated ledger for every rail | [#79](https://github.com/QMeshPy/distributed-quantum/pull/79) | [Credits and ledger](/docs/integrations/credits-ledger) |
+| Chain registry | One place that knows each network, its explorers, RPC and what it may do | [#39](https://github.com/QMeshPy/distributed-quantum/pull/39), [#92](https://github.com/QMeshPy/distributed-quantum/pull/92), [#93](https://github.com/QMeshPy/distributed-quantum/pull/93), [#102](https://github.com/QMeshPy/distributed-quantum/pull/102) | [Chain registry](/docs/integrations/chain-registry) |
+| Chainlink price feeds | Verifiable ETH/USD price inputs for finance and risk | [#98](https://github.com/QMeshPy/distributed-quantum/pull/98) | [Chainlink](/docs/integrations/chainlink) |
+| Robinhood tokenized stocks | Optimize a portfolio of stock tokens from Chainlink price history | [#106](https://github.com/QMeshPy/distributed-quantum/pull/106), [#107](https://github.com/QMeshPy/distributed-quantum/pull/107), [#108](https://github.com/QMeshPy/distributed-quantum/pull/108), [#115](https://github.com/QMeshPy/distributed-quantum/pull/115) | [Chainlink](/docs/integrations/chainlink) |
+| Provenance bundles | Hashed, verifiable records of runs | [#34](https://github.com/QMeshPy/distributed-quantum/pull/34) to [#37](https://github.com/QMeshPy/distributed-quantum/pull/37) | [Provenance](/docs/concepts/provenance) |
+| Ethereum anchoring | Merkle roots written to Ethereum Sepolia | [#113](https://github.com/QMeshPy/distributed-quantum/pull/113), [#114](https://github.com/QMeshPy/distributed-quantum/pull/114) | [Provenance](/docs/concepts/provenance) |
+| ENS | Resolve names, show names, a worker-subname proof of concept | [#97](https://github.com/QMeshPy/distributed-quantum/pull/97) | [ENS](/docs/integrations/ens) |
+| Sign-in with Ethereum | Wallet sign-in beside email codes | [#100](https://github.com/QMeshPy/distributed-quantum/pull/100) | [Sign-in with Ethereum](/docs/integrations/siwe) |
+| Starknet session keys | Agents spend STRK under on-chain caps | [#101](https://github.com/QMeshPy/distributed-quantum/pull/101), [#118](https://github.com/QMeshPy/distributed-quantum/pull/118) | [Starknet](/docs/integrations/starknet) |
+| NEAR AI Cloud and other LLM providers | Agent chat on private, attested inference, or Groq or OpenRouter | [#81](https://github.com/QMeshPy/distributed-quantum/pull/81), [#91](https://github.com/QMeshPy/distributed-quantum/pull/91), [#101](https://github.com/QMeshPy/distributed-quantum/pull/101) | [Agent LLM providers](/docs/integrations/agent-llm) |
+| Toju agent storage | Agents store reports on public IPFS for a capped Base Sepolia payment | [#81](https://github.com/QMeshPy/distributed-quantum/pull/81) | [Toju](/docs/integrations/toju) |
+| VAULT | A browser content layer: publish circuits and runs, open any CID | [#40](https://github.com/QMeshPy/distributed-quantum/pull/40), [#83](https://github.com/QMeshPy/distributed-quantum/pull/83), [#90](https://github.com/QMeshPy/distributed-quantum/pull/90), [#109](https://github.com/QMeshPy/distributed-quantum/pull/109) | [VAULT and IPFS](/docs/integrations/vault-ipfs) |
+| Kubo content node | The platform's own IPFS node, with a typed client, gateway reads, storage limits and metrics | [#80](https://github.com/QMeshPy/distributed-quantum/pull/80), [#82](https://github.com/QMeshPy/distributed-quantum/pull/82), [#85](https://github.com/QMeshPy/distributed-quantum/pull/85) to [#87](https://github.com/QMeshPy/distributed-quantum/pull/87), [#94](https://github.com/QMeshPy/distributed-quantum/pull/94), [#95](https://github.com/QMeshPy/distributed-quantum/pull/95), [#96](https://github.com/QMeshPy/distributed-quantum/pull/96) | [Kubo content node](/docs/integrations/kubo) |
+
+## In review
+
+| Work | Pull request | Closes issue |
+| --- | --- | --- |
+| Pay-per-fragment worker payouts | [#104](https://github.com/QMeshPy/distributed-quantum/pull/104) | [#8](https://github.com/QMeshPy/distributed-quantum/issues/8) |
+| Stripe Connect Express onboarding for workers | [#122](https://github.com/QMeshPy/distributed-quantum/pull/122) | [#110](https://github.com/QMeshPy/distributed-quantum/issues/110) |
+| Read-only wallet portfolio VaR and CVaR | [#123](https://github.com/QMeshPy/distributed-quantum/pull/123) | [#19](https://github.com/QMeshPy/distributed-quantum/issues/19) |
+| EtherCalc workbooks for experiment results (preview) | [#105](https://github.com/QMeshPy/distributed-quantum/pull/105) | tracks [#103](https://github.com/QMeshPy/distributed-quantum/issues/103) |
+| Simplified setup and hardened auth, storage and job recovery (**breaking**) | [#124](https://github.com/QMeshPy/distributed-quantum/pull/124) | none |
+
+[#124](https://github.com/QMeshPy/distributed-quantum/pull/124) renames some environment variables and changes how
+pinning credentials are handled. This documentation describes `main`; each page flags where #124 would change it.
+See the [roadmap](/docs/reference/roadmap) for the rest, including ideas that only exist as issues.

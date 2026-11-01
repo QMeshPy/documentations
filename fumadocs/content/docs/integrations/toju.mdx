@@ -1,0 +1,71 @@
+---
+title: Toju agent storage
+description: Agents draft a report and, with your approval, store it on public IPFS for a capped Base Sepolia payment.
+icon: HardDrive
+---
+
+An agent can draft a report in chat and propose storing it on **public IPFS** through the Toju storage server. You ask
+"Let's store this proposal so we can access it later", the agent prepares an **approval card**, and only the signed-in owner
+can approve the publication and its tiny testnet payment. It arrived in
+[#81](https://github.com/QMeshPy/distributed-quantum/pull/81) and is a **testnet** integration.
+
+<Callout type="warn">
+  Pinned content is **public**. Public IPFS copies may remain after the pin retention ends. Do not store anything you
+  would not publish.
+</Callout>
+
+## The flow
+
+1. Ask the agent for a draft. The agent shows only the draft.
+2. Ask it to store the proposal. It prepares an approval card showing the exact content, the public-IPFS notice, the
+   recipient, the SHA-256 of the content, the 30-day retention and the price.
+3. Click **Approve & store** once to publish, or **Cancel**. A plain "yes" applies only to the current pending approval.
+4. QMesh pays on Base Sepolia, uploads, retrieves the file and checks its SHA-256. The result reads "Stored and retrieved.
+   SHA-256 verified." with links to the artifact and the payment.
+5. The receipt is saved with the chat. For an uncertain outcome use **Check receipt (no new payment)**. QMesh **never
+   repays automatically**.
+
+The payment worker checks the on-chain USDC transfer and the downloaded bytes. An upload response alone is not treated as proof.
+
+## Safety limits
+
+| Limit | Value |
+| --- | --- |
+| Export size | 256 KiB |
+| Approval lifetime | 15 minutes |
+| Payment cap per export | 24 micro-USDC (`0.000024` test USDC) |
+| Network | Base Sepolia, faucet USDC |
+| A mismatched price quote | Fails closed |
+
+An agent can also propose exporting one of your own workflow runs by id. The backend reads **your** stored run snapshots and
+exports selected metadata and results. It does not trust results the model made up.
+
+## What runs where
+
+- **Toju server:** a separate Node and Express service with storage, payment, database and lifecycle-job routes. QMesh
+  points at it with `TOJU_API_URL`. The project hosts a shared test instance, which is not an availability guarantee.
+- **`backend/toju-client`:** a small isolated Node 22 worker that makes and verifies the payment. It is **not** a replacement
+  storage server.
+- **Backend:** `services/toju_storage.py` and the export routes `GET /api/v1/agents/{id}/exports` and
+  `POST /api/v1/agents/{id}/exports/{proposal_id}`.
+- **Console:** the approval card and receipt in **Agents → Agent Chat**.
+
+```txt title="backend/.env"
+TOJU_API_URL=https://your-toju-server.example
+TOJU_PAYMENT_RECIPIENT=0x...   # the server's public Base USDC address
+TOJU_NODE_BINARY=node          # must resolve to Node 22
+NETWORK=base-sepolia
+CDP_API_KEY_ID=
+CDP_API_KEY_SECRET=
+CDP_WALLET_SECRET=
+AGENT_AUTH_BRIDGE_SECRET=      # same value as the console
+```
+
+Fund the agent's CDP wallet with test USDC from the Circle faucet before approving. Never use mainnet funds.
+
+## Known limits
+
+A completed payment and verified retrieval have been shown on testnet, and one later approved draft was pinned but failed to
+settle (its uncertain receipt is kept). A full quantum experiment export, the Solana route, Filecoin payments, the renewal
+email flow and time-based deletion have **not** been verified end to end. Free-tier hosting means cold starts and quotas.
+The Solana storage route is a separate proposal ([#24](https://github.com/QMeshPy/distributed-quantum/issues/24)).

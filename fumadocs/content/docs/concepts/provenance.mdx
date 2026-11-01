@@ -74,11 +74,24 @@ is not retried. Bundles up to 256 KiB are stored as a single block.
 
 ## Anchor on a test network
 
-With `QB2_ANCHOR_NETWORK` and `QB2_ANCHOR_SENDER` set, the backend can verify anchors. With
-`QB2_ANCHOR_PRIVATE_KEY` also set, it anchors batches of bundles on a schedule. An anchor is a zero-value
-transaction from the anchor account to itself whose 45-byte calldata holds the marker `QMSHANC1`, the Merkle
-root, the batch size and a profile byte. Only test networks are allowed; the packaged registry uses Ethereum
-Sepolia.
+Anchoring writes the Merkle root of many bundles to Ethereum Sepolia, so anyone can later check that a bundle existed at that
+time. It arrived in [#113](https://github.com/QMeshPy/distributed-quantum/pull/113) (checking anchors) and
+[#114](https://github.com/QMeshPy/distributed-quantum/pull/114) (anchoring on a schedule). It is off until you configure it.
+
+- With `QB2_ANCHOR_NETWORK` and `QB2_ANCHOR_SENDER` set, the backend can **verify** anchors.
+- With `QB2_ANCHOR_PRIVATE_KEY` also set, it **anchors** circuit-job bundles on a schedule. Finance bundles are not anchored yet.
+  Use a dedicated, low-balance key that is never a user, platform or deployer wallet.
+- An anchor is a zero-value transaction from the anchor account to itself. Its 45-byte calldata holds the marker `QMSHANC1`, the
+  Merkle root, the batch size and a profile byte. No contract is deployed.
+- A run happens every `QB2_ANCHOR_INTERVAL_SECONDS` (default hourly). One batch is one transaction of about 22,000 gas, whatever
+  its size (up to `QB2_ANCHOR_MAX_BATCH`, default 10,000).
+- A batch survives crashes: it moves `prepared`, `signed`, `submitted`, `anchored` (or `failed`), the signed transaction is stored
+  **before** it is broadcast, a stuck transaction is replaced with a higher fee up to `QB2_ANCHOR_MAX_FEE_GWEI`, and anchors are
+  recorded only after the block is finalized. Only one replica runs the scheduler at a time.
+- To rotate the key, set the new key and sender and list the old address in `QB2_ANCHOR_PAST_SENDERS`, so older anchors keep
+  verifying.
+
+Only test networks are allowed.
 
 Anyone can check a downloaded bundle against its anchor without the database:
 
