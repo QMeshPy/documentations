@@ -24,7 +24,7 @@ export type D = { o: O; x: number; y: number; z: number };
 
 /* ------------------------------ clients ------------------------------ */
 
-export function Laptop({ o, x, y, z, scale = 1 }: D & { scale?: number }) {
+export function Laptop({ o, x, y, z, scale = 1, variant = 'dash' }: D & { scale?: number; variant?: 'dash' | 'code' | 'chart' }) {
   const w = 2.3 * scale;
   const d = 1.55 * scale;
   const bh = 0.13;
@@ -52,19 +52,34 @@ export function Laptop({ o, x, y, z, scale = 1 }: D & { scale?: number }) {
         {[0.09, 0.13, 0.17].map((xx) => (
           <rect key={xx} className="ink" x={xx} y={0.085} width={0.018} height={0.03} />
         ))}
-        {[
-          [0.26, 0.5],
-          [0.34, 0.36],
-          [0.42, 0.55],
-          [0.5, 0.28],
-          [0.58, 0.44],
-        ].map(([yy, len], i) => (
-          <line key={i} className="w soft" x1={0.1} y1={yy} x2={0.1 + len * 0.5} y2={yy} />
-        ))}
-        {[0.3, 0.5, 0.38, 0.62].map((hh, i) => (
-          <rect key={i} className="accf" x={0.64 + i * 0.075} y={0.8 - hh * 0.5} width={0.05} height={hh * 0.5} style={{ opacity: 0.85 }} />
-        ))}
-        <rect className="accf" x={0.1} y={0.73} width={0.2} height={0.1} rx={0.02} />
+        {variant === 'dash' && (
+          <>
+            {[[0.26, 0.5], [0.34, 0.36], [0.42, 0.55], [0.5, 0.28], [0.58, 0.44]].map(([yy, len], i) => (
+              <line key={i} className="w soft" x1={0.1} y1={yy} x2={0.1 + len * 0.5} y2={yy} />
+            ))}
+            {[0.3, 0.5, 0.38, 0.62].map((hh, i) => (
+              <rect key={i} className="accf" x={0.64 + i * 0.075} y={0.8 - hh * 0.5} width={0.05} height={hh * 0.5} style={{ opacity: 0.85 }} />
+            ))}
+            <rect className="accf" x={0.1} y={0.73} width={0.2} height={0.1} rx={0.02} />
+          </>
+        )}
+        {variant === 'code' && (
+          <>
+            {[[0.24, 0.3, true], [0.32, 0.5, false], [0.4, 0.38, false], [0.48, 0.58, false], [0.56, 0.26, true], [0.64, 0.46, false], [0.72, 0.34, false]].map(([yy, len, acc], i) => (
+              <line key={i} className={acc ? 'accs' : 'w soft'} x1={0.1 + (i % 3 === 1 ? 0.06 : 0)} y1={yy as number} x2={0.1 + (len as number) * 0.8} y2={yy as number} />
+            ))}
+          </>
+        )}
+        {variant === 'chart' && (
+          <>
+            {[0.1, 0.38, 0.66].map((xx) => (
+              <rect key={xx} className="w soft" x={xx} y={0.22} width={0.24} height={0.16} />
+            ))}
+            <rect className="accf" x={0.13} y={0.3} width={0.1} height={0.05} />
+            <polyline className="accs" points="0.1,0.8 0.22,0.68 0.36,0.74 0.5,0.56 0.64,0.62 0.78,0.48 0.9,0.54" />
+            <line className="w soft" x1={0.1} y1={0.84} x2={0.9} y2={0.84} />
+          </>
+        )}
       </Plane>
     </g>
   );
@@ -384,7 +399,7 @@ export function Hub({ o, x, y, z }: D) {
 
 /* ------------------------------- provenance ------------------------------- */
 
-export function Printer({ o, x, y, z }: D) {
+export function Printer({ o, x, y, z, slip = 1.1 }: D & { slip?: number }) {
   const w = 1.8;
   const d = 1.3;
   const h = 0.85;
@@ -408,10 +423,10 @@ export function Printer({ o, x, y, z }: D) {
           <Dots x={0.2} y={0.18} cols={9} rows={4} gap={0.12} />
         </FaceR>
       </RBox>
-      <Plane o={o} at={[x + 0.35, y + 0.7, z + h + 1.1]} u={[1, 0, 0]} v={[0, 0, -1]}>
-        <rect className="glass" x={0} y={0} width={1.2} height={1.1} />
-        <Hatch x={0.15} y={0.18} w={0.9} h={0.42} n={4} />
-        <polyline className="accs" points="0.3,0.84 0.46,0.98 0.82,0.7" />
+      <Plane o={o} at={[x + 0.35, y + 0.7, z + h + slip]} u={[1, 0, 0]} v={[0, 0, -1]}>
+        <rect className="glass" x={0} y={0} width={1.2} height={slip} />
+        <Hatch x={0.15} y={0.16 * slip} w={0.9} h={0.38 * slip} n={4} />
+        <polyline className="accs" points={`0.3,${0.76 * slip} 0.46,${0.89 * slip} 0.82,${0.64 * slip}`} />
       </Plane>
     </g>
   );

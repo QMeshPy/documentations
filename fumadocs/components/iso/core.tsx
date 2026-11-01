@@ -134,6 +134,7 @@ export function Label({
   text,
   className,
   anchor = 'start',
+  sub,
 }: {
   from?: [number, number];
   x: number;
@@ -142,6 +143,8 @@ export function Label({
   text: string;
   className?: string;
   anchor?: 'start' | 'end';
+  /** A short plain-English line under the name. */
+  sub?: string;
 }) {
   return (
     <g className={className}>
@@ -155,6 +158,11 @@ export function Label({
         {n && <tspan className="n">{n}  </tspan>}
         <tspan className="t">{text}</tspan>
       </text>
+      {sub && (
+        <text className="sub" x={x} y={y + 17} textAnchor={anchor}>
+          {sub}
+        </text>
+      )}
     </g>
   );
 }
@@ -229,6 +237,9 @@ html:not(.dark) .qi{--g:#fbfbfd;--ink:#14161c;--mute:#5b6070;--acc:#4f46e5;--edg
 .qi .dot{fill:var(--mute)}
 .qi .lab{font-family:var(--font-geist-mono),ui-monospace,monospace;font-size:11px;letter-spacing:.09em}
 .qi .lab .n{fill:var(--mute)}.qi .lab .t{fill:var(--ink)}
+.qi .sub{font-family:var(--font-inter),ui-sans-serif,system-ui,sans-serif;font-size:11.5px;fill:var(--mute)}
+.qi .tag{font-family:var(--font-geist-mono),ui-monospace,monospace;font-size:10px;letter-spacing:.08em;fill:var(--acc);stroke:var(--g);stroke-width:3.5;paint-order:stroke;stroke-linejoin:round}
+.qi .kick{font-family:var(--font-geist-mono),ui-monospace,monospace;font-size:10.5px;letter-spacing:.14em;fill:var(--mute)}
 .qi .mv{transform-box:fill-box;transform-origin:50% 50%;opacity:0}
 .qi .mv.keep{opacity:1}
 .qi .hl{fill:var(--acc);opacity:0;stroke:none}
