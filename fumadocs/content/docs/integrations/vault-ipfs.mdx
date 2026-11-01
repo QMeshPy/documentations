@@ -65,10 +65,8 @@ NEXT_PUBLIC_LIGHTHOUSE_KEY=
 ```
 
 <Callout type="warn">
-  Anything prefixed `NEXT_PUBLIC_` is shipped to the browser. These two keys are exposed that way today. The open pull
-  request [#124](https://github.com/QMeshPy/distributed-quantum/pull/124) moves them server-side as `PINATA_JWT` and
-  `LIGHTHOUSE_API_KEY`, requires sign-in to upload, and asks you to **rotate any key that was exposed**. Until it merges, treat
-  the browser keys as public.
+  Anything prefixed `NEXT_PUBLIC_` is shipped to the browser, so these two keys are visible to anyone who loads the console.
+  Use keys that are limited to pinning, and rotate them if they leak.
 </Callout>
 
 ## What is still open

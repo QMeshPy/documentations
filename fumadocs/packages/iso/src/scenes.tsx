@@ -11,6 +11,10 @@ import { StarknetScene } from './starknet';
 import { VaultScene } from './vault';
 import { AttestScene } from './attest';
 import { ChainsScene } from './chains';
+import { TojuScene } from './toju';
+import { EnsScene } from './ens';
+import { SiweScene } from './siwe';
+import { KuboScene } from './kubo';
 
 /** Every scene, by the name used in `<Iso scene="..." />`. */
 export const scenes = {
@@ -26,6 +30,10 @@ export const scenes = {
   vault: VaultScene,
   attest: AttestScene,
   chains: ChainsScene,
+  toju: TojuScene,
+  ens: EnsScene,
+  siwe: SiweScene,
+  kubo: KuboScene,
 } as const satisfies Record<string, ComponentType>;
 
 export type SceneName = keyof typeof scenes;

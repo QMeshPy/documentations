@@ -8,6 +8,8 @@ Users can sign in with an Ethereum wallet as well as with an emailed code. It us
 follows [EIP-4361](https://eips.ethereum.org/EIPS/eip-4361). It arrived in
 [#100](https://github.com/QMeshPy/distributed-quantum/pull/100).
 
+<Iso scene="siwe" />
+
 ## How a sign-in works
 
 1. The console asks the server for a **nonce**. A nonce is single use and expires.
@@ -37,9 +39,3 @@ A signed-in user can attach more than one wallet. **Settings** has a panel to li
 
 The feature ships with 16 tests covering nonce handling, message parsing, signature recovery, replay, domain, chain and expiry
 rejection, and the linking rules.
-
-<Callout type="warn">
-  [#124](https://github.com/QMeshPy/distributed-quantum/pull/124) is an open pull request that changes authentication
-  setup and, as written, conflicts with this feature on `main`. It must be reconciled before it merges. See the
-  [overview](/docs/integrations/overview).
-</Callout>
