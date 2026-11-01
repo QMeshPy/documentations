@@ -1,53 +1,35 @@
 ---
 title: Introduction
-description: QMesh turns quantum computation into network services that peers discover, pay for per request, and verify.
+description: QMesh runs quantum circuits as services on a peer-to-peer network, and records evidence of every run.
 icon: Rocket
 ---
 
-QMesh is an open-source research platform that treats quantum operations as **network services**. A coordinator discovers worker peers over libp2p, plans a circuit into fragments, reserves capacity on the peers, runs the fragments, and returns the result with a **receipt** you can verify.
+QMesh is an open-source research platform that treats quantum operations as **network services**. You submit an
+[OpenQASM](https://openqasm.com) circuit to a coordinator. The coordinator discovers worker peers over libp2p,
+splits the circuit into fragments, reserves capacity on the peers, runs the fragments, and returns the result
+together with a provenance record you can verify.
 
-<Callout type="warn" title="What is real, and what is simulated">
-  Circuits run on Qiskit statevector **simulation**, not quantum hardware. The network, payments and
-  provenance are real, and every chain QMesh writes to is a **testnet**.
+<Callout type="warn" title="Simulated qubits">
+  QMesh runs circuits on Qiskit statevector **simulation**. It does not control quantum hardware. The network,
+  the job lifecycle, the payment flow and the provenance records are real software, and every blockchain it
+  uses is a **testnet**. See [Scope](/docs/scope) for the full picture.
 </Callout>
 
-## Features
+## What you can do with it
 
-QMesh aims to cover the whole path from a circuit to a verifiable result. Here is what ships today.
-
-<Cards>
-  <Card icon={<Network />} title="Distributed circuits" href="/docs/architecture">
-    Normalize OpenQASM, plan fragments and execute them across worker peers, with every fallback recorded.
-  </Card>
-  <Card icon={<LineChart />} title="Portfolio optimization" href="/docs/research/paper">
-    QAOA benchmarked against classical baselines, with every measured state inspectable.
-  </Card>
-  <Card icon={<FlaskConical />} title="Risk and option pricing" href="/docs/qae-enhancement">
-    VaR, CVaR, credit-risk and option-pricing experiments beside their classical methods.
-  </Card>
-  <Card icon={<Coins />} title="Machine payments" href="/docs/algorand-x402">
-    Pay per request in USDC with the x402 flow on Algorand TestNet.
-  </Card>
-  <Card icon={<Wallet />} title="Credits and ledger" href="/docs/payments">
-    A unified payment-event ledger, credit packs, and the worker payout decision.
-  </Card>
-  <Card icon={<Fingerprint />} title="Provenance" href="/docs/provenance">
-    Merkle-verified run bundles anchored on Ethereum Sepolia.
-  </Card>
-  <Card icon={<Boxes />} title="VAULT and IPFS" href="/docs/vault">
-    Open any CID through trustless gateways and publish circuits with run links.
-  </Card>
-  <Card icon={<Link2 />} title="Chains and identity" href="/docs/chains">
-    A multi-chain registry, ENS names, and Sign-in with Ethereum.
-  </Card>
-  <Card icon={<Bot />} title="Agents" href="/docs/starknet">
-    Agents that spend under on-chain policies with Starknet session keys.
-  </Card>
-</Cards>
+- **Run a circuit across peers.** Submit OpenQASM over HTTP and watch the job move from `QUEUED` to `COMPLETED`.
+  See [Basic usage](/docs/basic-usage).
+- **Optimize a portfolio.** Upload asset data and compare a QAOA run with classical baselines.
+- **Price options and measure risk.** Run option-pricing and risk jobs (VaR, CVaR, credit risk) through the same
+  job model.
+- **Pay per request.** Expose a paid endpoint with the [x402](/docs/guides/x402-payments) `402 Payment Required`
+  flow, settled in USDC on Algorand TestNet.
+- **Verify a result.** Every completed circuit job gets a provenance bundle with a Merkle root. See
+  [Provenance](/docs/concepts/provenance).
 
 ## How a request flows
 
-Every run passes through the same five layers.
+A request passes through five layers. Each one has its own page under Concepts.
 
 <Iso scene="stack" />
 
@@ -55,50 +37,48 @@ Every run passes through the same five layers.
   <Step>
     ### Your app
 
-    Submit an OpenQASM circuit to the REST API, or paste it in the operator console.
+    Submit an OpenQASM circuit to the REST API, or paste it into the operator console.
   </Step>
   <Step>
     ### Coordinator
 
-    Normalize the circuit, build the execution plan, and split it into fragments.
+    Normalize the circuit, build an execution plan and split it into fragments.
+    See [Circuit planning](/docs/concepts/circuit-planning).
   </Step>
   <Step>
     ### Payments and registry
 
-    Answer `402 Payment Required`, settle in USDC, and look up the chains and services involved.
+    Charge for the request, either from prepaid credits or through an x402 payment, and look up the services
+    that are available.
   </Step>
   <Step>
     ### Peer mesh
 
-    Reserve peer capacity and stream fragments over libp2p for Qiskit statevector simulation.
+    Reserve capacity on each peer, then stream the fragments to them over libp2p.
+    See [Peers and discovery](/docs/concepts/peers) and [Reservations](/docs/concepts/reservations).
   </Step>
   <Step>
     ### Provenance
 
-    Hash the inputs, plan and results into a bundle, pin it to IPFS, and anchor the Merkle root.
+    Hash the inputs, the plan and the fragment results into a bundle with a Merkle root.
   </Step>
 </Steps>
 
-The full walk-through, with sequence diagrams and state machines, is in [Architecture](/docs/architecture).
-
-## Pick your path
+## Where to go next
 
 <Cards>
-  <Card icon={<BookOpen />} title="Understand the system" href="/docs/architecture">
-    Architecture, then the design rationale and tradeoffs.
+  <Card icon={<Download />} title="Installation" href="/docs/installation">
+    Run the backend and the console on your machine.
   </Card>
-  <Card icon={<Server />} title="Run it yourself" href="/docs/deployment">
-    Deploy the coordinator, console and a worker peer.
+  <Card icon={<Terminal />} title="Basic usage" href="/docs/basic-usage">
+    Submit a circuit, poll the job and read the result.
   </Card>
-  <Card icon={<Map />} title="See where it is going" href="/docs/roadmap">
-    The five-milestone roadmap and what shipped recently.
+  <Card icon={<Network />} title="Architecture" href="/docs/concepts/architecture">
+    The pieces of the system and how they fit.
   </Card>
 </Cards>
 
-## The headline result
-
-97% of QAOA runtime is the classical COBYLA parameter search, not the quantum circuit, so adding quantum peers to one run yields at most a **1.03×** speedup (Amdahl's law). The advantage shows up in scaling: **3.2×** faster at 40 assets and **9.5×** at 60, in simulator benchmarks from the [research paper](/docs/research/paper).
-
 ## AI resources
 
-These docs are built for agents as well as people. Every page is available as Markdown by adding `.md` to its URL, and the whole site is indexed at [`/llms.txt`](/llms.txt) and [`/llms-full.txt`](/llms-full.txt). Use **Copy Markdown** at the top of any page to paste it into your assistant.
+Every page is available as Markdown: add `.md` to its URL, or use **Copy Markdown** at the top of the page. The
+whole site is indexed at [`/llms.txt`](/llms.txt) and [`/llms-full.txt`](/llms-full.txt).

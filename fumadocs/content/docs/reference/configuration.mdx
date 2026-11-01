@@ -1,0 +1,104 @@
+---
+title: Configuration
+description: Every backend environment variable, with its default.
+icon: Settings
+---
+
+The backend reads its settings from environment variables. When it starts it also loads a `.env` file from its
+working directory, so `backend/.env` works. Defaults below are the values in the code. The sample
+`backend/.env.example` overrides a few of them, and those overrides are marked.
+
+## Service
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `QB2_ENVIRONMENT` | `development` | Label shown in health output. |
+| `QB2_SERVICE_NAME` | `quantum-backend` | Service name in logs and health output. |
+| `QB2_API_HOST` | `0.0.0.0` | Bind address. |
+| `QB2_API_PORT` | `8081` | Bind port. |
+| `QB2_LOG_LEVEL` | `INFO` | Standard Python log level. |
+| `QB2_JSON_LOGS` | `true` | Structured JSON logs. Set `false` for simpler local logs. |
+
+## Authentication
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `QB2_AUTH_REQUIRED` | `true` | When `false`, every request is treated as a local administrator. `.env.example` sets `false`. **Never disable this in production.** |
+| `QB2_ALLOW_DEV_BEARER_TOKENS` | `false` | Accept `Bearer dev-<user_id>` tokens even when authentication is required. For controlled local testing only. |
+
+## MongoDB
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `QB2_MONGODB_TARGET` | `local` | `local` uses `QB2_MONGODB_LOCAL_URI`; `remote` uses `QB2_MONGODB_REMOTE_URI`. |
+| `QB2_MONGODB_LOCAL_URI` | none | For example `mongodb://127.0.0.1:27017`. |
+| `QB2_MONGODB_REMOTE_URI` | none | For example an Atlas `mongodb+srv://` URI. |
+| `QB2_MONGODB_DATABASE` | `quantum_backend_v2` | Database name. `.env.example` sets `qds`. |
+| `QB2_MONGODB_SERVER_SELECTION_TIMEOUT_MS` | `5000` | How long to wait for a server. |
+
+## Peer log
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `QB2_PEER_ID` | `local-dev-peer` | Identity written into the peer log. |
+| `QB2_PEER_LOG_DIR` | under the backend folder | Where the append-only log is written. |
+| `QB2_PEER_LOG_FSYNC` | `true` | Flush every write to disk. |
+
+## libp2p
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `QB2_LIBP2P_ENABLED` | `true` | Run the libp2p host. |
+| `QB2_LIBP2P_PEER_ID` | `qb2-dev-peer` | Peer name. |
+| `QB2_LIBP2P_LISTEN_MULTIADDRS` | `/ip4/0.0.0.0/tcp/4011` | Comma-separated listen addresses. |
+| `QB2_LIBP2P_ADVERTISE_MULTIADDRS` | empty | Addresses to advertise, if different. |
+| `QB2_LIBP2P_BOOTSTRAP_PEERS` | empty | Comma-separated peers to connect to first. |
+| `QB2_LIBP2P_RENDEZVOUS_NAMESPACE` | `quantum-backend` | Prefix for the discovery topics and protocol ids. |
+| `QB2_LIBP2P_PEERSTORE_PATH` | under the backend folder | SQLite peerstore file. |
+| `QB2_LIBP2P_ACTIVATE_LISTENERS` | `true` | Start the listeners. |
+| `QB2_LIBP2P_HEARTBEAT_INTERVAL_SECONDS` | `60` | Heartbeat period (minimum 5). |
+| `QB2_LIBP2P_STALE_PEER_TTL_SECONDS` | `300` | Time without a message before a peer is stale (minimum 30). |
+| `QB2_LIBP2P_DEV_SERVICE_PEER_COUNT` | `0` | Embedded worker peers to start in this process (0 to 32). `.env.example` sets `4`. |
+| `QB2_LIBP2P_DEV_SERVICE_BASE_PORT` | `4021` | First port used by embedded workers. |
+
+## Credits and payments
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `QB2_CIRCUIT_JOB_CREDIT_COST` | `0` | Credits held per circuit job. `0` turns metering off. |
+| `QB2_X402_GATEWAY_SECRET` | none | Enables the hidden internal routes used by the [x402 gateway](/docs/guides/x402-payments). Must equal the console's `X402_GATEWAY_SECRET`. |
+| `QB2_BILLING_INTERNAL_SECRET` | none | Shared secret for the console's billing calls. |
+| `QB2_PAYMENT_RECONCILE_INTERVAL_SECONDS` | `300` | How often the payment reconciliation sweep runs. |
+
+## Content node and provenance
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `KUBO_RPC_URL` | `http://kubo:5001` | The private RPC address of the Kubo node. |
+| `KUBO_RPC_SECRET` | none | Private token shared with Kubo. Setting it turns on [bundle publishing](/docs/concepts/provenance). |
+| `KUBO_RPC_TIMEOUT_SECONDS` | `30` | Maximum 300. |
+| `KUBO_RPC_MAX_RESPONSE_BYTES` | `4194304` | Maximum 64 MiB. |
+| `IPFS_GATEWAY_URL` | `http://kubo:8080` | Private gateway used to read content. |
+| `IPFS_PUBLIC_GATEWAY_URL` | none | Browser-facing gateway origin, used to build "open evidence" links. |
+| `IPFS_GATEWAY_TIMEOUT_SECONDS` | `30` | |
+| `IPFS_GATEWAY_MAX_RESPONSE_BYTES` | `4194304` | |
+| `QB2_ANCHOR_NETWORK` | none | Turns on anchor verification. A registry alias or CAIP-2 id of a test network with the `anchor_root` capability. |
+| `QB2_ANCHOR_SENDER` | none | Public address of the anchor account. |
+| `QB2_ANCHOR_PAST_SENDERS` | empty | Comma-separated earlier anchor accounts, kept so old anchors still verify. |
+| `QB2_ANCHOR_PRIVATE_KEY` | none | A dedicated low-balance key. With it, the backend also sends anchors on a schedule. |
+| `QB2_ANCHOR_INTERVAL_SECONDS` | `3600` | Scheduled anchoring period. |
+| `QB2_ANCHOR_MAX_BATCH` | `10000` | Most bundles per batch. |
+| `QB2_ANCHOR_MAX_FEE_GWEI` | `100` | Fee ceiling for anchor transactions. |
+
+## Chains
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `QB2_CHAIN_REGISTRY_PATH` | the packaged registry | Path to a chain registry file. |
+| `NETWORK` | none | Wallet network name, for example `base-sepolia`. |
+
+<Callout>
+  Treat every variable above that holds a secret (`QB2_X402_GATEWAY_SECRET`, `QB2_BILLING_INTERNAL_SECRET`,
+  `KUBO_RPC_SECRET`, `QB2_ANCHOR_PRIVATE_KEY`) as private. Never expose one to a browser, and never commit a
+  `.env` file.
+</Callout>

@@ -12,9 +12,8 @@ export function baseOptions(): BaseLayoutProps {
     // with the docs-specific entry points.
     links: [
       { text: 'Docs', url: '/docs', active: 'nested-url' },
-      { text: 'Architecture', url: '/docs/architecture', active: 'url' },
-      { text: 'Research', url: '/docs/research', active: 'nested-url' },
-      { text: 'Roadmap', url: '/docs/roadmap', active: 'url' },
+      { text: 'Architecture', url: '/docs/concepts/architecture', active: 'url' },
+      { text: 'Reference', url: '/docs/reference/http-api', active: 'nested-url' },
       { type: 'button', text: 'Open the console', url: links.console, external: true },
     ],
     githubUrl: links.product,

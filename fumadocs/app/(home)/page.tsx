@@ -9,36 +9,24 @@ import { StackScene } from '@/components/iso/stack';
 const builtOn = [
   'py-libp2p',
   'Qiskit',
-  'PennyLane',
+  'FastAPI',
+  'Next.js',
+  'MongoDB',
   'IPFS',
-  'Helia',
   'Kubo',
   'Algorand x402',
   'Ethereum Sepolia',
-  'Base Sepolia',
-  'Starknet Sepolia',
   'Chainlink',
   'Robinhood Chain',
-  'ENS',
-  'Coinbase CDP',
-  'Stripe',
-  'NEAR AI Cloud',
-  'Groq',
-  'OpenRouter',
-  'Lighthouse',
-  'Toju',
 ];
 
 const features = [
-  { t: 'Distributed circuits.', d: 'Normalize OpenQASM, plan fragments and run them across worker peers.', chips: ['OpenQASM', 'libp2p', 'Qiskit'], href: '/docs/architecture' },
-  { t: 'Portfolio optimization.', d: 'QAOA benchmarked against classical baselines, state by state.', chips: ['QAOA', '3.2× at 40', '9.5× at 60'], href: '/docs/research/paper' },
-  { t: 'Risk and options.', d: 'VaR, CVaR, credit risk and option pricing beside classical methods.', chips: ['VaR', 'CVaR', 'QAE'], href: '/docs/qae-enhancement' },
-  { t: 'Machine payments.', d: 'Pay per request in USDC with the x402 flow on Algorand TestNet.', chips: ['402', 'USDC', 'Algorand'], href: '/docs/algorand-x402' },
-  { t: 'Credits and ledger.', d: 'Credit packs, USDC packs and a unified payment ledger.', chips: ['Stripe', 'ledger', 'payouts'], href: '/docs/payments' },
-  { t: 'Receipts and provenance.', d: 'Every result pinned to IPFS and anchored as a Merkle root on Sepolia.', chips: ['CID', 'Merkle', 'Sepolia'], href: '/docs/provenance' },
-  { t: 'VAULT.', d: 'Open any CID through trustless gateways and publish circuits.', chips: ['IPFS', 'Kubo', 'dag-json'], href: '/docs/vault' },
-  { t: 'Chains and identity.', d: 'A multi-chain registry, ENS names and Sign-in with Ethereum.', chips: ['registry', 'ENS', 'SIWE'], href: '/docs/chains' },
-  { t: 'Agents.', d: 'Agents that spend under on-chain policies with Starknet session keys.', chips: ['Starknet', 'Toju', 'policies'], href: '/docs/starknet' },
+  { t: 'Distributed circuits.', d: 'Submit OpenQASM, get a plan of fragments, and watch peers run them.', chips: ['OpenQASM', 'libp2p', 'Qiskit'], href: '/docs/concepts/circuit-planning' },
+  { t: 'Job lifecycle.', d: 'Follow every job from QUEUED to COMPLETED over a plain REST API.', chips: ['REST', 'progress', 'results'], href: '/docs/concepts/jobs' },
+  { t: 'Peer discovery.', d: 'Workers announce themselves over GossipSub; the coordinator tracks their health.', chips: ['GossipSub', 'heartbeats', 'trust tiers'], href: '/docs/concepts/peers' },
+  { t: 'Reservations.', d: 'Reserve a peer before sending work, with automatic fallback when one fails.', chips: ['prepare', 'commit', 'fallback'], href: '/docs/concepts/reservations' },
+  { t: 'Machine payments.', d: 'Charge per request with the x402 flow, settled in USDC on Algorand TestNet.', chips: ['402', 'USDC', 'Algorand'], href: '/docs/guides/x402-payments' },
+  { t: 'Provenance.', d: 'Every completed run gets a hashed bundle you can verify, publish and anchor.', chips: ['SHA-256', 'Merkle', 'IPFS'], href: '/docs/concepts/provenance' },
 ];
 
 function Rule({ children }: { children: string }) {
@@ -98,8 +86,8 @@ export default function HomePage() {
 
         <footer className="relative hidden items-center justify-between border-t border-fd-border px-7 py-3 font-mono text-[0.7rem] tracking-wide text-fd-muted-foreground lg:flex">
           <span className="flex gap-5">
-            <Link href="/docs/architecture" className="hover:text-fd-foreground">Architecture</Link>
-            <Link href="/docs/recent-updates" className="hover:text-fd-foreground">Changelog</Link>
+            <Link href="/docs/concepts/architecture" className="hover:text-fd-foreground">Architecture</Link>
+            <Link href="/docs/scope" className="hover:text-fd-foreground">Scope</Link>
             <a href={links.product} className="hover:text-fd-foreground">GitHub</a>
           </span>
           <span>Apache 2.0</span>
@@ -115,9 +103,9 @@ export default function HomePage() {
         <div className="mx-auto max-w-4xl px-6 pb-20 pt-8 md:px-8">
           <Rule>README</Rule>
           <p className="text-[1.0625rem] leading-relaxed text-fd-muted-foreground">
-            Quantum computation as <strong className="font-medium text-fd-foreground">discoverable, payable and verifiable</strong>{' '}
-            network services. Split circuits across a peer-to-peer mesh of ordinary devices, pay each peer per
-            request, and get a receipt for every result.
+            A research platform that runs quantum circuits as <strong className="font-medium text-fd-foreground">network services</strong>.
+            A coordinator plans a circuit into fragments, reserves worker peers over libp2p, runs the fragments on
+            Qiskit simulation, and records a verifiable provenance bundle for the result.
           </p>
 
           <div className="mt-7">
@@ -166,27 +154,6 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
-          </div>
-
-          {/* Results */}
-          <div className="mt-12">
-            <Rule>Results you can check</Rule>
-            <dl className="grid grid-cols-2 border-s border-t border-fd-border md:grid-cols-4">
-              {[
-                ['97%', 'of a QAOA run is classical parameter search'],
-                ['1.03×', 'ceiling from adding more nodes (Amdahl)'],
-                ['3.2×', 'faster at 40 assets'],
-                ['9.5×', 'faster at 60 assets'],
-              ].map(([v, l]) => (
-                <div key={v} className="border-b border-e border-fd-border p-5">
-                  <dt className="font-heading text-3xl font-medium tracking-tight">{v}</dt>
-                  <dd className="mt-2 text-[0.8125rem] leading-snug text-fd-muted-foreground">{l}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-3 text-[0.8125rem] text-fd-muted-foreground">
-              Simulator benchmarks from the QMesh research draft. QMesh runs on Qiskit statevector simulation, not quantum hardware.
-            </p>
           </div>
 
           <p className="mt-14 border-t border-fd-border pt-6 font-mono text-[0.7rem] tracking-wide text-fd-muted-foreground">

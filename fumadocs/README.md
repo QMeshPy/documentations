@@ -1,63 +1,59 @@
-# QMesh Docs (Fumadocs)
+# QMesh docs (Fumadocs)
 
-Next.js + [Fumadocs](https://www.fumadocs.dev/) site for the QMeshPy documentation repo.
+Next.js + [Fumadocs](https://www.fumadocs.dev/) site for the QMesh documentation.
 
 ## Setup
 
 ```bash
 cd fumadocs
 npm install
-npm run sync-docs   # refresh content from repo-root markdown
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — docs live at `/docs`.
+Open [http://localhost:3000](http://localhost:3000). The docs live at `/docs`.
+
+## Content
+
+`content/docs` is the **only** source of the published pages. They are written by hand and checked against the
+product code (`QMeshPy/distributed-quantum`). Nothing is imported from the repository's other Markdown files, which
+are working notes and are not published.
+
+```text
+content/docs
+  index.mdx            Introduction
+  scope.mdx            What is real, simulated and experimental
+  installation.mdx
+  basic-usage.mdx
+  concepts/            One page per concept
+  guides/              Task-based how-tos
+  reference/           HTTP API, configuration, FAQ
+```
+
+Each folder has a `meta.json` that sets the page order. A page is added by creating the file and listing it there.
+
+### Writing rules
+
+- Open every page with what it is for. Use the second person and short paragraphs.
+- State only what the code or a running system shows. If you cannot point to it, leave it out.
+- Say plainly what is simulated, experimental or testnet-only. Do not quote performance numbers or research
+  claims that are not published.
+- Keep working notes, progress logs, postmortems and unpublished papers out of the site.
 
 ## Structure
 
 | Path | Role |
 | --- | --- |
-| `content/docs` | MDX pages rendered by Fumadocs |
-| `scripts/sync-docs.mjs` | Copies/adapts markdown from the repo root into `content/docs`, resolves relative links, escapes currency `$`, writes the grouped sidebar |
-| `authored/` | Hand-written pages (Introduction) copied into `content/docs` by the sync |
-| `components/` | MDX components (Mermaid, icons, Steps, Tabs) and the QMesh mark |
-| `CONTENT_PLAN.md` | What the site should present, gaps, and the isometric illustration backlog |
+| `content/docs` | MDX pages |
+| `components/` | MDX components (Mermaid, Steps, Tabs, icons) and the QMesh mark |
+| `components/iso/` | Isometric illustrations |
 | `lib/source.ts` | Content source loader |
-| `lib/layout.shared.tsx` | Nav / GitHub options |
+| `lib/layout.shared.tsx` | Nav and GitHub options |
 | `app/(home)` | Landing page |
 | `app/docs` | Documentation layout and routes |
-
-## Sync
-
-Source of truth for most pages remains the repo-root `.md` files. After editing those:
-
-```bash
-npm run sync-docs
-```
-
-Imported pages keep the `.md` extension so math braces, autolinks, and comparison symbols are parsed as Markdown. Math (`$…$`, `$$…$$`) is typeset with KaTeX; on pages without math the sync escapes `$` so prices stay prices. ```` ```mermaid ```` blocks render as diagrams. The generated research and technical landing pages use `.mdx` for their Card components. Unsupported code languages render as plain text.
-
-Then restart or refresh the dev server.
 
 ## Isometric illustrations
 
 `components/iso/` is a small kit for the diagrams: true 30 degree isometric, 1px strokes over three tonal faces,
 one accent, themed from CSS variables, pure SVG and CSS (no script), and a still frame under
-`prefers-reduced-motion`.
-
-| Scene | Use |
-| --- | --- |
-| `stack` | The five layers of a run (home hero, Introduction) |
-| `fragments` | Circuit split into fragments across peers (Architecture) |
-| `x402` | Request, 402, pay, run, result (Algorand x402) |
-
-In MDX use `<Iso scene="stack" />`. In imported Markdown use a fence:
-
-````md
-```iso
-fragments
-```
-````
-
-`scripts/sync-docs.mjs` injects scenes after chosen headings (`SCENES`). New scenes go in `components/iso/` and
-are registered in `components/iso/index.tsx`.
+`prefers-reduced-motion`. Scenes are registered in `components/iso/index.tsx` and used in MDX as
+`<Iso scene="stack" />`.

@@ -1,0 +1,83 @@
+---
+title: Circuit planning
+description: How a circuit becomes fragments, stages and blocks, and how each block gets a peer.
+icon: Route
+---
+
+Before anything runs, the coordinator turns your circuit into an **execution plan**. This page describes what
+that plan contains and how peers are chosen. The plan for a finished job is available at
+`GET /api/v1/plans/{plan_id}`.
+
+## 1. Normalize the circuit
+
+The parser accepts OpenQASM 2 and OpenQASM 3 style text. It detects the format from the header (`OPENQASM 2` or
+`OPENQASM 3`), or from the declarations (`qreg` for 2, `qubit[` for 3). It reads the qubit count from the
+register declaration and turns every operation into one entry. It rejects, with a clear error, a circuit that is
+empty, has no executable operations, has no qubit register, contains an operation it cannot read, or has an
+unterminated `for` block.
+
+Each operation is mapped to one of **eleven service types**:
+
+| Gate or keyword in the circuit | Service type |
+| --- | --- |
+| `h` | `hadamard` |
+| `cx`, `cnot` | `cnot` |
+| `cz` | `cz` |
+| `controlled_u` | `controlled_unitary` |
+| `qft` | `qft` |
+| `teleport`, `teleportation` | `teleportation` |
+| `bell_pair`, `bell` | `bell_pair` |
+| `syndrome_extraction` | `syndrome_extraction` |
+| `distillation` | `distillation` |
+| `measure`, `measurement_feedforward` | `measurement_feedforward` |
+| any other gate | `programmable_gate` |
+
+A peer offers a **service**, and each service type is a separate thing a peer can advertise.
+
+## 2. Build the dependency graph
+
+Two operations are dependent when the later one touches a qubit that the earlier one touched last. The planner
+records, for every operation, the previous operation on each of its qubits. Operations with no path between them
+can run in the same step.
+
+Each operation becomes one **fragment**. The planner does not yet cut a single gate into smaller pieces or search
+for better cut points: the unit of distribution is the operation.
+
+## 3. Group fragments into stages and blocks
+
+- A **stage** is a set of fragments whose dependencies are all in earlier stages. Stages run one after another.
+- Within a stage, fragments that act on connected qubits are merged into a **block**. A block is sent to a single
+  peer and executed together, so entangled qubits stay on one machine.
+
+Block ids look like `block-s01-b01`: stage 1, block 1.
+
+## 4. Choose a peer for each block
+
+For each block the planner considers only peers that are healthy, not stale, and advertise **every** service the
+block needs. It scores each candidate with a weighted cost:
+
+| Part | Weight | What it measures |
+| --- | --- | --- |
+| Failure risk | 55% | One minus the peer's fidelity for the services the block needs. |
+| Load | 25% | The peer's active reservations and executions, plus blocks already planned for it in this plan. |
+| Entanglement | 20% | A penalty when the candidate is not a peer that already holds the block's inputs, so state must move; it also grows with the number of separate qubit groups and the number of qubits in the state. |
+
+The lowest total cost wins and becomes the block's **primary** peer. The next three become its **fallbacks**.
+If no peer qualifies, planning stops with an error that names the block and the services it needed.
+
+<Callout>
+  When no embedded workers are configured and no peer has registered, the coordinator lists itself as the only
+  candidate. In practice, run with workers (`QB2_LIBP2P_DEV_SERVICE_PEER_COUNT`) to see circuits spread out.
+</Callout>
+
+## What the plan stores
+
+The stored plan records each fragment, its dependencies, the stage and block it belongs to, its primary and
+fallback peers, and the score breakdown for every candidate. That makes it possible to see afterwards why a peer
+was chosen. The `plan_id` is generated for each run.
+
+## Limits
+
+Execution is Qiskit statevector simulation, so the number of qubits you can run is bounded by the memory needed
+for a statevector. Fidelity values describe how consistently the compiled circuit reproduces the ideal state in
+simulation. They are not measurements from hardware.

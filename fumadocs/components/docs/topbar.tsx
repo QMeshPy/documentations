@@ -10,17 +10,10 @@ import { cn } from '@/lib/cn';
 
 type Tab = { label: string; href: string; match: (p: string) => boolean; external?: boolean };
 
-const inResearch = (p: string) => p.startsWith('/docs/research') || p.startsWith('/docs/technical');
-const inRoadmap = (p: string) =>
-  p.startsWith('/docs/roadmap') ||
-  p.startsWith('/docs/future-roadmap') ||
-  p.startsWith('/docs/recent-updates');
-
 const tabs: Tab[] = [
   { label: 'Home', href: '/', match: (p) => p === '/' },
-  { label: 'Docs', href: '/docs', match: (p) => p.startsWith('/docs') && !inResearch(p) && !inRoadmap(p) },
-  { label: 'Research', href: '/docs/research', match: inResearch },
-  { label: 'Roadmap', href: '/docs/roadmap', match: inRoadmap },
+  { label: 'Docs', href: '/docs', match: (p) => p.startsWith('/docs') && !p.startsWith('/docs/reference') },
+  { label: 'Reference', href: '/docs/reference/http-api', match: (p) => p.startsWith('/docs/reference') },
   { label: 'GitHub', href: links.product, match: () => false, external: true },
 ];
 

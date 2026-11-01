@@ -2,10 +2,14 @@
   "title": "QMesh",
   "pages": [
     "index",
-    "(concepts)",
-    "(platform)",
-    "(research)",
-    "(roadmap)",
-    "(notes)"
+    "scope",
+    "installation",
+    "basic-usage",
+    "---Concepts---",
+    "...concepts",
+    "---Guides---",
+    "...guides",
+    "---Reference---",
+    "...reference"
   ]
 }

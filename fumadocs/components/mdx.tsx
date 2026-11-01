@@ -23,6 +23,12 @@ import {
   Bot,
   Link2,
   Map,
+  Download,
+  Terminal,
+  Handshake,
+  Route,
+  Radar,
+  ScrollText,
 } from 'lucide-react';
 import type { MDXComponents } from 'mdx/types';
 import Link from 'next/link';
@@ -50,6 +56,12 @@ const icons = {
   Bot,
   Link2,
   Map,
+  Download,
+  Terminal,
+  Handshake,
+  Route,
+  Radar,
+  ScrollText,
 };
 
 function Cards({ children }: { children: ReactNode }) {

@@ -1,0 +1,103 @@
+---
+title: x402 payments
+description: Charge for circuit and options runs with the x402 payment flow, settled in USDC on Algorand TestNet.
+icon: Coins
+---
+
+[x402](https://www.x402.org) uses the HTTP `402 Payment Required` status to let a client pay for a request
+programmatically. QMesh exposes two paid routes through it. A client asks for a run, learns the price from the
+`402` answer, pays in USDC on Algorand, and repeats the request with proof of payment. Only then is a job created.
+
+<Callout type="warn">
+  This guide covers **TestNet**. The configuration also accepts `mainnet`, but QMesh is a proof of concept on
+  simulators and its payment path has only been exercised on TestNet.
+</Callout>
+
+## The two routes
+
+| Route | Runs |
+| --- | --- |
+| `POST /api/x402/quantum/runs` | A circuit, distributed across worker peers. Body: `{"circuit": "<OpenQASM>"}`. |
+| `POST /api/x402/options/runs` | Quantum Amplitude Estimation option pricing, with a classical Black-Scholes baseline. |
+
+The options body takes `option_type` (one of `european_call_short`, `european_call_long`, `expand`, `delay`,
+`abandon`, `patent`, `natural_resource`, `financial_flexibility`), `current_value`, `strike_or_cost`,
+`time_to_expiry` (years), `volatility` and `risk_free_rate`. All six are required.
+
+Both routes answer a paid request with `201 Created`, a `job_id` and the job's initial status. Read the result with
+`GET /api/x402/quantum/runs/{jobId}` or `GET /api/x402/options/runs/{jobId}`. Reading a result is **not** paid.
+
+## How a paid request flows
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant G as x402 gateway (console)
+    participant F as Facilitator
+    participant A as Algorand
+    participant B as Coordinator
+    C->>G: POST /api/x402/quantum/runs
+    G-->>C: 402 Payment Required (price, receiver, asset)
+    C->>A: sign the USDC payment
+    C->>G: repeat the request with the payment
+    G->>F: verify and settle
+    F->>A: submit the transfer
+    G->>B: create the job (shared secret)
+    B-->>G: job_id
+    G-->>C: 201 Created with job_id
+```
+
+The gateway runs in the console's server routes. After a payment settles it calls the coordinator's hidden
+internal routes, authenticated with the `X-X402-Gateway-Secret` header. The coordinator stores these jobs under a
+fixed service identity (`x402-algorand`) and does not charge them against credits.
+
+## Configure it
+
+The routes are off unless `X402_ENABLED=true`. Until then they answer `503` with
+`{"error": "Algorand x402 is not enabled."}`.
+
+```txt title="frontend/.env.local"
+X402_ENABLED=true
+X402_NETWORK=testnet
+X402_AVM_ADDRESS=<your Algorand receiver address>
+X402_FACILITATOR_URL=https://facilitator.goplausible.xyz
+X402_QUANTUM_RUN_PRICE=$0.01
+X402_GATEWAY_SECRET=<openssl rand -hex 32>
+```
+
+```txt title="backend/.env"
+QB2_X402_GATEWAY_SECRET=<the same value as X402_GATEWAY_SECRET>
+```
+
+| Variable | Notes |
+| --- | --- |
+| `X402_NETWORK` | `testnet` (default) or `mainnet`. Anything else is a configuration error. |
+| `X402_AVM_ADDRESS` | Required. A valid Algorand address that receives the payments. Only the public address is needed; never put a mnemonic or private key in this repository. |
+| `X402_QUANTUM_RUN_PRICE` | A positive USD amount written as `$0.01`, with up to six decimals. Defaults to `$0.01`. It applies to both routes. |
+| `X402_FACILITATOR_URL` | The service that verifies and settles payments. Defaults to `https://facilitator.goplausible.xyz`. |
+| `X402_GATEWAY_SECRET` | Required, at least 16 characters. Must equal `QB2_X402_GATEWAY_SECRET` in the backend. |
+| `NEXT_PUBLIC_BACKEND_URL` | Where the gateway reaches the coordinator. Defaults to `http://localhost:8081`. |
+
+With a bad value, the route answers `503` with `Algorand x402 configuration is invalid.` and logs the reason on the
+server.
+
+The receiver account must be funded and opted in to the USDC asset before it can receive a payment. The payer
+needs TestNet USDC and an opt-in too.
+
+## Check the unpaid response
+
+Without a payment, the route should answer `402`:
+
+```bash
+curl -i -X POST http://localhost:3000/api/x402/quantum/runs \
+  -H "Content-Type: application/json" \
+  -d '{"circuit": "OPENQASM 2.0; include \"qelib1.inc\"; qreg q[1]; h q[0];"}'
+```
+
+The `402` response carries the price, the network, the receiver and the asset. An x402-capable client reads it,
+pays and retries. See the [x402 documentation](https://www.x402.org) for client libraries.
+
+## Discovery
+
+Both routes publish x402 Bazaar discovery metadata and carry the `x402-global-challenge` tag, so that
+discovery-aware clients and agents can find them and read their input schema.

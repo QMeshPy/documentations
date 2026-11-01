@@ -1,0 +1,106 @@
+---
+title: Basic usage
+description: Submit a circuit, follow the job and read the result over the HTTP API.
+icon: Terminal
+---
+
+These examples call the backend directly. They assume you followed [Installation](/docs/installation), so the API
+is at `http://localhost:8081` and authentication is off. If your backend requires authentication, add an
+`Authorization: Bearer <token>` header to every request.
+
+## Check that peers are available
+
+A circuit needs worker peers. List the services they advertise:
+
+```bash
+curl http://localhost:8081/api/v1/services
+```
+
+Each entry describes one service on one peer: `node_id`, `service_type` (for example `hadamard` or `cnot`),
+`fidelity`, the `qubit_min` and `qubit_max` it supports, and `availability`.
+
+## Submit a circuit
+
+Send OpenQASM text in the `circuit` field. This one prepares a Bell pair:
+
+```bash
+curl -X POST http://localhost:8081/api/v1/circuits/submit \
+  -H "Content-Type: application/json" \
+  -d '{"circuit": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0],q[1];\nmeasure q -> c;"}'
+```
+
+The API answers `201 Created` right away. The work happens in the background.
+
+```json
+{ "job_id": "job_8d0f5af2fd3640be8d62a9f48f8d3d6d", "status": "QUEUED" }
+```
+
+## Follow the job
+
+Poll the job until `status` is `COMPLETED` or `FAILED`:
+
+```bash
+curl http://localhost:8081/api/v1/jobs/job_8d0f5af2fd3640be8d62a9f48f8d3d6d
+```
+
+While it runs, `progress` tells you how many fragments have finished:
+
+```json
+{
+  "job_id": "job_8d0f5af2fd3640be8d62a9f48f8d3d6d",
+  "status": "EXECUTING",
+  "plan_id": "plan-3f7a10d6-8780-4c7f-8a3a-9cb8cf848a8e",
+  "error": null,
+  "result": null,
+  "progress": {
+    "total_fragments": 3,
+    "completed_fragments": 1,
+    "active_fragments": 2,
+    "completion_ratio": 0.3333,
+    "finalizing": false
+  }
+}
+```
+
+The states a job moves through are described in [Jobs](/docs/concepts/jobs). The values above are illustrative:
+your `job_id`, `plan_id` and fragment counts will differ.
+
+## Read the result
+
+When the job is `COMPLETED`, `result.quantum_result` holds the outcome. Among other fields it includes the final
+`statevector`, `probabilities`, `top_basis_states`, `bloch_vectors`, `entanglement_entropy` and a `fidelity`
+summary. A circuit that measures also reports sampled `counts` and the number of `shots`.
+
+Add `?result_detail=summary` to `GET /api/v1/jobs/{job_id}` when you do not need the large fields. The default
+is `full`. In the summary, `probabilities`, `statevector` and `reduced_density_matrices` are `null` and
+everything else is unchanged.
+
+A completed job also carries a `provenance_bundle_id`. Pass it to
+`GET /api/v1/provenance/{bundle_id}/verify` to check the record. See [Provenance](/docs/concepts/provenance).
+
+## Handle failures
+
+If a job ends as `FAILED`, the `error` field contains the reason. Common causes are a circuit the parser cannot
+read (see [Circuit planning](/docs/concepts/circuit-planning)) and no available peer for one of the required
+services. A request the API itself rejects, such as a `circuit` shorter than 10 characters, fails
+immediately with a validation error and creates no job.
+
+<Callout>
+  Credit metering is off by default (`QB2_CIRCUIT_JOB_CREDIT_COST=0`). When you turn it on, submitting a job holds
+  its cost first. With too few credits the API answers
+  `402 Payment Required` with the error code `INSUFFICIENT_CREDITS` and creates no job.
+</Callout>
+
+## List your jobs
+
+```bash
+curl "http://localhost:8081/api/v1/jobs?limit=20&status=COMPLETED"
+```
+
+`limit` accepts 1 to 200 (default 50), and `status` can be repeated. Without admin rights you only see your own jobs.
+
+## Next steps
+
+- Understand each step in [Architecture](/docs/concepts/architecture).
+- Look up every endpoint in the [HTTP API reference](/docs/reference/http-api).
+- Charge for requests with [x402 payments](/docs/guides/x402-payments).

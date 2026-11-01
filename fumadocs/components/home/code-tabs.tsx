@@ -8,8 +8,8 @@ const tabs = [
   {
     id: 'call',
     label: 'Call it',
-    hint: 'Submit a circuit to the paid route. It answers 402 until the run is paid in Algorand USDC.',
-    code: `curl -X POST "$QMESH/api/x402/quantum/runs" \\
+    hint: 'Submit an OpenQASM circuit. The API returns a job id right away; poll the job for the result.',
+    code: `curl -X POST "$QMESH/api/v1/circuits/submit" \\
   -H "Content-Type: application/json" \\
   -d '{"circuit": "OPENQASM 2.0; …"}'`,
   },
@@ -22,8 +22,8 @@ cd frontend && bun run dev`,
   },
   {
     id: 'power',
-    label: 'Power it',
-    hint: 'Turn a spare machine into a worker peer that joins the mesh and runs fragments.',
+    label: 'Try a node',
+    hint: 'An early example script that starts an external worker node and connects it to a coordinator.',
     code: `python scripts/node-starter-template.py \\
   --coordinator <MULTIADDR> --label my-node`,
   },

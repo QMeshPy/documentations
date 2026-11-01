@@ -1,0 +1,108 @@
+---
+title: HTTP API
+description: The coordinator's REST endpoints, grouped by what they do.
+icon: Globe
+---
+
+The coordinator serves a REST API under `/api/v1`. The authoritative, always-current reference is the OpenAPI
+page the backend generates at `/docs` (for example `http://localhost:8081/docs`). This page is a map of the
+endpoints that exist and what they are for.
+
+Most routes require an authenticated user (see [Scope](/docs/scope#authentication)). Users see their own
+resources; an administrator sees all. Job statuses for circuits are upper case (`QUEUED`, `COMPLETED`); finance,
+options and risk jobs use lower case (`queued`, `completed`).
+
+## System
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/health` | Liveness, version, uptime and persistence status. |
+| `GET /api/v1/ready` | Readiness, with active probes of dependencies. |
+| `GET /api/v1/bootstrap/libp2p` | The libp2p bootstrap plan. |
+| `GET /api/v1/bootstrap/libp2p/runtime` | A summary of the running libp2p host. |
+
+## Circuits and jobs
+
+| Method and path | Purpose |
+| --- | --- |
+| `POST /api/v1/circuits/submit` | Submit an OpenQASM circuit. Returns `201` with a `job_id`. |
+| `GET /api/v1/jobs` | List recent jobs. Query: `limit` (1 to 200, default 50), `status` (repeatable). |
+| `GET /api/v1/jobs/{job_id}` | Job status and result. Query: `result_detail=full|summary`. |
+| `GET /api/v1/plans/{plan_id}` | The execution plan for a job. |
+
+See [Basic usage](/docs/basic-usage) and [Jobs](/docs/concepts/jobs).
+
+## Peers and services
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/services` | Services advertised by live peers. |
+| `GET /api/v1/metrics/fidelity/{node_id}` | Fidelity samples for one node. |
+| `GET /api/v1/discovery/peers` | Known peers. Query: `include_stale`. |
+| `GET /api/v1/discovery/peers/{peer_id}` | One peer. |
+| `GET /api/v1/discovery/topology` | Peers with trust tier, health and staleness. |
+| `GET /api/v1/discovery/network/topology` | Topology in an older, flat format. |
+| `GET /api/v1/discovery/stats` | Network statistics. |
+| `POST /api/v1/enrollment/peers` | Enroll or update a peer. |
+| `GET /api/v1/enrollment/peers` | List enrollments. Query: `trust_tier`, `status`. |
+| `GET /api/v1/enrollment/peers/{peer_id}` | One enrollment. |
+| `POST /api/v1/enrollment/peers/{peer_id}/action` | Admin: `approve`, `reject` or `quarantine`. |
+
+See [Peers and discovery](/docs/concepts/peers).
+
+## Reservations
+
+| Method and path | Purpose |
+| --- | --- |
+| `POST /api/v1/reservations` | Request a reservation. |
+| `GET /api/v1/reservations/{reservation_id}` | Current state, rebuilt from events. |
+| `POST /api/v1/reservations/{reservation_id}/cancel` | Cancel a reservation. |
+
+See [Reservations](/docs/concepts/reservations).
+
+## Provenance
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/provenance/{bundle_id}/verify` | Verify a bundle. Owner or administrator only. |
+
+See [Provenance](/docs/concepts/provenance).
+
+## Finance, options and risk
+
+| Method and path | Purpose |
+| --- | --- |
+| `POST /api/v1/finance/submit` | Submit a financial CSV for quantum analysis. |
+| `GET /api/v1/finance` | List finance jobs. |
+| `GET /api/v1/finance/{job_id}` | Job status and results. |
+| `GET /api/v1/finance/{job_id}/comparison` | The quantum-versus-classical comparison report. |
+| `GET /api/v1/finance/tokenized-assets` | Tokenized stocks available for analysis. |
+| `POST /api/v1/finance/tokenized-portfolio` | Optimize tokenized stocks from Chainlink price history. |
+| `POST /api/v1/options/submit` | Submit an options pricing job. |
+| `POST /api/v1/options/batch` | Run quantum and Black-Scholes pricing for every row of a CSV. |
+| `GET /api/v1/options` and `GET /api/v1/options/{job_id}` | List jobs; read one. |
+| `POST /api/v1/risk/submit` | Submit a risk job (JSON). |
+| `POST /api/v1/risk/submit-csv` | Submit a risk job by uploading a portfolio CSV. |
+| `GET /api/v1/risk` and `GET /api/v1/risk/{job_id}` | List jobs; read one. |
+
+## Workflows
+
+| Method and path | Purpose |
+| --- | --- |
+| `POST /api/v1/workflows/runs` | Submit a workflow run. |
+| `GET /api/v1/workflows/runs` and `GET /api/v1/workflows/runs/{run_id}` | List runs; read one. |
+| `POST /api/v1/workflows/benchmarks` | Submit a benchmark run. |
+| `GET /api/v1/workflows/benchmarks/{benchmark_id}` | Read a benchmark run. |
+
+## Credits and chains
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/credits/balance` | Your credit balance, derived from the ledger. |
+| `GET /api/v1/chains` | The configured test networks and the operations each supports. |
+
+## Not covered here
+
+Administrative payment routes (`/api/v1/admin/payments/…`), the agent routes (`/api/v1/agent/…`), the experimental
+drug-discovery routes (`/api/v1/pharma/…`) and the hidden internal routes used by the x402 and billing gateways
+are not documented on this page. The OpenAPI page lists the ones that are public.

@@ -6,7 +6,6 @@
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "sync-docs": "node scripts/sync-docs.mjs",
     "types:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {

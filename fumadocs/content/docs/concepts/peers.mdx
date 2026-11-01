@@ -1,0 +1,70 @@
+---
+title: Peers and discovery
+description: How the coordinator finds worker peers, tracks their health and decides whether to trust them.
+icon: Radar
+---
+
+A **peer** is a libp2p node that offers one or more quantum services. The coordinator never has a fixed list of
+peers: it learns about them from messages they publish.
+
+## Discovery
+
+Discovery uses libp2p GossipSub. Two topics are named after the rendezvous namespace
+(`QB2_LIBP2P_RENDEZVOUS_NAMESPACE`, default `quantum-backend`):
+
+| Topic | Carries |
+| --- | --- |
+| `quantum-backend.peer-advertisement.v1` | The peer's id, trust tier, network addresses, supported protocols, the services it offers and its position in its own log. |
+| `quantum-backend.peer-heartbeat.v1` | The peer's health status, active reservations and active executions. |
+
+The coordinator reads these messages and keeps a **registry** of peers in memory. It also stores projections of
+them in MongoDB and rebuilds the registry from those projections when it starts.
+
+### Staleness
+
+A peer that has not sent an advertisement or heartbeat within `QB2_LIBP2P_STALE_PEER_TTL_SECONDS` (default 300
+seconds) is **stale**. Stale peers are left out of listings and planning, but their entries are kept: when a stale
+peer advertises again, it is refreshed. Peers send heartbeats every `QB2_LIBP2P_HEARTBEAT_INTERVAL_SECONDS`
+(default 60).
+
+## Ask the API
+
+| Endpoint | Returns |
+| --- | --- |
+| `GET /api/v1/discovery/peers` | Known peers. Add `include_stale=true` to include stale ones. |
+| `GET /api/v1/discovery/peers/{peer_id}` | One peer in full, or `404`. |
+| `GET /api/v1/discovery/topology` | Every peer with its trust tier, health and whether it is stale, plus active and stale counts. |
+| `GET /api/v1/discovery/stats` | Network statistics. |
+| `GET /api/v1/services` | One entry per service per live peer, with fidelity, qubit range and availability. |
+
+All discovery routes require an authenticated user.
+
+## Trust tiers
+
+Every peer has a trust tier:
+
+| Tier | Meaning |
+| --- | --- |
+| `platform_managed` | Operated by the core team. |
+| `org_managed` | Operated by a verified organization. |
+| `user_contributed` | Contributed by an authenticated user. This is the default. |
+| `public_untrusted` | Unknown origin. Intended for sandboxed execution only. |
+| `quarantined` | Suspended pending review. |
+
+## Enrollment
+
+Enrollment records who owns a peer. `POST /api/v1/enrollment/peers` enrolls or updates a peer for the
+signed-in user. Only an `ADMIN` or `OPERATOR` can enroll a peer into `platform_managed` or `org_managed`. An
+administrator reviews a peer with `POST /api/v1/enrollment/peers/{peer_id}/action`, using the action `approve`,
+`reject` or `quarantine`, with an optional reason of up to 300 characters.
+
+## Service quality
+
+Each service has a quality record. When a block reports a fidelity score, the coordinator updates that peer's fidelity with it. The
+planner reads these values when it scores candidates.
+
+<Callout type="warn">
+  In local development the worker peers run inside the backend process. The repository includes an example
+  script, `scripts/node-starter-template.py`, that starts an external node, but a managed network of third-party
+  nodes is not finished. See [Scope](/docs/scope).
+</Callout>

@@ -1,0 +1,120 @@
+---
+title: Installation
+description: Run the QMesh backend and the operator console on your machine.
+icon: Download
+---
+
+This page gets the backend running locally with its embedded worker peers, then starts the console. It uses the
+`.env.example` defaults, which turn authentication **off**. That is right for your own machine and wrong for
+anything reachable from the internet.
+
+<Steps>
+  <Step>
+    ### Install the prerequisites
+
+    - **Python 3.12 or 3.13** (the backend declares `>=3.12,<3.14`) and [uv](https://docs.astral.sh/uv/).
+    - **MongoDB**, local or [Atlas](https://www.mongodb.com/atlas). It is the backend's only database.
+    - **Node.js 22** and [Bun](https://bun.sh), for the console.
+    - **Docker**, only if you want the full stack or the content node.
+
+    Clone the product repository:
+
+    ```bash
+    git clone https://github.com/QMeshPy/distributed-quantum.git
+    cd distributed-quantum
+    ```
+  </Step>
+
+  <Step>
+    ### Configure the backend
+
+    ```bash
+    cd backend
+    cp .env.example .env
+    ```
+
+    The defaults in `.env.example` that matter for a first run:
+
+    ```txt title="backend/.env"
+    QB2_AUTH_REQUIRED=false
+    QB2_MONGODB_TARGET=local
+    QB2_MONGODB_LOCAL_URI=mongodb://127.0.0.1:27017
+    QB2_MONGODB_DATABASE=qds
+    QB2_LIBP2P_DEV_SERVICE_PEER_COUNT=4
+    ```
+
+    `QB2_LIBP2P_DEV_SERVICE_PEER_COUNT=4` starts four worker peers inside the backend process. The code default
+    is `0`, which starts none, so fragments would not spread across peers. To use an Atlas cluster, set
+    `QB2_MONGODB_TARGET=remote` and `QB2_MONGODB_REMOTE_URI`. See [Configuration](/docs/reference/configuration).
+  </Step>
+
+  <Step>
+    ### Start the backend
+
+    ```bash
+    make install
+    make run
+    ```
+
+    <Callout type="warn">
+      `make run` frees its ports first: it **kills any process** listening on the API port (`8081` by default)
+      and the libp2p port (`4011` by default). Do not run it while something else you care about uses them.
+      `make run-clean` additionally deletes the local peerstore and peer logs before starting.
+    </Callout>
+
+    Check that it is up:
+
+    ```bash
+    curl http://localhost:8081/api/v1/health
+    ```
+
+    The response includes `"status": "ok"` and the state of the persistence layer. Interactive API docs are served
+    at [`http://localhost:8081/docs`](http://localhost:8081/docs).
+  </Step>
+
+  <Step>
+    ### Start the console
+
+    ```bash
+    cd ../frontend
+    cp .env.example .env.local
+    bun install
+    bun run dev
+    ```
+
+    In `.env.local`, `NEXT_PUBLIC_BACKEND_URL` must point at the backend (`http://localhost:8081`), and
+    `NEXT_PUBLIC_TRIAL_DISABLED=true` skips the one-hour trial gate locally. Open
+    [`http://localhost:3000`](http://localhost:3000).
+
+    The console's sign-in uses email codes sent through Resend, plus Sign-in with Ethereum. Those need
+    `MONGODB_URI`, `BETTER_AUTH_SECRET`, `RESEND_API_KEY` and `OTP_EMAIL_FROM`; all are listed in
+    `frontend/.env.example`. You do not need the console to use the API: [Basic usage](/docs/basic-usage) calls the
+    backend directly.
+  </Step>
+</Steps>
+
+## Run the full stack with Docker
+
+The repository's `docker-compose.yaml` defines the backend, a Caddy reverse proxy and a Kubo content node (plus an
+optional Prometheus under the `monitoring` profile). It does **not** include the console, which is deployed
+separately.
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+The root `.env.example` is written for a hosted MongoDB (Atlas); set your MongoDB connection in it before
+you start. The Kubo node needs `KUBO_RPC_SECRET`, a private random token of 32 to 128 characters, or it will refuse
+to start.
+
+## Verify the install
+
+If `make run` is up and four peers joined, listing the services returns entries:
+
+```bash
+curl http://localhost:8081/api/v1/services
+```
+
+An empty list means no peers have registered yet. Wait a few seconds and retry, then check that
+`QB2_LIBP2P_DEV_SERVICE_PEER_COUNT` is set in `backend/.env`.

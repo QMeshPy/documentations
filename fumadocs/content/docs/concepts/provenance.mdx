@@ -1,0 +1,89 @@
+---
+title: Provenance
+description: How QMesh records a run so that its result can be checked later.
+icon: FingerprintPattern
+---
+
+When a circuit job completes, QMesh builds a **provenance bundle**: a record of what was submitted, which plan ran
+and what came back, committed with a hash. Anyone holding the bundle can recompute the hash and see whether
+anything changed.
+
+## What a bundle proves
+
+A bundle proves that a recorded result has **not changed** since it was recorded. It does not prove that the work
+ran on quantum hardware (it did not: see [Scope](/docs/scope)), that the answer is scientifically correct, that a
+peer was honest, or that stored data stays available. Treat an anchor receipt as evidence to check, not as a
+verification result.
+
+## What goes in
+
+The bundle commits to the input, the plan id, the ordered fragment results and the final result. It stores a hash
+of the result rather than a second copy of the potentially large statevector. It includes the run and owner ids
+and event records, and it does not include the circuit text or the counts.
+
+A bundle is created for **circuit jobs**. Finance jobs have their own provenance inside their results and are not
+covered by the bundle pipeline yet.
+
+If a new circuit run cannot persist its provenance, the run fails instead of reporting completion.
+
+## How it is hashed
+
+1. The bundle is turned into canonical JSON: keys sorted, no insignificant whitespace, UTF-8. This is a Python
+   JSON profile, **not RFC 8785**, so another language must reproduce the same bytes rather than rely on its
+   default serializer.
+2. The commitment is the SHA-256 of an envelope `{"profile":"qmesh-provenance-sha256-v1","bundle":{…}}`. The
+   `storage` and `anchors` fields are excluded, so attaching a storage location or an anchor later does not change
+   the hash.
+3. Many bundles can be combined under one **Merkle root**. Leaves are `SHA256(0x00 || digest)` and parents are
+   `SHA256(0x01 || left || right)`. An odd last node at each level is promoted unchanged. This follows the tree
+   shape of [RFC 6962](https://www.rfc-editor.org/rfc/rfc6962#section-2.1), and it is not compatible with
+   OpenZeppelin's `MerkleProof`.
+
+## Verify a run
+
+```bash
+curl http://localhost:8081/api/v1/provenance/<bundle_id>/verify
+```
+
+Only the run's owner or an administrator can verify; anything else is a `404`. The response lists checks, each
+of kind `hash`, `storage` or `anchor`, with one of four statuses:
+
+| Status | Meaning |
+| --- | --- |
+| `passed` | The stated check succeeded. |
+| `failed` | The evidence contradicts the recorded commitment. |
+| `unavailable` | An adapter, a historical commitment or an external service is missing. |
+| `not_applicable` | No attachment of that type was recorded. |
+
+The overall result is `unverified` when a check failed or none passed, `partially_verified` when some passed but
+the evidence is incomplete, and `verified` only when every applicable check passed **and** at least one storage or
+anchor check succeeded. Local database hashes alone never reach `verified`.
+
+## Publish to IPFS
+
+If `KUBO_RPC_SECRET` is set, the coordinator publishes each completed bundle to the platform's Kubo node and pins
+it, after the run is already saved. Publishing is best effort: a failure never changes or fails the run, and it
+is not retried. Bundles up to 256 KiB are stored as a single block.
+
+<Callout type="warn">
+  Pinned content is announced on the **public** IPFS network. Bundles carry run and owner ids and hashes, not the
+  circuit, but publish them only where that is acceptable.
+</Callout>
+
+## Anchor on a test network
+
+With `QB2_ANCHOR_NETWORK` and `QB2_ANCHOR_SENDER` set, the backend can verify anchors. With
+`QB2_ANCHOR_PRIVATE_KEY` also set, it anchors batches of bundles on a schedule. An anchor is a zero-value
+transaction from the anchor account to itself whose 45-byte calldata holds the marker `QMSHANC1`, the Merkle
+root, the batch size and a profile byte. Only test networks are allowed; the packaged registry uses Ethereum
+Sepolia.
+
+Anyone can check a downloaded bundle against its anchor without the database:
+
+```bash
+cd backend
+uv run --frozen python scripts/verify_anchor.py bundle.json --sender 0xANCHOR_ACCOUNT
+```
+
+The script exits `0` if every anchor passed, `1` if any check failed, and `2` if none failed but a transaction
+was unavailable.

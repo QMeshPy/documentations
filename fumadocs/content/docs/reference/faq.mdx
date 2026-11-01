@@ -1,0 +1,39 @@
+---
+title: FAQ
+description: Short answers to the questions people ask first.
+icon: CircleQuestionMark
+---
+
+<Accordions>
+  <Accordion title="Does QMesh run on quantum hardware?">
+    No. Circuits run on Qiskit statevector simulation. QMesh is a proof of concept for orchestrating quantum
+    operations as network services, not a hardware control stack.
+  </Accordion>
+  <Accordion title="Is the peer network real?">
+    The software is: a coordinator and workers exchange discovery messages, reservations and fragments over
+    py-libp2p. In local development the workers run inside the backend process, so it is a controlled demo
+    network. An example script can start an external node, but an open network of third-party nodes is not finished.
+  </Accordion>
+  <Accordion title="Does it use real money?">
+    No. Payments use Algorand TestNet USDC, and every other chain QMesh touches is a test network.
+  </Accordion>
+  <Accordion title="What does a provenance bundle prove?">
+    That a recorded result has not changed since it was recorded. It does not prove hardware execution,
+    scientific correctness or peer honesty. See [Provenance](/docs/concepts/provenance).
+  </Accordion>
+  <Accordion title="Which circuits can I submit?">
+    OpenQASM 2 or 3 style text. Each operation is mapped to one of eleven service types, and any gate the parser
+    does not recognize becomes a `programmable_gate`. See [Circuit planning](/docs/concepts/circuit-planning).
+  </Accordion>
+  <Accordion title="Why did my job fail?">
+    Read the `error` field on the job. The usual causes are a circuit the parser rejects, no peer offering a
+    required service, or a block that failed on every assigned peer. See [Jobs](/docs/concepts/jobs).
+  </Accordion>
+  <Accordion title="Do I need the console?">
+    No. Every example in [Basic usage](/docs/basic-usage) calls the backend directly. The x402 payment gateway
+    is the exception: it runs in the console's server routes.
+  </Accordion>
+  <Accordion title="Is it open source?">
+    Yes, under Apache 2.0. The code is at [QMeshPy/distributed-quantum](https://github.com/QMeshPy/distributed-quantum).
+  </Accordion>
+</Accordions>

@@ -1,0 +1,37 @@
+---
+title: Scope
+description: What is real, what is simulated and what is still experimental.
+icon: Scale
+---
+
+QMesh is a proof of concept. This page says plainly what it does and does not do, so you can decide whether it
+fits what you want to build.
+
+## What is real, and what is not
+
+| Area | Status |
+| --- | --- |
+| Quantum execution | **Simulated.** Circuits run on Qiskit statevector simulation. There is no quantum hardware control. |
+| Peer network | **Real software.** The coordinator and workers talk over py-libp2p (GossipSub for discovery, streams for reservations and fragments). |
+| Local network | In local development the worker peers are started **inside the backend process** (`QB2_LIBP2P_DEV_SERVICE_PEER_COUNT`). That is a controlled demo network. An example script (`scripts/node-starter-template.py`) can start an external node, but QMesh is not a finished open network of third-party nodes. |
+| Payments | **Testnet.** The x402 flow settles USDC on Algorand TestNet. |
+| Provenance anchors | **Testnet only.** Anchoring is off until you set `QB2_ANCHOR_NETWORK`, and only test networks are allowed (Ethereum Sepolia in the packaged registry). |
+| Drug-discovery pipeline | **Experimental.** Its quantum stages are simulated. It is not covered by these docs. |
+
+## What a result proves
+
+A provenance bundle proves that a recorded result has not changed since it was recorded. It does **not** prove
+that the work ran on quantum hardware, that the answer is scientifically correct, that a peer was honest, or that
+stored data stays available.
+
+## Authentication
+
+The backend requires authentication by default. The `backend/.env.example` file sets `QB2_AUTH_REQUIRED=false`
+for local development, which treats every request as a local administrator. Never run a public deployment that
+way.
+
+## Not documented yet
+
+These areas exist in the product and are not covered here yet: credits and the payment ledger, the VAULT and
+IPFS content node, the chain registry and ENS, Sign-in with Ethereum, Starknet session keys for agents, and the
+agent workspace. They will be added as each one has a page that has been checked against the code.
