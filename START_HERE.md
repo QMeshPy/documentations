@@ -105,6 +105,10 @@ docs/
 │   ├── algorand-x402-implementation-plan.md
 │   └── algorand-x402-runbook.md          TestNet setup and verification
 │
+├── mesh/                                 ← Joining more laptops as peers
+│   ├── remote-workers.md                 Coordinator + worker setup (Windows, macOS, Linux), tunnels, health checks
+│   └── tree-mesh.md                      Chained-group layout: status and what it needs
+│
 ├── toju/                                 ← Toju agent storage (Base Sepolia testnet)
 │   ├── toju-agent-storage-plan.md
 │   ├── toju-agent-storage-research.md
@@ -135,6 +139,7 @@ docs/
 | Make product/advisor decisions | `research/QUANTUM_SCALING_STRATEGY.md` → `research/ALTERNATIVE_QUANTUM_FINANCE_PROBLEMS.md` |
 | Deploy to production | `../DEPLOYMENT-MANUAL.md` → `LIGHTSAIL-DEPLOYMENT.md` |
 | Take paid x402 requests on Algorand | `algorand-x402/algorand-x402-runbook.md` → `algorand-x402/algorand-x402-design.md` |
+| Connect more laptops as peers | `mesh/remote-workers.md` |
 | Run or host Toju agent storage | `toju/toju-render-testnet-guide.md` → `toju/toju-devcon-demo.md` |
 
 ---
