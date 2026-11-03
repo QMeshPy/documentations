@@ -1,0 +1,240 @@
+---
+title: Reach the coordinator
+description: Same Wi-Fi, or a zrok tunnel for workers on other networks. Includes firewall commands.
+icon: Route
+---
+
+A worker needs one thing from the network: a way to open a TCP connection to the coordinator's port `4011`. There
+are two ways to give it that.
+
+<Iso scene="tunnel" />
+
+| | Path A: same Wi-Fi | Path B: different networks (zrok) |
+| --- | --- | --- |
+| Use when | Everyone is on one network and the laptops can talk to each other | Workers are on different Wi-Fi networks, or the network blocks laptop-to-laptop traffic |
+| Extra software | None | zrok on the coordinator laptop **and** on every worker laptop |
+| Accounts | None | A free zrok account for the coordinator laptop **and** every worker |
+| Worker address | `/ip4/<LAN-IP>/tcp/4011/p2p/<ID>` | `/ip4/127.0.0.1/tcp/4011/p2p/<ID>` |
+
+<Callout type="warn" title="Public Wi-Fi often blocks this">
+  Conference, hotel and café networks very often enable **client isolation**, which stops laptops reaching each
+  other even on the same network. Path A then fails with a timeout. Test it on the actual network early, and have
+  Path B ready. A phone hotspot, or your own travel router, usually works for Path A because it does not isolate
+  clients.
+</Callout>
+
+## Path A: same Wi-Fi
+
+There is nothing to install. Give workers this address, built from the values you read in
+[Set up the coordinator](/docs/mesh/coordinator#read-the-three-values-you-give-to-workers):
+
+```txt
+/ip4/<YOUR-LAN-IP>/tcp/4011/p2p/<PEER-ID>
+```
+
+Make sure the coordinator's firewall is not blocking incoming connections ([firewall commands](#firewall-commands)
+below).
+
+## Path B: different networks with zrok
+
+zrok creates a private tunnel. The coordinator laptop **shares** port `4011`. Each worker laptop **accesses** that
+share, which opens a port on the worker's own laptop (`127.0.0.1:4011`) that is connected to the coordinator's port
+`4011`. The worker then dials its own `127.0.0.1:4011`.
+
+```txt
+worker ─► 127.0.0.1:4011 ─► zrok ─► (internet) ─► zrok ─► coordinator localhost:4011 ─► backend
+```
+
+Because the coordinator's side of the tunnel connects to `localhost`, the coordinator's firewall does not matter on
+this path.
+
+TCP sharing in zrok is **private only**. There is no public address for raw TCP, so **every worker laptop needs a
+zrok account**, and the free tier has limits on bandwidth and shares. Check the current limits at
+[zrok.io/pricing](https://zrok.io/pricing/) before the event.
+
+The command is named **`zrok2`** in the current zrok documentation (version 2). Older guides call it `zrok`. If
+`zrok2` is not found but `zrok` is, use that name in every command below.
+
+<Callout type="warn" title="Not tested end to end">
+  The zrok commands on this page come from zrok's own documentation. They need a zrok account, and they have **not
+  been tested** with QMesh. Rehearse the whole setup with two laptops on different networks before a live demo.
+  In particular, confirm that two worker processes on one laptop can both dial the same `127.0.0.1:4011` listener,
+  and that about a dozen workers can use one share token at the same time. The zrok documentation states neither.
+</Callout>
+
+<Steps>
+  <Step>
+    ### Everyone: install zrok2 and enable it, once
+
+    <Tabs items={['macOS', 'Linux', 'Windows (CMD)']}>
+      <Tab value="macOS">
+        Download the macOS archive that matches your CPU (`arm64` is Apple Silicon, `amd64` is Intel) from
+        [github.com/openziti/zrok/releases](https://github.com/openziti/zrok/releases). Look for `zrok2 ... darwin
+        ... .tar.gz`. Then:
+
+        ```bash
+        cd ~/Downloads && mkdir -p /tmp/zrok2 && tar -xf ./zrok*darwin*.tar.gz -C /tmp/zrok2
+        mkdir -p ~/bin && install /tmp/zrok2/zrok2 ~/bin/
+        echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshenv && export PATH="$HOME/bin:$PATH"
+        zrok2 version
+        ```
+      </Tab>
+      <Tab value="Linux">
+        ```bash
+        curl -sSf https://get.openziti.io/install.bash | sudo bash -s zrok2
+        zrok2 version
+        ```
+      </Tab>
+      <Tab value="Windows (CMD)">
+        Download the Windows archive (`zrok2 ... windows ... .tar.gz`) from the same releases page into your
+        Downloads folder. Then, in **cmd.exe**:
+
+        ```bat
+        mkdir "%USERPROFILE%\bin"
+        cd /d "%USERPROFILE%\Downloads"
+        for %f in (zrok*windows*.tar.gz) do tar -xf "%f" -C "%USERPROFILE%\bin"
+        set PATH=%PATH%;%USERPROFILE%\bin
+        zrok2 version
+        ```
+
+        In a `.bat` file, write `%%f` instead of `%f`. The `set PATH` line lasts only for that Command Prompt
+        window. To make it permanent, open *Start → "Edit the system environment variables" → Environment
+        Variables → User variables → Path → New* and add `%USERPROFILE%\bin`. If `zrok2 version` says "not
+        recognized", run `dir "%USERPROFILE%\bin"` to see the exact file name that was extracted.
+      </Tab>
+    </Tabs>
+
+    Then create an account and enable zrok. This is the same on every platform:
+
+    1. Sign up at [myzrok.io](https://myzrok.io), then open [api-v2.zrok.io](https://api-v2.zrok.io), the zrok
+       console.
+    2. Click the "get started" button and copy your **account token**.
+    3. Run:
+
+       ```bash
+       zrok2 enable <YOUR-ACCOUNT-TOKEN>
+       zrok2 status
+       ```
+
+    `zrok2 status` should show your API endpoint and mark the account token and environment as set. The account
+    token is a password. Do not share it or post it in chat.
+
+    The zrok documentation describes sign-up through the myzrok.io web console. Some older guides mention
+    `zrok invite`; the current hosted flow does not use it.
+  </Step>
+
+  <Step>
+    ### Coordinator laptop: share port 4011
+
+    With the backend running (`make run`), in a new terminal:
+
+    ```bash
+    zrok2 share private --headless --open --backend-mode tcpTunnel localhost:4011
+    ```
+
+    It prints a **share token** and the command workers must run, something like
+    `zrok2 access private <SHARE-TOKEN>`. Keep this terminal open for the whole session.
+
+    - `--open` lets **any zrok user who knows the share token** access the share. For a group of workers that is
+      the practical choice: the share token is the secret. Give it only to the people who should join, and stop and
+      restart the share (which gives a new token) if it leaks.
+    - The default is a **closed** share, where only your account and the accounts you grant can use it. To use that
+      instead, drop `--open` and add `--access-grant user@example.com` for each person, or later run
+      `zrok2 modify share <SHARE-TOKEN> --add-access-grant user@example.com`.
+    - The zrok docs also mention a `--share-token <name>` option to choose the token yourself. If it works for a
+      TCP tunnel, it lets you print the same token on a slide and reuse it after a restart. Try it during your
+      rehearsal.
+
+    If you restart the share, the token changes (unless you chose it yourself), and every worker laptop must
+    restart its `access` command with the new token.
+  </Step>
+
+  <Step>
+    ### Each worker laptop: open the tunnel
+
+    In a terminal that stays open, separate from the window the worker will run in:
+
+    ```bash
+    zrok2 access private --bind 127.0.0.1:4011 <SHARE-TOKEN>
+    ```
+
+    This is the same in Windows Command Prompt, macOS and Linux. It listens on `127.0.0.1:4011` on the worker's own
+    laptop. Test it from another window:
+
+    ```bash
+    python -c "import socket; socket.create_connection(('127.0.0.1', 4011), 5); print('TUNNEL OK')"
+    ```
+
+    If port `4011` is already used on the worker's laptop, pick another, for example `--bind 127.0.0.1:4012`, and use
+    `4012` in the worker address too.
+
+    The worker address is then `/ip4/127.0.0.1/tcp/4011/p2p/<PEER-ID>`. Ignore the LAN IP completely.
+  </Step>
+</Steps>
+
+### Which values change for zrok
+
+- **Coordinator `backend/.env`:** nothing extra. The share connects to `localhost:4011`, which the backend already
+  listens on. `QB2_LIBP2P_ADVERTISE_MULTIADDRS` is not needed, because workers are given the address by hand.
+- **Workers:** no `.env` at all. The only per-person values are the worker's `--coordinator` address and its
+  `--label`.
+
+## Firewall commands
+
+The coordinator must accept incoming connections on TCP `4011` **only on the same-Wi-Fi path**. On the zrok path
+the traffic reaches the backend over the loopback interface, so the firewall is not involved. Workers only make
+outbound connections and need no firewall changes.
+
+<Callout type="warn">
+  These are the standard commands for each system, but they were **not run** as part of writing the guide. Try them
+  on your own machine first.
+</Callout>
+
+<Tabs items={['macOS (coordinator)', 'Linux (coordinator)', 'Windows (CMD, as Administrator)']}>
+  <Tab value="macOS (coordinator)">
+    ```bash
+    # Is it on or off? (no sudo needed)
+    /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+
+    # Turn it OFF / ON (asks for your password)
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+
+    # Keep it ON but let the backend's Python accept incoming connections
+    cd distributed-quantum/backend
+    PY="$(python3 -c 'import os; print(os.path.realpath(".venv/bin/python"))')"
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add "$PY"
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblockapp "$PY"
+
+    # Review what is allowed or blocked
+    /usr/libexec/ApplicationFirewall/socketfilterfw --listapps
+    ```
+
+    The same switch is in *System Settings → Network → Firewall*. With the firewall **off**, which is the usual
+    default, macOS shows no "allow incoming connections" prompt at all.
+  </Tab>
+  <Tab value="Linux (coordinator)">
+    ```bash
+    sudo ufw status                       # Ubuntu/Debian
+    sudo ufw allow 4011/tcp
+    sudo ufw disable                      # or: sudo ufw enable
+
+    sudo firewall-cmd --state             # Fedora/RHEL
+    sudo firewall-cmd --permanent --add-port=4011/tcp && sudo firewall-cmd --reload
+    ```
+  </Tab>
+  <Tab value="Windows (CMD, as Administrator)">
+    Only needed if a Windows machine ever hosts a listener.
+
+    ```bat
+    netsh advfirewall show allprofiles state
+    netsh advfirewall set allprofiles state off
+    netsh advfirewall set allprofiles state on
+    netsh advfirewall firewall add rule name="qmesh-4011" dir=in action=allow protocol=TCP localport=4011
+    ```
+  </Tab>
+</Tabs>
+
+## Next
+
+[Start a worker](/docs/mesh/workers) on each laptop.

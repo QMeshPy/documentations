@@ -23,9 +23,9 @@ cd frontend && bun run dev`,
   {
     id: 'power',
     label: 'Try a node',
-    hint: 'An early example script that starts an external worker node and connects it to a coordinator.',
-    code: `python scripts/node-starter-template.py \\
-  --coordinator <MULTIADDR> --label my-node`,
+    hint: 'Join another laptop to a coordinator as a worker. It only dials out, so it needs no open port.',
+    code: `python -u scripts/run_remote_worker.py \\
+  --coordinator /ip4/<HOST>/tcp/4011/p2p/<PEER-ID> --label alice-1`,
   },
 ];
 

@@ -40,7 +40,7 @@ Scenes are plain components too: `import { StackScene } from '@/packages/iso'`.
 | `src/core.tsx` | Projection (`P`, `U`), `Box`, `Wire`, `Label`, keyframe helpers (`kf`, `route`, `anim`, `pulse`), and `IsoSvg`, the root `<svg>` with the base styles |
 | `src/solids.tsx` | `Plane` (lay a 2D drawing on any surface), `Top`, `FaceL`, `FaceR`, `RBox` (rounded box), `Cyl`, `Cable`, `Quad`, and details such as `Hatch`, `Dots`, `Led`, `Screw`, `PlateText` |
 | `src/devices.tsx` | Laptop, Monitor, Tablet, Phone, Server, Switch, Rack, Drum (ledger), Terminal, Tower, Sbc, MiniPc, SmallLaptop, Hub, Printer, Stamp, Nas, Docs, Wallet, Chain, Coins |
-| `src/scene-kit.tsx` | The shared parts of the explainer scenes: `Floor`, `Pad`, `Slip`, `Coin`, `Orb`, `Mark`, `Steps`, and their CSS helpers |
+| `src/scene-kit.tsx` | The shared parts of the explainer scenes: `Floor`, `Pad` (with `nameAt` to keep its plate clear of a device), `Slip`, `Coin`, `Orb`, `Mark`, `Steps`, and their CSS helpers |
 | `src/scenes.tsx` | The scene registry and the `Iso` wrapper |
 | `src/*.tsx` | One file per scene |
 

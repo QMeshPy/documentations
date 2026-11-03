@@ -1,0 +1,108 @@
+---
+title: Overview
+description: Join more laptops to one mesh. One coordinator, any number of workers, no port-forwarding.
+icon: Network
+---
+
+A **mesh** is one laptop running the **coordinator** (the backend) and any number of other laptops running
+**worker peers**. A circuit job is split into blocks, and the blocks run on the workers' laptops.
+
+<Iso scene="mesh" />
+
+- Workers only dial **out**. A worker needs no port-forwarding, no router settings and no public IP.
+- Workers can be on **different Wi-Fi networks**. They reach the coordinator directly (same network) or through a
+  zrok tunnel (different networks). See [Reach the coordinator](/docs/mesh/networks).
+- Workers need **no `.env` file, no database, no API keys and not the full backend**. Only the coordinator needs
+  those.
+
+<Callout type="warn" title="Quantum execution is still simulated">
+  Workers run their blocks on a Qiskit simulator. A mesh of laptops spreads simulated circuits across real
+  machines over a real peer-to-peer network. It does not add quantum hardware. See [Scope](/docs/scope).
+</Callout>
+
+## How it works
+
+1. The coordinator's backend listens for peers on TCP port `4011` and serves its HTTP API on `8081`.
+2. Each worker **dials out** to the coordinator and keeps that connection open. It also announces itself and sends
+   heartbeats, as described in [Peers and discovery](/docs/concepts/peers).
+3. When a job arrives, the coordinator splits the circuit into blocks, as described in
+   [Circuit planning](/docs/concepts/circuit-planning). For each block it picks a healthy peer and runs the
+   [reservation](/docs/concepts/reservations) steps: `reservation/prepare`, `reservation/commit`, then
+   `fragment/dispatch`. The peer runs the block and returns the result.
+4. The coordinator sends that work **back over the connection the worker opened**. That is why a worker needs no
+   open port.
+5. If a peer is unreachable or rejects a block, the coordinator moves that block to the **next peer** instead of
+   failing the job.
+6. If a worker loses the coordinator (a restart or a network drop), it **re-dials every 15 seconds** by itself. See
+   [Start a worker](/docs/mesh/workers#if-the-link-drops).
+7. A worker's **peer ID comes from its `--label`**. The same label gives the same ID, so two machines, or two
+   processes, must never share a label.
+
+## What each side needs
+
+| | Coordinator | Worker |
+| --- | --- | --- |
+| Machine | macOS laptop (Linux works the same way) | Windows, macOS or Linux |
+| What runs | The full backend, started with `make run` | `scripts/run_remote_worker.py` |
+| Python | 3.12 or 3.13 (uv installs it) | 3.12 or 3.13. **Not 3.14.** |
+| Install size | The full backend, which is large | Small. About 84 packages in the author's test, about a minute on a fast connection |
+| `.env` file | **Yes** | **No** |
+| MongoDB | **Yes** | No |
+| zrok | Only on the different-networks path | Only on the different-networks path |
+| Must be reachable | TCP `4011`, or a zrok share | Nothing |
+
+Why a worker's install is small: the full backend needs `pyscf`, which has no Windows build, and pulls in several
+gigabytes of chemistry and machine-learning libraries. A worker only needs the circuit simulator, so it installs
+from `requirements-remote-worker.txt`, with versions pinned in `constraints-remote-worker.txt`. Both files, and the
+worker script, came in with
+[distributed-quantum#132](https://github.com/QMeshPy/distributed-quantum/pull/132), which is merged.
+
+Python 3.14 is not supported: the backend declares `>=3.12,<3.14`. Install 3.12 next to it. Nothing needs
+uninstalling.
+
+## Set up a mesh
+
+<Cards>
+  <Card icon={<Server />} title="1. The coordinator" href="/docs/mesh/coordinator">
+    Install the backend on one laptop and read the three values workers need.
+  </Card>
+  <Card icon={<Route />} title="2. Reach it" href="/docs/mesh/networks">
+    Same Wi-Fi, or a zrok tunnel for workers on other networks.
+  </Card>
+  <Card icon={<Cpu />} title="3. Start workers" href="/docs/mesh/workers">
+    Windows, macOS and Linux steps for each worker laptop.
+  </Card>
+  <Card icon={<Rocket />} title="4. Verify and run a job" href="/docs/mesh/run-a-job">
+    Check the peers are healthy, run a circuit, and see which peer ran which block.
+  </Card>
+</Cards>
+
+Something not working? See [Troubleshooting](/docs/mesh/troubleshooting). A second layout, with groups chained
+through each other, is described in [Chained groups](/docs/mesh/tree-mesh). **It does not work yet.**
+
+## What has been tested
+
+These are the results the people who wrote the setup guide recorded. Rehearse the whole setup with your own
+laptops before relying on it, especially before a live demo.
+
+| Tested | Not tested |
+| --- | --- |
+| The coordinator and workers all on one Mac, including two workers, zero embedded peers, a coordinator restart, and the small install from a fresh environment | Windows Command Prompt commands |
+| A Windows laptop (Git Bash) on the same Wi-Fi as the coordinator | Linux |
+| | The zrok path |
+| | ngrok |
+| | Public Wi-Fi |
+| | More than a few peers at once |
+
+## Known limits
+
+- **Only circuit jobs are distributed.** The drug-discovery (Pharma) pipeline runs entirely on the coordinator.
+  Distributing its VQE stage is not built yet.
+- **There is no authentication on the mesh port.** Anyone who can reach port `4011`, or who holds the zrok share
+  token, and who knows the namespace can join as a peer. That is fine for a demo. Do not leave it exposed.
+- **Half-dead connections may go unnoticed.** If Wi-Fi vanishes without closing the connection, restart the worker.
+- **Slow laptops count as unreachable.** A peer slower than the 15-second request timeout is treated as
+  unreachable for that block, and the block moves on.
+- **The prebuilt zip can go stale.** `backend/qmesh-worker.zip`, the no-git download for Windows, is a snapshot of
+  the worker code.
+- **Chained groups do not work.** See [Chained groups](/docs/mesh/tree-mesh).

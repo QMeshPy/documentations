@@ -28,19 +28,25 @@ export function Pad({
   at,
   size = [1.7, 1.5],
   name,
+  nameAt = 'left',
   cls,
 }: {
   o: O;
   at: [number, number];
   size?: [number, number];
   name?: string;
+  /** Which end of the front edge carries the name. 'right' keeps it clear of a device standing at the left. */
+  nameAt?: 'left' | 'right';
   cls?: string;
 }) {
   return (
     <Top o={o} at={[at[0], at[1], TOPZ]}>
       {cls && <rect className={`hl ${cls}`} x={0} y={0} width={size[0]} height={size[1]} rx={0.12} />}
       <rect className="w soft" x={0} y={0} width={size[0]} height={size[1]} rx={0.12} />
-      {name && <PlateText x={0.1} y={size[1] - 0.36} w={Math.min(1.1, size[0] - 0.2)} h={0.26} text={name} size={0.15} />}
+      {name && (() => {
+        const w = Math.min(1.1, size[0] - 0.2);
+        return <PlateText x={nameAt === 'right' ? size[0] - w - 0.1 : 0.1} y={size[1] - 0.36} w={w} h={0.26} text={name} size={0.15} />;
+      })()}
     </Top>
   );
 }

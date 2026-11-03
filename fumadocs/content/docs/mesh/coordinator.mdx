@@ -1,0 +1,180 @@
+---
+title: Set up the coordinator
+description: Run the backend on one laptop and read the three values every worker needs.
+icon: Server
+---
+
+The coordinator is the full QMesh backend on one laptop. It plans jobs, keeps the peer list, and sends blocks to
+workers. These steps are written for **macOS**. Linux works the same way, with your package manager in place of
+Homebrew, but the Linux path has not been tested.
+
+If you only want a single-machine setup with embedded helper peers, use [Installation](/docs/installation)
+instead. This page is for a coordinator that **workers on other laptops join**.
+
+<Steps>
+  <Step>
+    ### Install the tools, once
+
+    ```bash
+    # Homebrew first, if `brew --version` does not work: https://brew.sh
+    brew install git uv
+
+    # MongoDB. The backend will not start without a reachable MongoDB.
+    brew tap mongodb/brew
+    brew install mongodb-community
+    brew services start mongodb-community
+    ```
+
+    Check that all three are in place:
+
+    ```bash
+    git --version
+    uv --version
+    mongod --version | head -1
+    brew services list | grep mongodb          # should say "started"
+    ```
+
+    No local MongoDB? Use a MongoDB Atlas connection string and put it in `QB2_MONGODB_URI` in the next steps.
+  </Step>
+
+  <Step>
+    ### Get the code
+
+    ```bash
+    git clone https://github.com/QMeshPy/distributed-quantum
+    cd distributed-quantum/backend
+    make install                               # runs `uv sync --extra dev`; takes several minutes
+    ```
+  </Step>
+
+  <Step>
+    ### Create `backend/.env`
+
+    This is the **minimum** that makes the backend start and serve the mesh. In a test the backend was started
+    with only these values, and it came up healthy and accepted workers.
+
+    ```dotenv title="backend/.env"
+    # Required: the backend refuses to start without a reachable MongoDB.
+    QB2_MONGODB_URI=mongodb://127.0.0.1:27017
+
+    # Required for local use: the code default is true, which makes every API call need a login.
+    QB2_AUTH_REQUIRED=false
+
+    # 0 = no in-process helper peers, so every block runs on the worker laptops.
+    # Use 1 or more if you want local helpers as a safety net.
+    QB2_LIBP2P_DEV_SERVICE_PEER_COUNT=0
+    ```
+
+    Optional lines:
+
+    ```dotenv title="backend/.env"
+    # A separate database, so a demo never touches other data.
+    # This matters if your local and deployed backends share one Atlas cluster.
+    QB2_MONGODB_DATABASE=qds-mesh
+
+    # Only if the console runs on Vercel (see "Choose where the console runs" below).
+    CORS_ORIGINS=https://your-app.vercel.app,http://localhost:3000
+    ```
+
+    Leave everything else unset. Features that need other keys (the AI agent chat, payments, IPFS storage) will
+    not work without them, but circuit jobs do not need them.
+
+    <Callout>
+      The `.env` file is read **only when the backend starts**. After any edit, press `Ctrl+C` in the backend
+      terminal and run `make run` again.
+    </Callout>
+  </Step>
+
+  <Step>
+    ### Start the backend
+
+    ```bash
+    cd distributed-quantum/backend
+    make run
+    ```
+
+    Leave this terminal open. It serves the API on `http://127.0.0.1:8081` and accepts workers on TCP port
+    `4011`.
+
+    <Callout type="warn">
+      `make run` frees its ports first: it **kills any process** listening on `8081` and `4011`. Do not run it
+      while something else you care about uses them.
+    </Callout>
+
+    Keep the Mac awake for the whole session, because a sleeping Mac drops every worker. In a second terminal:
+
+    ```bash
+    caffeinate -dims
+    ```
+  </Step>
+
+  <Step>
+    ### Read the three values you give to workers
+
+    Wait 20 to 30 seconds after `make run`, then in a second terminal:
+
+    ```bash
+    # 1) The backend is healthy
+    curl -s http://127.0.0.1:8081/api/v1/health
+
+    # 2) The coordinator's peer ID
+    curl -s http://127.0.0.1:8081/api/v1/bootstrap/libp2p/runtime | python3 -c "import sys,json; print(json.load(sys.stdin)['host_peer_id'])"
+
+    # 3) Your LAN IP (only needed for the same-Wi-Fi path)
+    ipconfig getifaddr en0          # Wi-Fi on most Macs
+    ipconfig getifaddr en1          # try this if en0 prints nothing (Ethernet adapter)
+    ifconfig | grep "inet " | grep -v 127.0.0.1      # lists every address if neither works
+    ```
+
+    The peer ID comes from `QB2_LIBP2P_PEER_ID` (default `qb2-local-peer`), so it stays the same across restarts.
+    With the default it is `12D3KooWQbdErPwWTNpwGJnAcuHbZmTYb2zL19B3ua9rrvvmuLnV`. Still run the command to
+    confirm it, because it changes if you set `QB2_LIBP2P_PEER_ID`.
+
+    Workers need an address built from these values:
+
+    | Path | Worker address |
+    | --- | --- |
+    | Same Wi-Fi | `/ip4/<YOUR-LAN-IP>/tcp/4011/p2p/<PEER-ID>` |
+    | Different networks (zrok) | `/ip4/127.0.0.1/tcp/4011/p2p/<PEER-ID>` |
+
+    The next page explains [which path to use](/docs/mesh/networks).
+  </Step>
+</Steps>
+
+## Choose where the console runs
+
+Workers never open the console. They only run workers. The console is for you.
+
+- **Simplest, and the choice for a live demo.** Run the console on your own Mac and project it. Nothing else needs
+  configuring:
+
+  ```bash
+  cd frontend && bun install && bun run dev      # then open http://localhost:3000
+  ```
+
+  Put `NEXT_PUBLIC_BACKEND_URL=http://localhost:8081` in `frontend/.env.local`.
+
+- **A console hosted on Vercel.** The browser must reach your backend over HTTPS, so port `8081` needs a public
+  URL. Set both of these:
+
+  | Where | Variable | Value |
+  | --- | --- | --- |
+  | Vercel project settings | `NEXT_PUBLIC_BACKEND_URL` | `https://<your-public-api-url>`. Then **redeploy**: the value is baked in at build time. |
+  | `backend/.env` | `CORS_ORIGINS` | `https://<your-vercel-domain>,http://localhost:3000` |
+
+  For the public URL, an ngrok HTTP tunnel works, and the free tier supports HTTP with one static domain:
+
+  ```bash
+  ngrok http --url=<your-free-static-domain>.ngrok-free.app 8081
+  ```
+
+  On older ngrok versions the flag is `--domain` instead of `--url`. A static domain matters because the backend URL
+  is baked into the console at build time, so a URL that changes each run means a redeploy each time.
+
+  <Callout type="warn">
+    This Vercel path has **not been tested**. Test the Vercel site against your tunnel before a live demo.
+  </Callout>
+
+## Next
+
+[Reach the coordinator](/docs/mesh/networks) from the worker laptops, then [start the workers](/docs/mesh/workers).

@@ -1,0 +1,132 @@
+---
+title: Verify and run a job
+description: Check that workers are healthy, run a circuit on the mesh, and see which peer ran each block.
+icon: Rocket
+---
+
+Once the coordinator is running and workers are connected, check the peer list, then submit a circuit and look at
+which peer ran each block.
+
+## Verify the mesh
+
+On the coordinator laptop, about 15 seconds after the workers start:
+
+```bash
+curl -s http://127.0.0.1:8081/api/v1/discovery/peers | python3 -c "import sys,json; ps=json.load(sys.stdin)['peers']; print(len(ps),'peers'); [print(p['peer_id'][:14], p['health_status'], p['last_seen_at']) for p in ps]"
+```
+
+The expected count is **1 coordinator, plus `QB2_LIBP2P_DEV_SERVICE_PEER_COUNT`, plus one per running worker
+process**. With the value `0` and 12 people each running 2 peers, that is 25.
+
+- `health_status` is `healthy` (heartbeating) or `unknown` (just joined, no heartbeat yet). A new peer can show
+  `unknown` for up to one heartbeat interval, which is 10 seconds for a worker started with the default
+  `--heartbeat`.
+- A worker re-sends its service advertisement every fifth heartbeat. If its first advertisement was missed, it can
+  stay invisible for about five heartbeat intervals. If a worker is still missing after a minute, see
+  [Troubleshooting](/docs/mesh/troubleshooting).
+- `last_seen_at` should stay within a few heartbeat intervals. If it keeps getting older, the peer has stopped
+  talking.
+- A peer silent for **300 seconds** is dropped from the list, so a worker you kill stays listed until then.
+
+On the worker side, the worker's window shows `Coordinator CONNECTED`, and the coordinator's list shows your peer
+ID. The worker prints its peer ID on its first line.
+
+## Run a job on the mesh
+
+Submit from the console's circuit page, or with `curl` on the coordinator laptop. This 4-qubit circuit splits into
+several blocks:
+
+```txt
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[4];
+h q[0];
+cx q[0],q[1];
+cx q[1],q[2];
+cx q[2],q[3];
+```
+
+```bash
+curl -s -X POST http://127.0.0.1:8081/api/v1/circuits/submit -H 'content-type: application/json' \
+  -d '{"circuit":"OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[4];\nh q[0];\ncx q[0],q[1];\ncx q[1],q[2];\ncx q[2],q[3];"}'
+# returns {"job_id":"job-...","status":"QUEUED"}
+```
+
+Then read the job, and print which peer ran each block:
+
+```bash
+curl -s http://127.0.0.1:8081/api/v1/jobs/<JOB-ID> | python3 -c "
+import sys,json
+d=json.load(sys.stdin); print(d['status'], d.get('error'))
+for f in (d.get('result') or {}).get('fragment_results',[]): print(f['fragment_id'], f['node_id'][:14], f['status'])"
+```
+
+Worker operators see their own peer IDs in that output, and their worker windows show `fragment/dispatch`. For the
+job states, see [Jobs](/docs/concepts/jobs).
+
+In a test with 2 workers and no other peers (`QB2_LIBP2P_DEV_SERVICE_PEER_COUNT=0`), all four blocks ran on the two
+workers. The planner decides which peer gets which block, so with many peers a given worker may get **none** on a
+small circuit. A bigger circuit means more blocks, so more workers get work. How the planner chooses is explained in
+[Circuit planning](/docs/concepts/circuit-planning).
+
+<Callout type="warn" title="Write measurements one qubit at a time">
+  If you add measurements, write them per qubit (`measure q[0] -> c[0];` with `creg c[4];`). The whole-register form
+  `measure q -> c;` fails with `No qubit arguments parsed for operation: measure q -> c`. The API's own example uses
+  the whole-register form, so avoid copying it. Leaving measurements out entirely also works.
+</Callout>
+
+<Callout type="warn" title="Drug-discovery jobs do not run on workers">
+  The Pharma pipeline executes everything on the coordinator today, so workers only show their "I'm alive" lines
+  during a Pharma job. Only **circuit** jobs are distributed.
+</Callout>
+
+## When a peer fails mid-job
+
+If a peer cannot be reached, or fails partway through a block, the coordinator closes that attempt's reservation and
+execution records and moves the block to the next peer. If every peer fails, the job fails with
+`failed across all assigned peers`. Blocks that finished beside a failed block are still handed over, so the
+workers that ran them are credited. The mechanism is the [reservation](/docs/concepts/reservations) fallback loop.
+
+<Iso scene="reservation" />
+
+## Health checks and monitoring
+
+### Coordinator
+
+| What | Command |
+| --- | --- |
+| The backend is up | `curl -s http://127.0.0.1:8081/api/v1/health` |
+| The coordinator's peer ID | `curl -s http://127.0.0.1:8081/api/v1/bootstrap/libp2p/runtime` (field `host_peer_id`) |
+| All peers and their health | `curl -s http://127.0.0.1:8081/api/v1/discovery/peers` |
+| Network topology | `curl -s http://127.0.0.1:8081/api/v1/discovery/topology` |
+| Discovery statistics | `curl -s http://127.0.0.1:8081/api/v1/discovery/stats` |
+| The libp2p port is listening | `lsof -nP -iTCP:4011 -sTCP:LISTEN` |
+| Who is connected right now | `lsof -nP -iTCP:4011 -sTCP:ESTABLISHED` (one line per connection) |
+| The number of connections | `lsof -nP -iTCP:4011 -sTCP:ESTABLISHED \| wc -l` |
+| A job's status | `curl -s http://127.0.0.1:8081/api/v1/jobs/<JOB-ID>` |
+| Recent jobs | `curl -s http://127.0.0.1:8081/api/v1/jobs` |
+| The zrok share's status | `zrok2 status` |
+| MongoDB is running | `brew services list \| grep mongodb` |
+
+What the backend terminal prints:
+
+- `periodic advertisement published (peer_id=..., addrs=N)` is normal.
+- `peer <id> unreachable: ...` followed by `trying next peer` means one peer failed on a block and the block moved
+  to another. If the id in that line is the **coordinator's own**, it is harmless: the planner considered the
+  coordinator itself and found no handler there.
+- `failed across all assigned peers` means no peer could run a block. Check that workers are connected and healthy.
+
+### Worker
+
+| What | Windows (CMD) | macOS and Linux |
+| --- | --- | --- |
+| The worker is connected | The worker window prints `Coordinator CONNECTED` | The same |
+| A live connection exists | `netstat -an \| findstr 4011` (look for `ESTABLISHED`) | `lsof -nP -iTCP:4011 -sTCP:ESTABLISHED` |
+| The tunnel listener is up (zrok) | `netstat -an \| findstr 4011` (look for `LISTENING`) | `lsof -nP -iTCP:4011 -sTCP:LISTEN` |
+| The tunnel or network is reachable | The `socket.create_connection` one-liner from [Start a worker](/docs/mesh/workers) | The same |
+| Python processes are running | `tasklist \| findstr python` | `pgrep -fl run_remote_worker` |
+| zrok is enabled | `zrok2 status` | `zrok2 status` |
+
+## Next
+
+If something is not behaving, go to [Troubleshooting](/docs/mesh/troubleshooting).

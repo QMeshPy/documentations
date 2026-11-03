@@ -1,0 +1,62 @@
+---
+title: Troubleshooting
+description: Symptoms and fixes for the coordinator, the network path, workers and jobs.
+icon: Wrench
+---
+
+Find your symptom, then the likely cause and the fix. The most common problems come from the network path, a
+shared label, or Python 3.14.
+
+## Reaching the coordinator
+
+| Symptom | Likely cause and fix |
+| --- | --- |
+| The `REACHABLE` check times out (same Wi-Fi) | Client isolation on the network, which is very common on public networks. Other causes: a wrong IP (it changes, so re-run `ipconfig getifaddr en0`), the macOS firewall blocking, or the backend not running. Try a phone hotspot, or switch to the zrok path. |
+| The `REACHABLE` check fails (zrok) | The `zrok2 access private` window is closed or has errored, the share token is wrong, the coordinator restarted the share (new token), the share is closed and your account was not granted access, or you are not enabled (`zrok2 status`). |
+| `zrok2: command not found`, or "not recognized" | The PATH is not set. Reopen the terminal, or re-run the PATH step in [Reach the coordinator](/docs/mesh/networks). If `zrok2` really does not exist but `zrok` does, use `zrok` everywhere. |
+| `zrok2 access` says the port is in use | Something already uses `4011`. Use `--bind 127.0.0.1:4012` and change `4011` to `4012` in the worker address. |
+
+## Starting a worker
+
+| Symptom | Likely cause and fix |
+| --- | --- |
+| `not a valid multiaddr ending in /p2p/<peer-id>` | A typo in the address. It must start with `/ip4/` (or `/dns4/`) and end with `/p2p/<id>`. Extra spaces or line breaks also cause it. Copy it as one line. |
+| `Coordinator NOT CONNECTED - retrying every 15s` | The coordinator is not running, the tunnel is down, the IP is wrong, or the peer ID is wrong. Fix the cause. The worker reconnects on its own within about 15 seconds. |
+| The worker was connected, then the laptop slept or changed Wi-Fi | A half-dead connection may not be noticed. Press `Ctrl+C` and start the worker again. |
+| `python --version` says 3.14 | Use 3.12 or 3.13. On Windows, `py -3.12 -m venv .venv`. On macOS and Linux, `uv venv --python 3.12 .venv`. |
+| `.venv\Scripts\activate.bat` is not found | You are in the wrong folder, or the environment was not created. Run `dir`, look for `.venv`, and re-run the install step. |
+| `pip install` prints "yanked version: grpcio" | A harmless warning. The install still succeeds. |
+| `pip install` fails with a build error | Almost always Python 3.14. Check `python --version` inside the activated environment. |
+| Windows asks about the firewall | Click **Allow**. The worker works either way, because it only makes outbound connections. |
+
+## Peers and work
+
+| Symptom | Likely cause and fix |
+| --- | --- |
+| A worker is connected but never gets work | The planner gave the blocks to other peers (use a bigger circuit), or the job was a Pharma job, which is not distributed. Confirm your peer is `healthy` in `/discovery/peers`. |
+| Two workers appear as one peer, or the peer flips on and off | They share a label. Each process needs its own label. |
+| A worker is missing from the list for a minute or more | Its first advertisement was missed, and it re-sends one only every fifth heartbeat. Wait about five heartbeat intervals. If it never appears, check the worker window shows `Coordinator CONNECTED` and that `--namespace` matches the coordinator's. |
+| Old workers are still listed after they left | They are dropped after 300 seconds without a heartbeat. This is normal. |
+| The peer count is not what you set | `.env` is read only at startup, so restart the backend. Remember that the count is 1 coordinator, plus embedded peers, plus one per worker process. |
+| Everyone's workers dropped at once | The coordinator's Mac slept, the backend restarted, or the zrok share stopped. Workers reconnect by themselves once the coordinator is back. After a zrok share restart they must also restart `zrok2 access` with the new token. |
+
+## The coordinator
+
+| Symptom | Likely cause and fix |
+| --- | --- |
+| The backend will not start: `MongoDB is not configured. Set QB2_MONGODB_URI.` | `QB2_MONGODB_URI` is missing from `backend/.env`. |
+| The backend will not start: `ServerSelectionTimeoutError` | MongoDB is not running (`brew services start mongodb-community`), or the URI is wrong. |
+| API calls return 401, or ask for a login | `QB2_AUTH_REQUIRED=false` is missing from `.env`. Restart the backend after editing. |
+
+## Jobs
+
+| Symptom | Likely cause and fix |
+| --- | --- |
+| The job fails with `No qubit arguments parsed for operation: measure q -> c` | Use per-qubit measurements, or none. See [Verify and run a job](/docs/mesh/run-a-job#run-a-job-on-the-mesh). |
+| The job fails with `failed across all assigned peers` | Every peer failed the block. Check the backend log for `unreachable` lines and make sure the workers are connected. |
+| A job is slow | A dead peer was tried first. Each failed attempt can cost up to about 15 seconds before the block moves on. |
+
+<Callout>
+  A worker's state file, `~/.qb2-worker/<label>.sqlite3`, is safe to delete. The peer ID does not change, because it
+  comes from the label.
+</Callout>

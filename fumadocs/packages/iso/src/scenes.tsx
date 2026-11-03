@@ -15,6 +15,10 @@ import { TojuScene } from './toju';
 import { EnsScene } from './ens';
 import { SiweScene } from './siwe';
 import { KuboScene } from './kubo';
+import { MeshScene } from './mesh';
+import { TunnelScene } from './tunnel';
+import { RedialScene } from './redial';
+import { TreeScene } from './tree';
 
 /** Every scene, by the name used in `<Iso scene="..." />`. */
 export const scenes = {
@@ -34,6 +38,10 @@ export const scenes = {
   ens: EnsScene,
   siwe: SiweScene,
   kubo: KuboScene,
+  mesh: MeshScene,
+  tunnel: TunnelScene,
+  redial: RedialScene,
+  tree: TreeScene,
 } as const satisfies Record<string, ComponentType>;
 
 export type SceneName = keyof typeof scenes;

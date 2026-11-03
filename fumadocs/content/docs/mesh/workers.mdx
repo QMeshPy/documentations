@@ -1,0 +1,252 @@
+---
+title: Start a worker
+description: Install and run a worker peer on Windows, macOS or Linux, with no .env file and no open port.
+icon: Cpu
+---
+
+A worker is one process running `scripts/run_remote_worker.py`. One process is one peer. It dials the coordinator,
+announces itself, and runs the blocks the coordinator sends it.
+
+## What you need from the coordinator
+
+Every worker laptop needs three values from whoever runs the coordinator:
+
+| Value | Example |
+| --- | --- |
+| Coordinator address | `/ip4/127.0.0.1/tcp/4011/p2p/12D3KooWQbdErPwWTNpwGJnAcuHbZmTYb2zL19B3ua9rrvvmuLnV` (zrok) or `/ip4/192.168.1.20/tcp/4011/p2p/...` (same Wi-Fi) |
+| Your label, unique | `alice-1` for your first peer, `alice-2` for your second |
+| Share token, zrok path only | `abc123xyz` |
+
+**Labels** are 3 to 64 characters: letters, digits, `.`, `_` and `-`, and not starting with a dot. The script rejects
+anything else. Use your first name plus a number (`alice-1`), and add a last initial if two people share a first
+name (`alice-k-1`). The label seeds your peer ID, so two machines with the same label become **one peer** and break
+each other's connections.
+
+**One or two peers.** To run two peers, open two terminal windows and start the worker in each with **different
+labels** (`alice-1`, `alice-2`). Everything else is the same.
+
+## Install and start
+
+<Tabs items={['Windows (CMD)', 'macOS', 'Linux']}>
+  <Tab value="Windows (CMD)">
+    Use **Command Prompt (cmd.exe)** for every command below. Not PowerShell, and not Git Bash.
+
+    <Steps>
+      <Step>
+        ### Check for Python 3.12 or 3.13
+
+        ```bat
+        py -0
+        ```
+
+        If the list has no `3.12` or `3.13`, install it, then **close and reopen** Command Prompt:
+
+        ```bat
+        winget install Python.Python.3.12
+        ```
+
+        No winget? Download the 3.12 installer from [python.org](https://www.python.org/downloads/) and tick *Add
+        python.exe to PATH*.
+      </Step>
+
+      <Step>
+        ### Get the worker code
+
+        Pick one option.
+
+        **Option A: git (small download).**
+
+        ```bat
+        git --version
+        git clone --depth 1 https://github.com/QMeshPy/distributed-quantum
+        cd distributed-quantum\backend
+        ```
+
+        If `git` is missing, run `winget install Git.Git` and reopen Command Prompt.
+
+        **Option B: no git (about 480 KB).**
+
+        ```bat
+        cd /d "%USERPROFILE%"
+        curl -L -o qmesh-worker.zip https://github.com/QMeshPy/distributed-quantum/raw/main/backend/qmesh-worker.zip
+        tar -xf qmesh-worker.zip
+        cd qmesh-worker
+        ```
+
+        Both options leave you in a folder containing `src`, `scripts` and the two `.txt` files.
+      </Step>
+
+      <Step>
+        ### Create the environment and install, once
+
+        ```bat
+        py -3.12 -m venv .venv
+        .venv\Scripts\activate.bat
+        python --version
+        python -m pip install --upgrade pip
+        pip install -r requirements-remote-worker.txt -c constraints-remote-worker.txt
+        ```
+
+        `python --version` must print `3.12.x` or `3.13.x`. Your prompt gets a `(.venv)` prefix while the
+        environment is active. You will see a warning about a *yanked grpcio version* during the install. It is
+        harmless.
+      </Step>
+
+      <Step>
+        ### On the zrok path, open the tunnel
+
+        In a second Command Prompt window, follow [Each worker laptop: open the tunnel](/docs/mesh/networks#path-b-different-networks-with-zrok).
+        Leave it running.
+      </Step>
+
+      <Step>
+        ### Check you can reach the coordinator
+
+        On the same-Wi-Fi path use the LAN IP. On the zrok path use `127.0.0.1`.
+
+        ```bat
+        python -c "import socket; socket.create_connection(('127.0.0.1', 4011), 5); print('REACHABLE')"
+        ```
+
+        It must print `REACHABLE`. A timeout or an error means the tunnel, or the LAN path, is not working. Stop and
+        fix that first ([troubleshooting](/docs/mesh/troubleshooting)).
+      </Step>
+
+      <Step>
+        ### Start your worker
+
+        Replace the address and the label.
+
+        ```bat
+        python -u scripts\run_remote_worker.py --coordinator /ip4/127.0.0.1/tcp/4011/p2p/12D3KooWQbdErPwWTNpwGJnAcuHbZmTYb2zL19B3ua9rrvvmuLnV --label alice-1
+        ```
+
+        Every **new** Command Prompt window needs this first. Adjust the path to where you cloned or extracted:
+
+        ```bat
+        cd /d %USERPROFILE%\distributed-quantum\backend
+        .venv\Scripts\activate.bat
+        ```
+
+        For Option B the folder is `%USERPROFILE%\qmesh-worker`. If Windows asks whether to let Python through the
+        firewall, click **Allow**. The worker only makes outbound connections, so it works either way.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab value="macOS">
+    This needs Python 3.12 or 3.13. The simplest way to get it is [uv](https://docs.astral.sh/uv/), which fetches
+    the right Python automatically.
+
+    ```bash
+    # 1. Tools (Homebrew first if you don't have it: https://brew.sh)
+    brew install git uv
+
+    # 2. Code
+    git clone --depth 1 https://github.com/QMeshPy/distributed-quantum
+    cd distributed-quantum/backend
+
+    # 3. Environment (about 1 minute)
+    uv venv --python 3.12 .venv
+    source .venv/bin/activate
+    python --version                      # must say 3.12.x
+    uv pip install -r requirements-remote-worker.txt -c constraints-remote-worker.txt
+
+    # 4. On the zrok path, open the tunnel in a second terminal window.
+    #    See "Each worker laptop: open the tunnel" on the previous page.
+
+    # 5. Check reachability (use the LAN IP on the same-Wi-Fi path)
+    python -c "import socket; socket.create_connection(('127.0.0.1', 4011), 5); print('REACHABLE')"
+
+    # 6. Start your worker
+    python -u scripts/run_remote_worker.py \
+      --coordinator /ip4/127.0.0.1/tcp/4011/p2p/12D3KooWQbdErPwWTNpwGJnAcuHbZmTYb2zL19B3ua9rrvvmuLnV \
+      --label alice-1
+    ```
+
+    In a new terminal window, run `cd distributed-quantum/backend && source .venv/bin/activate` first.
+
+    Without uv, use plain pip: `python3.12 -m venv .venv`, then `source .venv/bin/activate`, then
+    `pip install -r requirements-remote-worker.txt -c constraints-remote-worker.txt`.
+  </Tab>
+
+  <Tab value="Linux">
+    <Callout type="warn">The Linux steps have not been tested.</Callout>
+
+    ```bash
+    # 1. Tools (Debian/Ubuntu shown; use your package manager otherwise)
+    sudo apt update && sudo apt install -y git curl
+    curl -LsSf https://astral.sh/uv/install.sh | sh        # then open a NEW terminal
+
+    # 2. Code
+    git clone --depth 1 https://github.com/QMeshPy/distributed-quantum
+    cd distributed-quantum/backend
+
+    # 3. Environment (uv downloads Python 3.12 if your system Python is wrong)
+    uv venv --python 3.12 .venv
+    source .venv/bin/activate
+    python --version                      # must say 3.12.x
+    uv pip install -r requirements-remote-worker.txt -c constraints-remote-worker.txt
+
+    # 4. On the zrok path, open the tunnel in a second terminal.
+    #    See "Each worker laptop: open the tunnel" on the previous page.
+
+    # 5. Check reachability
+    python -c "import socket; socket.create_connection(('127.0.0.1', 4011), 5); print('REACHABLE')"
+
+    # 6. Start your worker
+    python -u scripts/run_remote_worker.py \
+      --coordinator /ip4/127.0.0.1/tcp/4011/p2p/12D3KooWQbdErPwWTNpwGJnAcuHbZmTYb2zL19B3ua9rrvvmuLnV \
+      --label alice-1
+    ```
+  </Tab>
+</Tabs>
+
+## What a healthy worker prints
+
+```txt
+Worker 'alice-1' peer ID: 12D3KooW... (namespace 'quantum-backend')
+Waiting for work. Ctrl+C to stop.
+[hh:mm:ss] Coordinator CONNECTED
+```
+
+Lines like `periodic advertisement published` are the worker's regular "I'm alive" message. When it receives a block
+you will also see `reservation/prepare`, `reservation/commit` and `fragment/dispatch` lines, one for each step of
+the [reservation](/docs/concepts/reservations). Stop a worker with `Ctrl+C`.
+
+If it cannot reach the coordinator, it prints `Coordinator NOT CONNECTED - retrying every 15s`, or exits with
+`Could not start the worker` and a reason.
+
+## If the link drops
+
+<Iso scene="redial" />
+
+A worker behind a NAT or a Wi-Fi network cannot be dialed back, so it restores the connection itself. While it is
+not connected to the coordinator it tries again **every 15 seconds**, and each attempt gives up after 10 seconds.
+A coordinator restart, a Wi-Fi drop or a restarted backend all end the same way: the worker reconnects on its own,
+with no restart.
+
+Two cases need you:
+
+- After a **zrok share restart**, the share token changes, so the worker laptop must restart its
+  `zrok2 access` command with the new token.
+- A **half-dead connection**, for example after the laptop sleeps or switches Wi-Fi, may not be noticed. Press
+  `Ctrl+C` and start the worker again.
+
+## Worker options
+
+| Flag | Meaning |
+| --- | --- |
+| `--coordinator` | `/ip4/<host>/tcp/<port>/p2p/<peer-id>`, or `/dns4/...`. Required. |
+| `--label` | A unique name for this peer, 3 to 64 characters of letters, digits, `.`, `_` and `-`. Required. |
+| `--namespace` | Must match the coordinator. Default `quantum-backend`. |
+| `--heartbeat` | Seconds between heartbeats. Default `10`. |
+
+The worker keeps a small state file at `~/.qb2-worker/<label>.sqlite3` (on Windows,
+`%USERPROFILE%\.qb2-worker`). It is safe to delete: the peer ID does not change, because it comes from the label.
+
+A worker does **not** listen on any port. It dials out and nothing more.
+
+## Next
+
+[Verify the mesh and run a job](/docs/mesh/run-a-job).
