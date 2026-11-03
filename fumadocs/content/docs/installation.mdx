@@ -37,15 +37,16 @@ anything reachable from the internet.
 
     ```txt title="backend/.env"
     QB2_AUTH_REQUIRED=false
-    QB2_MONGODB_TARGET=local
-    QB2_MONGODB_LOCAL_URI=mongodb://127.0.0.1:27017
-    QB2_MONGODB_DATABASE=qds
+    QB2_MONGODB_URI=mongodb://127.0.0.1:27017
     QB2_LIBP2P_DEV_SERVICE_PEER_COUNT=4
     ```
 
     `QB2_LIBP2P_DEV_SERVICE_PEER_COUNT=4` starts four worker peers inside the backend process. The code default
-    is `0`, which starts none, so fragments would not spread across peers. To use an Atlas cluster, set
-    `QB2_MONGODB_TARGET=remote` and `QB2_MONGODB_REMOTE_URI`. See [Configuration](/docs/reference/configuration).
+    is `0`, which starts none, so fragments would not spread across peers. To use an Atlas cluster, put
+    its `mongodb+srv://` connection string in `QB2_MONGODB_URI`. The backend will not start without that variable. See
+    [Configuration](/docs/reference/configuration).
+
+    Want workers on **other laptops** instead of embedded ones? See [Run a mesh](/docs/mesh/overview).
   </Step>
 
   <Step>

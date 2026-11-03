@@ -6,7 +6,7 @@ icon: CreditCard
 
 Billing is **optional** and runs in Stripe **test mode**. With nothing configured the console works exactly as it does
 without it. Three pieces build on each other: a subscription that lifts the free-trial gate, credit packs that pay for
-circuit runs, and an option to buy those packs in USDC. Worker payouts are a separate effort (see the end of this page).
+circuit runs, and an option to buy those packs in USDC. Paying workers is covered at the end of this page.
 
 <Iso scene="credits" />
 
@@ -78,7 +78,7 @@ Runs stay free until `QB2_CIRCUIT_JOB_CREDIT_COST` is above `0`. With it above z
 
 - Submitting a job **holds** the cost. With too few credits the API answers `402` with the error code
   `insufficient_credits`.
-- A job that **completes** captures the hold. A job that **fails** releases it.
+- A job that **completes** captures the hold. A job that **fails** releases it, less what its workers earned for the fragments that finished (see [Paying workers](#paying-workers)).
 - Jobs paid through [x402](/docs/integrations/x402) are paid per request and skip the meter.
 
 ## USDC credit packs
@@ -95,14 +95,24 @@ Limits that come from Stripe, not QMesh:
 - Stablecoin payments cannot be disputed. Refunds are supported and go back to the paying wallet. A refund does **not**
   yet debit the credits it granted. The same is true for card refunds.
 
-## In review: paying workers
+## Paying workers
 
-These are not merged. Treat them as plans.
+Two separate things now exist for workers.
 
-- [#104](https://github.com/QMeshPy/distributed-quantum/pull/104) pays workers **per fragment** in USDC as results are
-  recorded, capped at the job's credit hold, with each fragment paid once.
-- [#122](https://github.com/QMeshPy/distributed-quantum/pull/122) adds optional **Stripe Connect Express** onboarding so a
-  worker can cash out to a bank or a stablecoin wallet. It is gated by `STRIPE_CONNECT_ENABLED`.
-- The decision behind both is recorded in a
-  [spike](https://github.com/QMeshPy/distributed-quantum/issues/77): on-chain USDC is the default, and Connect is an
-  optional off-ramp for workers who want a normal cash-out.
+- **Per-fragment payouts in USDC** ([#104](https://github.com/QMeshPy/distributed-quantum/pull/104)) pay a worker for each fragment they run, in batched transfers
+  from the job's credit hold. They are described on [Credits and ledger](/docs/integrations/credits-ledger#paying-workers).
+- **Stripe Connect Express onboarding** ([#122](https://github.com/QMeshPy/distributed-quantum/pull/122)) is optional and **off by default**. It is switched on with
+  `STRIPE_CONNECT_ENABLED=true` and a **test-mode** secret key (`sk_test_...`; a live key keeps it off). When it is on,
+  **Settings** shows a payout card where a worker can create a Stripe Express account, finish onboarding and open the
+  Stripe dashboard. The card shows **Not set up**, **Pending**, **Payout ready** or **Unavailable**. The account is
+  created in the country named by `STRIPE_CONNECT_DEFAULT_COUNTRY` (default `US`). The console routes are
+  `GET /api/billing/connect`, `POST /api/billing/connect/onboard` and `POST /api/billing/connect/dashboard`.
+
+<Callout type="warn" title="Connect does not move money yet">
+  In `main`, the onboarding only creates and tracks the Stripe account. Nothing sends funds through it. Worker payouts
+  are USDC transfers from the platform wallet. A cash-out from the ledger balance is still a proposal
+  ([#111](https://github.com/QMeshPy/distributed-quantum/issues/111)).
+</Callout>
+
+The choice between the two is recorded in a [spike](https://github.com/QMeshPy/distributed-quantum/issues/77): on-chain USDC is the default, and Connect is an optional
+off-ramp for workers who want a normal cash-out.

@@ -28,6 +28,7 @@ options and risk jobs use lower case (`queued`, `completed`).
 | `POST /api/v1/circuits/submit` | Submit an OpenQASM circuit. Returns `201` with a `job_id`. |
 | `GET /api/v1/jobs` | List recent jobs. Query: `limit` (1 to 200, default 50), `status` (repeatable). |
 | `GET /api/v1/jobs/{job_id}` | Job status and result. Query: `result_detail=full|summary`. |
+| `GET /api/v1/jobs/{job_id}/payouts` | What a job owes its workers, fragment by fragment (the job's owner or an admin). See [Paying workers](/docs/integrations/credits-ledger#paying-workers). |
 | `GET /api/v1/plans/{plan_id}` | The execution plan for a job. |
 
 See [Basic usage](/docs/basic-usage) and [Jobs](/docs/concepts/jobs).
@@ -119,7 +120,7 @@ of an ordinary bearer token.
 | `POST /api/v1/proposals/{id}/fund`, `GET /api/v1/proposals/{id}/funders` | Fund a proposal, and list who did. |
 | `POST /api/v1/proposals/{id}/fragments/generate`, `.../fragments/{fragment_id}/claim`, `POST .../results` | Fragments of a proposal and their results. |
 | `POST /api/v1/marketplace/register-pricing`, `GET /api/v1/marketplace/workers` | Worker pricing and listings. |
-| `POST /api/v1/marketplace/estimate-cost`, `GET /api/v1/marketplace/worker/{worker_id}/earnings` | Cost estimates and worker earnings. |
+| `POST /api/v1/marketplace/estimate-cost`, `GET /api/v1/marketplace/worker/{worker_id}/earnings` | Cost estimates and worker earnings, including pending earnings and paid and withheld fragments. |
 
 ## ENS
 

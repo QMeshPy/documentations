@@ -11,8 +11,9 @@ three pull requests: [#81](https://github.com/QMeshPy/distributed-quantum/pull/8
 [#101](https://github.com/QMeshPy/distributed-quantum/pull/101) (the provider dropdown).
 
 <Callout type="warn">
-  [#81](https://github.com/QMeshPy/distributed-quantum/pull/81) **removed AWS Bedrock** from agent chat and replaced it with
-  Groq and OpenRouter. Bedrock is no longer an agent option.
+  [#81](https://github.com/QMeshPy/distributed-quantum/pull/81) **removed AWS Bedrock** from the console's agent chat and
+  replaced it with Groq and OpenRouter. Bedrock is no longer an option there. The backend's separate `/api/v1/agent` routes
+  and its intent classifier still read `AWS_BEDROCK_ENABLED`, which defaults to on, and use Bedrock when AWS credentials are set.
 </Callout>
 
 <Iso scene="attest" />

@@ -12,7 +12,9 @@ icon: CircleQuestionMark
   <Accordion title="Is the peer network real?">
     The software is: a coordinator and workers exchange discovery messages, reservations and fragments over
     py-libp2p. In local development the workers run inside the backend process, so it is a controlled demo
-    network. An example script can start an external node, but an open network of third-party nodes is not finished.
+    network. Other laptops can join as workers too: they dial out to the coordinator and run circuit blocks (see
+    [Run a mesh](/docs/mesh/overview)). The mesh port has no authentication, so it is for demos. An open network of
+    third-party nodes is not finished.
   </Accordion>
   <Accordion title="Does it use real money?">
     No. Payments use Algorand TestNet USDC, and every other chain QMesh touches is a test network.

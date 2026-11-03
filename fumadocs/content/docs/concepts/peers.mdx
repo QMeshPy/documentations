@@ -19,15 +19,19 @@ Discovery uses libp2p GossipSub. Two topics are named after the rendezvous names
 | `quantum-backend.peer-advertisement.v1` | The peer's id, trust tier, network addresses, supported protocols, the services it offers and its position in its own log. |
 | `quantum-backend.peer-heartbeat.v1` | The peer's health status, active reservations and active executions. |
 
-The coordinator reads these messages and keeps a **registry** of peers in memory. It also stores projections of
-them in MongoDB and rebuilds the registry from those projections when it starts.
+The coordinator reads these messages and keeps a **registry** of peers in memory. It also writes projections of them to
+MongoDB. After a restart the registry starts empty and fills as peers advertise again: saved peers are not restored,
+because a restarted coordinator cannot tell whether they are still alive, and they would only show up as ghosts.
 
 ### Staleness
 
 A peer that has not sent an advertisement or heartbeat within `QB2_LIBP2P_STALE_PEER_TTL_SECONDS` (default 300
 seconds) is **stale**. Stale peers are left out of listings and planning, but their entries are kept: when a stale
 peer advertises again, it is refreshed. Peers send heartbeats every `QB2_LIBP2P_HEARTBEAT_INTERVAL_SECONDS`
-(default 60).
+(default 5). A peer re-sends its service advertisement every fifth heartbeat, so a peer whose first advertisement
+was missed can stay invisible for about five heartbeat intervals. Workers started with
+`scripts/run_remote_worker.py` use their own `--heartbeat` flag, default 10, and publish only: they do not subscribe to the
+discovery topics. To put workers on other laptops, see [Run a mesh](/docs/mesh/overview).
 
 ## Ask the API
 
@@ -66,7 +70,7 @@ Each service has a quality record. When a block reports a fidelity score, the co
 planner reads these values when it scores candidates.
 
 <Callout type="warn">
-  In local development the worker peers run inside the backend process. The repository includes an example
-  script, `scripts/node-starter-template.py`, that starts an external node, but a managed network of third-party
-  nodes is not finished. See [Scope](/docs/scope).
+  In local development the worker peers run inside the backend process. Other laptops can join as workers with
+  `scripts/run_remote_worker.py`, as described in [Run a mesh](/docs/mesh/overview), but a managed network of
+  third-party nodes is not finished. See [Scope](/docs/scope).
 </Callout>

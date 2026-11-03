@@ -5,8 +5,10 @@ icon: Settings
 ---
 
 The backend reads its settings from environment variables. When it starts it also loads a `.env` file from its
-working directory, so `backend/.env` works. Defaults below are the values in the code. The sample
-`backend/.env.example` overrides a few of them, and those overrides are marked.
+working directory, so `backend/.env` works. Secrets and machine-specific values belong in `.env`. The non-secret
+defaults live in `backend/src/quantum_backend_v2/config/constants.py`, and each one can still be overridden by the
+environment variable of the same purpose, which is the one named below. The sample `backend/.env.example` sets only
+`QB2_AUTH_REQUIRED=false` and `QB2_LIBP2P_DEV_SERVICE_PEER_COUNT=4` away from the code defaults.
 
 ## Service
 
@@ -30,18 +32,16 @@ working directory, so `backend/.env` works. Defaults below are the values in the
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `QB2_MONGODB_TARGET` | `local` | `local` uses `QB2_MONGODB_LOCAL_URI`; `remote` uses `QB2_MONGODB_REMOTE_URI`. |
-| `QB2_MONGODB_LOCAL_URI` | none | For example `mongodb://127.0.0.1:27017`. |
-| `QB2_MONGODB_REMOTE_URI` | none | For example an Atlas `mongodb+srv://` URI. |
-| `QB2_MONGODB_DATABASE` | `quantum_backend_v2` | Database name. `.env.example` sets `qds`. |
+| `QB2_MONGODB_URI` | none, **required** | The one MongoDB connection string every backend service uses: `mongodb://127.0.0.1:27017` locally, or an Atlas `mongodb+srv://` URI. The backend stops at startup with `MongoDB is not configured. Set QB2_MONGODB_URI.` if it is missing. |
+| `QB2_MONGODB_DATABASE` | `qds` | Database name. |
 | `QB2_MONGODB_SERVER_SELECTION_TIMEOUT_MS` | `5000` | How long to wait for a server. |
 
 ## Peer log
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `QB2_PEER_ID` | `local-dev-peer` | Identity written into the peer log. |
-| `QB2_PEER_LOG_DIR` | under the backend folder | Where the append-only log is written. |
+| `QB2_PEER_ID` | `qb2-local-peer` | Identity written into the peer log. |
+| `QB2_PEER_LOG_DIR` | `./quantum-backend/peer-logs` | Where the append-only log is written, relative to the folder the backend starts in. |
 | `QB2_PEER_LOG_FSYNC` | `true` | Flush every write to disk. |
 
 ## libp2p
@@ -49,16 +49,16 @@ working directory, so `backend/.env` works. Defaults below are the values in the
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `QB2_LIBP2P_ENABLED` | `true` | Run the libp2p host. |
-| `QB2_LIBP2P_PEER_ID` | `qb2-dev-peer` | Peer name. |
+| `QB2_LIBP2P_PEER_ID` | `qb2-local-peer` | The coordinator's peer label. Its peer ID is derived from this, so it stays the same across restarts. Embedded helper peers are named `<label>-worker-<n>`. |
 | `QB2_LIBP2P_LISTEN_MULTIADDRS` | `/ip4/0.0.0.0/tcp/4011` | Comma-separated listen addresses. |
 | `QB2_LIBP2P_ADVERTISE_MULTIADDRS` | empty | Addresses to advertise, if different. |
-| `QB2_LIBP2P_BOOTSTRAP_PEERS` | empty | Comma-separated peers to connect to first. |
+| `QB2_LIBP2P_BOOTSTRAP_PEERS` | empty | Comma-separated peers to dial on startup. Empty for a coordinator. Embedded helper peers are pointed at the coordinator automatically. A backend that has bootstrap peers also re-dials any that drop, every 15 seconds. |
 | `QB2_LIBP2P_RENDEZVOUS_NAMESPACE` | `quantum-backend` | Prefix for the discovery topics and protocol ids. |
-| `QB2_LIBP2P_PEERSTORE_PATH` | under the backend folder | SQLite peerstore file. |
+| `QB2_LIBP2P_PEERSTORE_PATH` | `./quantum-backend/libp2p/peerstore.sqlite3` | SQLite peerstore file. |
 | `QB2_LIBP2P_ACTIVATE_LISTENERS` | `true` | Start the listeners. |
-| `QB2_LIBP2P_HEARTBEAT_INTERVAL_SECONDS` | `60` | Heartbeat period (minimum 5). |
+| `QB2_LIBP2P_HEARTBEAT_INTERVAL_SECONDS` | `5` | Heartbeat period (minimum 5). A peer also re-sends its service advertisement every fifth heartbeat. A remote worker uses its own `--heartbeat` flag, default 10. |
 | `QB2_LIBP2P_STALE_PEER_TTL_SECONDS` | `300` | Time without a message before a peer is stale (minimum 30). |
-| `QB2_LIBP2P_DEV_SERVICE_PEER_COUNT` | `0` | Embedded worker peers to start in this process (0 to 32). `.env.example` sets `4`. |
+| `QB2_LIBP2P_DEV_SERVICE_PEER_COUNT` | `0` | Embedded worker peers to start in this process (0 to 32). `.env.example` sets `4`. It is deliberately not a code constant, so a production deployment never starts dev workers by accident. For workers on other laptops, see [Run a mesh](/docs/mesh/overview). |
 | `QB2_LIBP2P_DEV_SERVICE_BASE_PORT` | `4021` | First port used by embedded workers. |
 
 ## Credits and payments
@@ -69,6 +69,11 @@ working directory, so `backend/.env` works. Defaults below are the values in the
 | `QB2_X402_GATEWAY_SECRET` | none | Enables the hidden internal routes used by the [x402 gateway](/docs/integrations/x402). Must equal the console's `X402_GATEWAY_SECRET`. |
 | `QB2_BILLING_INTERNAL_SECRET` | none | Shared secret for the console's billing calls. |
 | `QB2_PAYMENT_RECONCILE_INTERVAL_SECONDS` | `300` | How often the payment reconciliation sweep runs. |
+| `QB2_WORKER_PAYOUT_WALLET` | none | The platform wallet that sends [worker payouts](/docs/integrations/credits-ledger#paying-workers). Unset means payouts accrue and nothing is sent. |
+| `QB2_WORKER_PAYOUT_THRESHOLD` | `1` | Send once a worker's accrued USDC reaches this. |
+| `QB2_WORKER_PAYOUT_MAX_AGE_SECONDS` | `86400` | Or once their oldest unpaid fragment is this old. |
+| `QB2_WORKER_PAYOUT_INTERVAL_SECONDS` | `300` | How often the settler runs. `0` turns sending off. |
+| `QB2_WORKER_PAYOUT_MIN_FIDELITY` | `0` | Fragments below this observed fidelity (0 to 1) are not paid. |
 
 ## Content node and provenance
 
@@ -95,7 +100,7 @@ working directory, so `backend/.env` works. Defaults below are the values in the
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `QB2_CHAIN_REGISTRY_PATH` | the packaged registry | Path to a chain registry file. |
-| `NETWORK` | none | Wallet network name, for example `base-sepolia`. |
+| `NETWORK` | `base-sepolia` | Wallet network name or id, for example `base-sepolia` or `arbitrum-sepolia`. |
 
 ## Agents and wallets
 
@@ -127,7 +132,7 @@ See [Starknet session keys](/docs/integrations/starknet).
 
 | Variable | Purpose |
 | --- | --- |
-| `QB2_BASE_SEPOLIA_RPC_URL`, `QB2_ETHEREUM_SEPOLIA_RPC_URL`, `QB2_ROBINHOOD_TESTNET_RPC_URL`, `QB2_STARKNET_SEPOLIA_RPC_URL` | RPC overrides. See [Chain registry](/docs/integrations/chain-registry). |
+| `QB2_BASE_SEPOLIA_RPC_URL`, `QB2_ARBITRUM_SEPOLIA_RPC_URL`, `QB2_ETHEREUM_SEPOLIA_RPC_URL`, `QB2_ROBINHOOD_TESTNET_RPC_URL`, `QB2_STARKNET_SEPOLIA_RPC_URL` | RPC overrides. See [Chain registry](/docs/integrations/chain-registry). |
 | `QB2_ROBINHOOD_MAINNET_RPC_URL` | Read-only RPC for tokenized-stock prices. See [Chainlink](/docs/integrations/chainlink). |
 
 ## Console (frontend)
@@ -138,6 +143,9 @@ These go in `frontend/.env.local` (see `frontend/.env.example`).
 | --- | --- |
 | `NEXT_PUBLIC_BACKEND_URL` | Where the console reaches the coordinator. |
 | `NEXT_PUBLIC_TRIAL_DISABLED` | `true` skips the one-hour trial gate locally. |
+| `X402_ENABLED`, `X402_NETWORK`, `X402_AVM_ADDRESS`, `X402_FACILITATOR_URL`, `X402_GATEWAY_SECRET` | The [x402 gateway](/docs/integrations/x402). |
+| `X402_QUANTUM_RUN_PRICE`, `X402_RISK_RUN_PRICE`, `X402_FINANCE_RUN_PRICE`, `X402_PHARMA_RUN_PRICE` | Flat price per paid call. Defaults `0.01`, `0.05`, `0.05` and `0.25`. |
+| `STRIPE_CONNECT_ENABLED`, `STRIPE_CONNECT_DEFAULT_COUNTRY` | Optional [Stripe Connect Express onboarding](/docs/integrations/billing#paying-workers). Off by default. Needs a test-mode key. The country defaults to `US`. |
 | `MONGODB_URI`, `MONGODB_DB_NAME` | Sign-in sessions. |
 | `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET` | Better Auth. |
 | `RESEND_API_KEY`, `OTP_EMAIL_FROM` | Emailed sign-in codes. |
@@ -153,3 +161,15 @@ These go in `frontend/.env.local` (see `frontend/.env.example`).
   `KUBO_RPC_SECRET`, `QB2_ANCHOR_PRIVATE_KEY`, `WALLET_ENCRYPTION_KEY`, `STARKNET_RELAYER_PRIVATE_KEY`, every API key) as private. Never expose one to a browser, and never commit a
   `.env` file.
 </Callout>
+
+## Remote worker script
+
+`scripts/run_remote_worker.py` takes flags, not environment variables, and needs no `.env` file. See
+[Start a worker](/docs/mesh/workers#worker-options).
+
+| Flag | Default | Purpose |
+| --- | --- | --- |
+| `--coordinator` | required | `/ip4/<host>/tcp/<port>/p2p/<peer-id>` or `/dns4/...`. |
+| `--label` | required | Unique name, 3 to 64 characters of letters, digits, `.`, `_` and `-`. It derives the peer ID. |
+| `--namespace` | `quantum-backend` | Must match the coordinator's `QB2_LIBP2P_RENDEZVOUS_NAMESPACE`. |
+| `--heartbeat` | `10` | Seconds between heartbeats. |

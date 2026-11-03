@@ -21,6 +21,7 @@ The registry ships as `registry.toml` inside the backend package. Networks are n
 | Network | Id | Alias | What QMesh may do there |
 | --- | --- | --- | --- |
 | Base Sepolia (default) | `eip155:84532` | `base-sepolia` | Wallets, balances, USDC transfers, Aave supply and withdraw, a faucet hint, explorer links, transaction checks |
+| Arbitrum Sepolia | `eip155:421614` | `arbitrum-sepolia` | The same wallet operations as Base Sepolia (Aave V3 supply and withdraw, USDC transfers, a faucet hint), plus explorer links and transaction checks. Added in [#125](https://github.com/QMeshPy/distributed-quantum/pull/125) |
 | Ethereum Sepolia | `eip155:11155111` | `ethereum-sepolia` | Explorer links, transaction checks, the ETH/USD price feed, provenance anchoring |
 | Robinhood Chain Testnet | `eip155:46630` | `robinhood-testnet` | Explorer links and transaction checks only |
 | Starknet Sepolia | `starknet:SN_SEPOLIA` | `starknet-sepolia` | Explorer links and transaction checks, plus the opt-in [session policy](/docs/integrations/starknet) |
@@ -46,6 +47,7 @@ An entry names an environment variable, never a URL, plus an optional keyless pu
 | Network | Override variable | Public fallback |
 | --- | --- | --- |
 | Base Sepolia | `QB2_BASE_SEPOLIA_RPC_URL` | `https://sepolia.base.org` |
+| Arbitrum Sepolia | `QB2_ARBITRUM_SEPOLIA_RPC_URL` | `https://sepolia-rollup.arbitrum.io/rpc` |
 | Ethereum Sepolia | `QB2_ETHEREUM_SEPOLIA_RPC_URL` | `https://ethereum-sepolia-rpc.publicnode.com` |
 | Robinhood Chain Testnet | `QB2_ROBINHOOD_TESTNET_RPC_URL` | `https://rpc.testnet.chain.robinhood.com` |
 | Starknet Sepolia | `QB2_STARKNET_SEPOLIA_RPC_URL` | `https://starknet-sepolia-rpc.publicnode.com` |
@@ -77,5 +79,9 @@ explorer links from it. A network that lacks the capability an action needs is l
 | `QB2_CHAIN_REGISTRY_PATH` | Use another registry file. Relative paths use the working directory. |
 | `NETWORK` | The wallet network, by alias or id. Unset means the registry default. An unknown value stops startup. |
 
-Wallets are single-network for now. A second wallet network, a network per request and per-payment network storage wait for
-a second chain that supports wallets.
+The default wallet network stays Base Sepolia. `POST /api/v1/wallet/create` accepts an optional `{"network": "arbitrum-sepolia"}`
+(an alias or a CAIP-2 id), and balance, transfer, faucet and history then run against the network **stored with the wallet**.
+Set `NETWORK=arbitrum-sepolia` to make Arbitrum the default for a whole deployment. Wallet capabilities are limited to the
+CDP and AgentKit networks the backend lists in code, which today are Base Sepolia and Arbitrum Sepolia. Advertising Arbitrum in
+[x402](/docs/integrations/x402) payment challenges waits for multi-network x402
+([#5](https://github.com/QMeshPy/distributed-quantum/issues/5), in review as [#135](https://github.com/QMeshPy/distributed-quantum/pull/135)).

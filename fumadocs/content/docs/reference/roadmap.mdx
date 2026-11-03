@@ -4,7 +4,7 @@ description: Work in review and ideas that exist only as issues. None of this is
 icon: Milestone
 ---
 
-This page lists what is **not** in `main` yet, as of **1 November 2026**. It comes from the open pull requests and issues of
+This page lists what is **not** in `main` yet, as of **3 November 2026**. It comes from the open pull requests and issues of
 [QMeshPy/distributed-quantum](https://github.com/QMeshPy/distributed-quantum). The maintainers call the plan a proposal,
 and the epic ([#1](https://github.com/QMeshPy/distributed-quantum/issues/1)) sets these ground rules for all of it:
 
@@ -19,8 +19,7 @@ What already shipped is on the [integrations overview](/docs/integrations/overvi
 
 | Work | What it changes | Pull request |
 | --- | --- | --- |
-| Pay-per-fragment payouts | Workers are paid per fragment in USDC, capped at the job's credit hold. A failed job is now charged for the fragments that finished. | [#104](https://github.com/QMeshPy/distributed-quantum/pull/104) |
-| Stripe Connect Express | Workers can opt in to cash out to a bank or stablecoin wallet. | [#122](https://github.com/QMeshPy/distributed-quantum/pull/122) |
+| Multi-network x402 for circuits | USDC payments on Base Sepolia, Solana devnet and Algorand TestNet, dynamic prices tied to the circuit, and stored receipts that replay without settling again. Its author's to-do list still includes verifying testnet settlement on all three networks. | [#135](https://github.com/QMeshPy/distributed-quantum/pull/135) |
 | Wallet portfolio analyzer | VaR and CVaR on an address's on-chain holdings, read-only. | [#123](https://github.com/QMeshPy/distributed-quantum/pull/123) |
 | EtherCalc workbooks | Persistent, shareable spreadsheets for experiment results, with IPFS versions. A draft, off by default. | [#105](https://github.com/QMeshPy/distributed-quantum/pull/105) |
 
@@ -28,8 +27,7 @@ What already shipped is on the [integrations overview](/docs/integrations/overvi
 
 | Idea | Issue |
 | --- | --- |
-| One x402 paywall across Base, Solana and Algorand, with dynamic pricing | [#5](https://github.com/QMeshPy/distributed-quantum/issues/5) |
-| Paid x402 endpoints for risk, finance and pharma services | [#6](https://github.com/QMeshPy/distributed-quantum/issues/6) |
+| One x402 paywall across Base, Solana and Algorand, with dynamic pricing (a first implementation is in review as [#135](https://github.com/QMeshPy/distributed-quantum/pull/135)) | [#5](https://github.com/QMeshPy/distributed-quantum/issues/5) |
 | A public MCP server that charges by x402, and an agent that pays x402 | [#7](https://github.com/QMeshPy/distributed-quantum/issues/7) |
 | Escrow-backed reservations | [#9](https://github.com/QMeshPy/distributed-quantum/issues/9) |
 | Tempo and Machine Payments Protocol sessions | [#11](https://github.com/QMeshPy/distributed-quantum/issues/11) |
@@ -45,7 +43,7 @@ What already shipped is on the [integrations overview](/docs/integrations/overvi
 | Idea | Issue |
 | --- | --- |
 | Base mainnet-readiness safeguards, Basenames and portable reputation | [#14](https://github.com/QMeshPy/distributed-quantum/issues/14) |
-| Escrow, wallets and x402 on Arbitrum | [#15](https://github.com/QMeshPy/distributed-quantum/issues/15) |
+| x402 on Arbitrum (wallets and Aave escrow shipped in [#125](https://github.com/QMeshPy/distributed-quantum/pull/125)) | [#15](https://github.com/QMeshPy/distributed-quantum/issues/15) |
 | OP Stack support (Optimism, Unichain-ready) in the registry | [#16](https://github.com/QMeshPy/distributed-quantum/issues/16) |
 | Solana wallets, Solana Pay, memo anchors and a Toju SOL storage route | [#24](https://github.com/QMeshPy/distributed-quantum/issues/24) |
 | Chainlink CCIP cross-chain funding and payout, and CRE-driven escrow release | [#26](https://github.com/QMeshPy/distributed-quantum/issues/26) |

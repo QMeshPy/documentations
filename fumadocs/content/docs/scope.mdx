@@ -13,7 +13,7 @@ fits what you want to build.
 | --- | --- |
 | Quantum execution | **Simulated.** Circuits run on Qiskit statevector simulation. There is no quantum hardware control. |
 | Peer network | **Real software.** The coordinator and workers talk over py-libp2p (GossipSub for discovery, streams for reservations and fragments). |
-| Local network | In local development the worker peers are started **inside the backend process** (`QB2_LIBP2P_DEV_SERVICE_PEER_COUNT`). That is a controlled demo network. An example script (`scripts/node-starter-template.py`) can start an external node, but QMesh is not a finished open network of third-party nodes. |
+| Local network | In local development the worker peers are started **inside the backend process** (`QB2_LIBP2P_DEV_SERVICE_PEER_COUNT`). Other laptops can also join as workers by dialing out to the coordinator (`scripts/run_remote_worker.py`, see [Run a mesh](/docs/mesh/overview)). Only a few laptops on one Wi-Fi have been tested, the mesh port has **no authentication**, and QMesh is not a finished open network of third-party nodes. |
 | Payments | **Testnet and test mode.** x402 settles USDC on Algorand TestNet, Stripe runs in test mode, and agent payments use Base Sepolia and Starknet Sepolia. |
 | Provenance anchors | **Testnet only.** Anchoring is off until you set `QB2_ANCHOR_NETWORK`, and only test networks are allowed (Ethereum Sepolia in the packaged registry). |
 | Drug-discovery pipeline | **Experimental.** Its quantum stages are simulated. It is not covered by these docs. |
