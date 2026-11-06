@@ -58,6 +58,8 @@ Each takes `{ o, x, y, z }`: the back corner and the height of the surface it st
 | `Chain` | A blockchain | `n` linked blocks along +x, `accent`. |
 | `Printer`, `Stamp`, `Docs` | A receipt, a stamp or signature, a stack of records | `Printer slip` sets the paper length. |
 
+`Docs`, `Coins`, `Hub` and `Chain` have no name plate of their own. Name them by standing them on a named `Pad`.
+
 If the story needs a device that is not here, build it from `RBox`, `Cyl`, `Plane` and the detail pieces, in a new function with the same `{ o, x, y, z }` signature, and add it to `devices.tsx`. Keep the same weight of detail as its neighbours: a rounded body, one face with hatch or vents, a plate or LED, no more.
 
 ## Scene kit (`scene-kit.tsx`)
@@ -90,3 +92,9 @@ If the story needs a device that is not here, build it from `RBox`, `Cyl`, `Plan
 | `EASE` | `move`, `settle`, `linear`. |
 
 Put a moving thing in `<g className="mv <anim-class>">`. `mv` hides it until its animation runs; `mv keep` leaves it visible.
+
+**Anchors.** `route`'s `from` must equal the `at` of the thing you draw, or it jumps at the start. A `Slip` is anchored at its back corner and measures 0.62 by 0.4, so its centre is at `at + (0.31, 0.2)`; that is why slip lanes run 0.2 tile off the cable they follow. `Orb` and `Coin` are anchored at their centre. A tag sits about 16px right of and 12px above its thing, so it can land on a device the thing is approaching: stop moves at least 1.2 tiles short of a device, or tag only the first thing, mid-journey.
+
+**Reduced motion.** Anything driven by a window (`windowCss`) starts hidden, so it is absent from the still frame. Moving things need `mv`; marks and pad highlights hide themselves. `Tag` takes a `cls`, so a timed tag can use a window class directly.
+
+**Sizes of text.** `PlateText` is a fixed-width plate: the text does not shrink to fit, so `w` must be about `characters * size * 0.65` plus 0.2. Device plates use size 0.15 to 0.17, which is about 5px on screen and only good for a name. For a statement on the floor use size 0.2 or more and split long lines in two plates. A step `name` should be at most 14 characters, and a `sub` at most 46, which is the width of the step list.

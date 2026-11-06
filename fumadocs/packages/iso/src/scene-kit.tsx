@@ -51,7 +51,7 @@ export function Pad({
   );
 }
 
-/** Dashed cable on the floor. */
+/** Lifts 2D floor points (x, y) into tile paths just above the floor, for `Cable` and `route`. */
 export const floorPath = (pts: [number, number][], z = TOPZ + 0.01): V[] => pts.map(([x, y]) => [x, y, z]);
 
 /** A message: a small glass slip lying on the floor, drawn at `at`, with an optional tag that travels with it. */
@@ -129,11 +129,11 @@ export function Mark({ o, at, kind, cls }: { o: O; at: V; kind: 'ok' | 'no'; cls
   );
 }
 
-/** A short mono caption anchored at a tile position, in the accent colour. */
-export function Tag({ o, at, text, dx = 14, dy = -14 }: { o: O; at: V; text: string; dx?: number; dy?: number }) {
+/** A short mono caption anchored at a tile position, in the accent colour. `cls` lets a window or animation drive it (give it `mv` or use `windowCss`). */
+export function Tag({ o, at, text, dx = 14, dy = -14, cls }: { o: O; at: V; text: string; dx?: number; dy?: number; cls?: string }) {
   const [x, y] = P(o, at);
   return (
-    <text className="tag" x={x + dx} y={y + dy}>
+    <text className={cls ? `tag ${cls}` : 'tag'} x={x + dx} y={y + dy}>
       {text}
     </text>
   );
@@ -165,10 +165,13 @@ export function stepCss(prefix: string, loop: number, steps: Step[]) {
   return c;
 }
 
-/** CSS: an opacity window (a mark, a pad) that is on between a and b. */
+/**
+ * CSS: an opacity window (a mark, a pad, a tag) that is on between a and b.
+ * It starts hidden, so under reduced motion (animations off) the element stays hidden.
+ */
 export function windowCss(name: string, loop: number, a: number, b: number, peak = 1) {
   const f = (t: number, v: number) => `${pc(t)}{opacity:${v}}`;
-  return `@keyframes ${name}{${f(0, 0)}${f(a - 0.01, 0)}${f(a, peak)}${f(b, peak)}${f(b + 0.02, 0)}${f(1, 0)}}.${name}{animation:${name} ${loop}s linear infinite}`;
+  return `@keyframes ${name}{${f(0, 0)}${f(a - 0.01, 0)}${f(a, peak)}${f(b, peak)}${f(b + 0.02, 0)}${f(1, 0)}}.${name}{opacity:0;animation:${name} ${loop}s linear infinite}`;
 }
 
 /** Orb, mark and tag styles, scoped to a scene class. */

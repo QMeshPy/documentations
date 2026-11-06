@@ -46,6 +46,7 @@ Use the same device for the same idea in every scene. A reader should learn it o
 | A job, a block of work, a circuit | `Orb` |
 | A payment | `Coin`, or `Coins` |
 | A balance or a pool | `Drum` |
+| A ledger, a log, a record book | `Docs` on a named `Pad` |
 | Success | `Mark kind="ok"` |
 | Failure or a block | `Mark kind="no"` |
 | A live connection | `Cable` with `flow` |
@@ -54,10 +55,11 @@ Use the same device for the same idea in every scene. A reader should learn it o
 ## Layout
 
 - Aim for at most four to six things on the floor. More than that stops being a diagram and becomes a map.
-- Give each actor a **name**: a `PlateText` on its body, or a `Pad name`. Never leave a device unnamed.
+- Give each actor a **name**: a `PlateText` on its body, or a `Pad name`. Never leave a device unnamed. `Docs`, `Coins`, `Hub` and `Chain` have no plate of their own, so stand them on a named `Pad`.
 - Put actors on opposite sides of the floor with the action between them, so travel is visible. Coordinator left, workers right is the established pattern.
 - A bus (one cable that fans out to several) is clearer than several long cables crossing.
 - Leave at least 1.2 tiles of empty cable between two things that a slip travels between, or the slip cannot be seen moving. A gap of 0.8 looked like the slip was simply sitting there.
+- Tags sit up and to the right of what they label. Stop a move at least 1.2 tiles short of a device, or the tag lands on its screen. Keep a `Mark` (a 9px circle in screen space) at least 0.5 tile from any plate text, or it covers the text.
 - A device on a `Pad` that stands at the pad's left will cover the pad's name plate. Set `nameAt="right"` and make the pad about 2.3 wide.
 - Draw text on the floor with `PlateText` inside a `Top`, so it lies in the plane. Free `<text>` in screen pixels is only for labels and tags.
 
@@ -65,7 +67,7 @@ Use the same device for the same idea in every scene. A reader should learn it o
 
 - The step list is the scene's caption. Each step has an `n` (`'01'`), a short caps `name` (one or two words), and a `sub`, one plain sentence with no jargon the page has not yet introduced.
 - Tag the first moving thing of each kind with a word that names it (`HELLO`, `BLOCK`, `RESULT`, `REQUEST`). Tags travel with the thing.
-- Names are caps, short, and mono. Numbers like `01` come from the kit; do not restyle them.
+- Names are caps, short, and mono. Step `name`: 14 characters at most. Step `sub`: 46 characters at most, which is the width of the list. Numbers like `01` come from the kit; do not restyle them.
 - Use the same words on the page and in the scene. If the page says "reservation", the scene does not say "booking".
 
 ## Timing
@@ -92,4 +94,5 @@ Use the same device for the same idea in every scene. A reader should learn it o
 - **A moving thing that never appears.** It is missing `mv` (it needs the class that hides it until animated), or its animation class name does not match the CSS.
 - **The live cable does not go dark when the link is cut.** Draw a plain `Cable` under a `Cable flow` and fade the flow one out with its own keyframes.
 - **A step that lights too early or late.** Its `a` and `b` do not match the move's `t0` and `t1`. Open the frame at the middle of the window and check.
+- **A timed element shows in the reduced-motion frame.** `windowCss` now starts hidden, but an element driven by a hand-written animation needs `mv` (or `opacity:0` as its base) or it stays visible when animation is off.
 - **Elements disappear in one theme.** A hard-coded colour. Replace it with a kit class.

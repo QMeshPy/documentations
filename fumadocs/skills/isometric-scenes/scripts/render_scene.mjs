@@ -3,13 +3,14 @@
  * Render an isometric scene to PNG frames so you can look at it.
  *
  *   node render_scene.mjs <scene.tsx> --out <dir> [--export TemplateScene] [--loop 12]
- *        [--times 0.1,0.3,0.5,0.7,0.9] [--scheme both|dark|light] [--width 900] [--reduced]
+ *        [--times 0.1,0.3,0.5,0.7,0.9] [--scheme both|dark|light] [--width 900] [--sheet] [--reduced]
  *
- * Needs, resolvable from the scene's folder or the current folder: react, react-dom, esbuild, playwright.
+ * Needs react, react-dom, esbuild and playwright, found in the scene's folder, the current folder or NODE_PATH.
  * (A Next.js project already has the first two; `npm i -D esbuild playwright` adds the rest.)
  *
  * For each time t (a fraction of the loop) it pauses every CSS animation at t * loop seconds and
- * screenshots the SVG in dark and light. With --reduced it instead emulates "prefers-reduced-motion"
+ * screenshots the SVG in dark and light. With --sheet it also writes one contact sheet per scheme, with
+ * every time captioned, so you can look at the whole loop in one image. With --reduced it instead emulates "prefers-reduced-motion"
  * and reports how many animations are still running (the answer must be 0).
  */
 import { createRequire } from 'node:module';
@@ -24,7 +25,7 @@ const opt = (k, d) => {
   return i >= 0 && args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : d;
 };
 if (!file) {
-  console.error('usage: render_scene.mjs <scene.tsx> --out <dir> [--export Name] [--loop 12] [--times a,b,c] [--scheme both|dark|light] [--reduced]');
+  console.error('usage: render_scene.mjs <scene.tsx> --out <dir> [--export Name] [--loop 12] [--times a,b,c] [--scheme both|dark|light] [--sheet] [--reduced]');
   process.exit(2);
 }
 const scene = resolve(file);
@@ -34,6 +35,7 @@ const times = opt('times', '0.1,0.3,0.5,0.7,0.9').split(',').map(Number);
 const scheme = opt('scheme', 'both');
 const width = parseInt(opt('width', '900'), 10);
 const reduced = args.includes('--reduced');
+const sheet = args.includes('--sheet');
 mkdirSync(out, { recursive: true });
 
 const req = createRequire(resolve(dirname(scene), 'x.js'));
@@ -68,7 +70,11 @@ await esbuild.build({
   format: 'cjs',
   jsx: 'automatic',
   outfile: bundle,
-  nodePaths: [resolve(process.cwd(), 'node_modules'), resolve(dirname(scene), 'node_modules')],
+  nodePaths: [
+    resolve(process.cwd(), 'node_modules'),
+    resolve(dirname(scene), 'node_modules'),
+    ...(process.env.NODE_PATH || '').split(':').filter(Boolean),
+  ],
   logLevel: 'error',
 });
 const svg = req2(bundle);
@@ -101,12 +107,26 @@ for (const s of schemes) {
     if (running) bad = true;
     await el.screenshot({ path: resolve(out, `${name}-${s}-reduced.png`) });
   } else {
+    const shots = [];
     for (const t of times) {
       await p.evaluate(([t, loop]) => document.getAnimations().forEach((a) => { a.pause(); a.currentTime = t * loop * 1000; }), [t, loop]);
       await p.waitForTimeout(120);
       const f = resolve(out, `${name}-${s}-t${String(t).replace('.', '_')}.png`);
       await el.screenshot({ path: f });
+      shots.push([t, f]);
       console.log(f);
+    }
+    if (sheet) {
+      const { readFileSync } = await import('node:fs');
+      const cells = shots
+        .map(([t, f]) => `<figure><img src="data:image/png;base64,${readFileSync(f).toString('base64')}"><figcaption>t = ${t} (${(t * loop).toFixed(1)}s)</figcaption></figure>`)
+        .join('');
+      const sp = await ctx.newPage();
+      await sp.setViewportSize({ width: 1800, height: 800 });
+      await sp.setContent(`<body style="margin:0;background:${s === 'dark' ? '#0d0f14' : '#fbfbfd'};color:#888;font:14px monospace"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px">${cells}</div><style>img{width:100%;display:block}figcaption{padding:4px 0 10px}figure{margin:0}</style></body>`);
+      const sf = resolve(out, `${name}-${s}-sheet.png`);
+      await sp.screenshot({ path: sf, fullPage: true });
+      console.log(sf);
     }
   }
   if (errors.length) { console.error(`[${s}] page errors:`, errors); bad = true; }

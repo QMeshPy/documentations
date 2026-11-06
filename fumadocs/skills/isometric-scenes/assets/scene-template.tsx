@@ -1,4 +1,4 @@
-import { IsoSvg, anim, route, type O, type V } from './kit/core';
+import { IsoSvg, anim, route, type O } from './kit/core';
 import { Cable } from './kit/solids';
 import { Server, SmallLaptop } from './kit/devices';
 import {
@@ -39,6 +39,9 @@ const LOOP = 12;
 const Z = TOPZ + 0.12;
 
 // Where things stand, in tiles. The floor is 9.5 wide (x) and 6 deep (y).
+// A Slip is anchored at its back corner and is 0.62 by 0.4, so its centre is (+0.31, +0.2) from `at`. That is why the
+// slip lane below runs at CABLE_Y - 0.2: it puts the slip's centre on the cable. Orbs and coins are anchored at their centre.
+// The `from` of every route() must equal the `at` of the thing it moves.
 const SERVER: [number, number] = [0.6, 2.2];
 const CABLE_Y = 2.9; // the cable between them runs along this y
 const CLIENT_X = 6.6; // the client's pad starts here
@@ -56,7 +59,7 @@ const steps: Step[] = [
 // One scene's CSS: scoped shared styles, the step highlights, then each moving thing's route.
 // `route(from, via[], t0, t1)` makes something appear at `from`, travel through `via` between t0 and t1, then fade.
 const css = (() => {
-  let c = sceneCss('qm-template') + stepCss('tp', LOOP, steps);
+  let c = sceneCss('tp-scene') + stepCss('tp', LOOP, steps);
   c += anim('tp-ask', LOOP, route([START, CABLE_Y - 0.2, Z], [[2.3, CABLE_Y - 0.2, Z]], 0.05, 0.25));
   c += anim('tp-ans', LOOP, route([SERVER[0] + 1.8, CABLE_Y, Z + 0.25], [[CLIENT_X - 0.3, CABLE_Y, Z + 0.25]], 0.54, 0.76));
   c += windowCss('tp-work', LOOP, 0.3, 0.5); // the server's tick while it works
@@ -68,7 +71,7 @@ const css = (() => {
 export function TemplateScene() {
   return (
     <IsoSvg
-      id="qm-template" // becomes the SVG's class; must be unique per scene and match sceneCss(...)
+      id="tp-scene" // becomes the SVG's class; unique per scene, and the same string you passed to sceneCss(...)
       viewBox={VIEWBOX}
       title="A client asks a server for work" // the accessible name: say what the picture shows
       desc="A client sends a request to the server. The server does the job and sends the result back the same way. The client then has its answer." // the accessible description: the whole story in full sentences
